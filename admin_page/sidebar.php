@@ -1,6 +1,6 @@
 <style>
     .bg-color {
-        background-color: #F5E6E9 !important; /* Override the background color */
+        background-color: #d24444 !important; /* Override the background color */
         background-image: none !important;    /* Remove the gradient */
     }
 </style>

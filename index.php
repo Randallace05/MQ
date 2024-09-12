@@ -11,7 +11,7 @@
         <div class="flex-container">
             <!-- Image Section -->
             <div class="image-container">
-                <img src="mq-kitchen.png" alt="MO Kitchen">
+                <img src="uploads/mq-kitchen.png" alt="MO Kitchen">
             </div>
 
             <!-- Form Section -->

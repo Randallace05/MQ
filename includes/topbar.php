@@ -74,7 +74,7 @@
 </style>
 <div class="topbar"></div>
 <div class="header">
-    <img src="bgMQ.png" alt="MO Kitchen Logo">
+    <img src="uploads/bgMQ.png" alt="MO Kitchen Logo">
         <div class="nav-links">
             <ul>
                 <li>Home</li>

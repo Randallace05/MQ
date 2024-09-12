@@ -72,17 +72,3 @@
     }
 
 </style>
-<div class="topbar"></div>
-<div class="header">
-    <img src="uploads/bgMQ.png" alt="MO Kitchen Logo">
-        <div class="nav-links">
-            <ul>
-                <li>Home</li>
-                <li>About</li>
-                <li>Contact Us</li>
-                <li>Sign Up</li>
-            </ul>
-        </div>
-    <input type="text" class="search-bar" placeholder="What are you looking for?">    
-</div>
-<hr> 

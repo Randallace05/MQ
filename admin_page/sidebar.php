@@ -36,7 +36,7 @@
 
             <!-- Nav Item - Food -->
             <li class="nav-item">
-                <a class="nav-link" href="charts.html">
+                <a class="nav-link" href="foodMenu.php">
                     <i class="fa-solid fa-jar"></i>
                     <span>Food Menu</span></a>
             </li>

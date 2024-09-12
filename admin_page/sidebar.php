@@ -1,6 +1,6 @@
 <style>
     .bg-color {
-        background-color: #F5E6E9 !important; /* Override the background color */
+        background-color: #d24444 !important; /* Override the background color */
         background-image: none !important;    /* Remove the gradient */
     }
 </style>
@@ -36,7 +36,7 @@
 
             <!-- Nav Item - Food -->
             <li class="nav-item">
-                <a class="nav-link" href="charts.html">
+                <a class="nav-link" href="foodMenu.php">
                     <i class="fa-solid fa-jar"></i>
                     <span>Food Menu</span></a>
             </li>

@@ -72,3 +72,10 @@
     }
 
 </style>
+<div class="topbar"></div>
+<div class="header">
+    <img src="uploads/bgMQ.png" alt="MO Kitchen Logo">
+
+    <input type="text" class="search-bar" placeholder="What are you looking for?">    
+</div>
+<hr> 

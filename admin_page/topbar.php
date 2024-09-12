@@ -1,3 +1,28 @@
+<style>
+    .btn-css{
+        color:#fff;
+        background-color:#D24444;
+        border-color:#D24444
+        }
+    .btn-css:hover{
+        color:#fff;
+        background-color:#f44336;
+        border-color:#f44336
+        }
+    .btn-css.focus,.btn-primary:focus{
+        color:#fff;
+        background-color:#f44336;
+        border-color:#f44336;
+        box-shadow:0 0 0 .2rem rgba(105,136,228,.5)
+        }
+    .btn-css.disabled,.btn-primary:disabled{
+        color:#fff;
+        background-color:#D24444;
+        border-color:#D24444
+        }
+</style>
+
+
 <!-- Topbar -->
 <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
 
@@ -13,7 +38,7 @@
         <input type="text" class="form-control bg-light border-0 small" placeholder="Search for..."
             aria-label="Search" aria-describedby="basic-addon2">
         <div class="input-group-append">
-            <button class="btn btn-primary" type="button">
+            <button class="btn btn-primary btn-css" type="button">
                 <i class="fas fa-search fa-sm"></i>
             </button>
         </div>

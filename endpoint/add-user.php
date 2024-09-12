@@ -18,6 +18,7 @@ if (isset($_POST['register'])) {
         $email = $_POST['email'];
         $username = $_POST['username'];
         $password = $_POST['password'];
+        $user_role = $_POST['us'];
         
         $conn->beginTransaction();
     

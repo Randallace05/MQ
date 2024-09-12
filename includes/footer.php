@@ -15,6 +15,7 @@
         flex: 1 1 150px; /* Adjusted width for smaller column size */
         padding: 10px; /* Smaller padding */
         box-sizing: border-box;
+        margin-left: 100px;
     }
 
     footer h4 {

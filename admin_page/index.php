@@ -23,12 +23,6 @@
 
 </head>
 
-<style>
-    .bg-gradient-primary{
-        background-color: #f5e6e9;
-    }
-</style>
-
 <body id="page-top">
 
     <!-- Page Wrapper -->

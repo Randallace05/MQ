@@ -1,12 +1,19 @@
+<style>
+    .bg-color {
+        background-color: #F5E6E9 !important; /* Override the background color */
+        background-image: none !important;    /* Remove the gradient */
+    }
+</style>
+
 <!-- Sidebar -->
-        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+        <ul class="bg-color navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
             <!-- Sidebar - Brand -->
             <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.php">
                 <div class="sidebar-brand-icon rotate-n-15">
                     <i class="fa-solid fa-pepper-hot"></i>
                 </div>
-                <div class="sidebar-brand-text mx-3">MQ Admin</div>
+                <div class="sidebar-brand-text mx-3">MQ KITCHEN</div>
             </a>
 
             <!-- Divider -->

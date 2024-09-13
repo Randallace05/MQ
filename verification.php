@@ -30,8 +30,8 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background: rgb(11,43,26);
-            background: radial-gradient(circle, rgba(11,43,26,1) 0%, rgba(9,78,69,1) 100%);
+            background: rgb(255,153,153);
+            background: radial-gradient(circle, rgb(210, 70, 70) 0%, rgba(210, 70, 70) 100%);
             background-size: cover;
             background-repeat: no-repeat;
             background-attachment: fixed;
@@ -51,11 +51,8 @@
 <body>
     
     <div class="main">
-
         <!-- Email Verification Area -->
-
         <div class="verification-container">
-
             <div class="verification-form" id="loginForm">
                 <h2 class="text-center">Email Verification</h2>
                 <p class="text-center">Please check your email for verification code.</p>
@@ -65,9 +62,7 @@
                     <button type="submit" class="btn btn-secondary login-btn form-control mt-4" name="verify">Verify</button>
                 </form>
             </div>
-
         </div>
-
     </div>
 
     <!-- Bootstrap Js -->

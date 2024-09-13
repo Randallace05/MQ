@@ -96,4 +96,6 @@
         <p><a href="#" style="color: white;">FAQ</a></p>
         <p><a href="#" style="color: white;">Contact</a></p>
     </div>
+
+    <!-- <div class="container"><p class="m-0 text-center text-white">Copyright &copy; Your Website 2023</p></div> -->
 </footer>

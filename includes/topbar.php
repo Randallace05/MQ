@@ -2,15 +2,16 @@
     .header {
             padding: 0px 20px;
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
             flex-wrap: wrap;
+            gap:300px;
     }
 
     .topbar{
         background-color:black;
-        height:25px;
-        
+        height:30px;
+            
     }
 
     .nav-links {
@@ -19,9 +20,11 @@
     }
 
     .nav-links a {
-            color: white;
+            color: black;
             text-decoration: none;
-            font-weight: bold;
+            font-family: 'Poppins';
+            font-size: 16px;
+            
     }
 
     .nav-links a:hover {
@@ -36,7 +39,8 @@
     }
 
     hr{
-        margin-top: 5px;
+        z-index: -1;
+        margin-top: -10px;
     }
 
     /* Search Bar Styling */
@@ -70,19 +74,23 @@
             max-width: none; /* No max width limitation */
         }
     }
+    
+    
 
 </style>
+
+<!-- start include header -->
+<?php include("includes/header.php"); ?> 
+<!-- end include header -->
+
 <div class="topbar"></div>
 <div class="header">
     <img src="uploads/bgMQ.png" alt="MO Kitchen Logo">
         <div class="nav-links">
-            <ul>
-                <li>Home</li>
-                <li>About</li>
-                <li>Contact Us</li>
-                <li>Sign Up</li>
-            </ul>
+            <a href="#news">Home</a>
+            <a href="#contact">Contact</a>
+            <a href="#contact">Sign Up</a>
         </div>
     <input type="text" class="search-bar" placeholder="What are you looking for?">    
 </div>
-<hr> 
+<hr>

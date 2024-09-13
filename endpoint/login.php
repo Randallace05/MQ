@@ -23,7 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 echo "
                 <script>
                     alert('Welcome Admin, Login Successful!');
-                    window.location.href = '../admin_page/index.php'; // Admin dashboard
+                    window.location.href = '../admin_page/dashboard/index.php'; // Admin dashboard
                 </script>
                 ";
             } else {

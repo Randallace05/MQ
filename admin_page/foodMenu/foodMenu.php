@@ -39,7 +39,7 @@
             <div id="content">
 
                 <!-- Topbar -->
-            <?php include("../includesAdmin/topbar.php"); ?>
+                <?php include("../includesAdmin/topbar.php"); ?>
                 <!-- End of Topbar -->
 
                 <!-- Begin Page Content -->
@@ -53,8 +53,15 @@
                     <!-- Content Row -->
                     <div class="row">
 
-                       
-                    
+                       <!-- Food Menu Add -->
+                       <?php include("foodMenuBackend.php"); ?>
+                       <!-- End of Food Menu CRUD -->
+                        
+                       <!-- Food Menu Read -->
+                       <?php include("readMenu.php"); ?>
+                       <!-- End of Food Menu CRUD -->
+                    </div>
+                        
 
                 </div>
                 <!-- /.container-fluid -->

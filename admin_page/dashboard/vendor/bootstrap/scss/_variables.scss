@@ -43,6 +43,7 @@ $yellow:  #ffc107 !default;
 $green:   #28a745 !default;
 $teal:    #20c997 !default;
 $cyan:    #17a2b8 !default;
+$mqCard:  #f5e6e9 !default;
 
 $colors: () !default;
 $colors: map-merge(
@@ -840,7 +841,7 @@ $card-cap-bg:                       rgba($black, .03) !default;
 $card-cap-color:                    null !default;
 $card-height:                       null !default;
 $card-color:                        null !default;
-$card-bg:                           $white !default;
+$card-bg:                           $mqCard !default;
 
 $card-img-overlay-padding:          1.25rem !default;
 

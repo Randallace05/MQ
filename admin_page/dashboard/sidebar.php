@@ -36,35 +36,35 @@
 
             <!-- Nav Item - Food -->
             <li class="nav-item">
-                <a class="nav-link" href="foodMenu.php">
+                <a class="nav-link" href="../foodMenu/foodMenu.php">
                     <i class="fa-solid fa-jar"></i>
                     <span>Food Menu</span></a>
             </li>
 
             <!-- Nav Item - MAnage Order -->
             <li class="nav-item">
-                <a class="nav-link" href="charts.html">
+                <a class="nav-link" href="../orders/orders.php">
                     <i class="fa-solid fa-cart-shopping"></i>
                     <span>Manage Order</span></a>
             </li>
 
             <!-- Nav Item - Customer Review -->
             <li class="nav-item">
-                <a class="nav-link" href="charts.html">
+                <a class="nav-link" href="../review/review.php">
                     <i class="fa-regular fa-comments"></i>
                     <span>Customer Review</span></a>
             </li>
 
             <!-- Nav Item - Chat -->
             <li class="nav-item">
-                <a class="nav-link" href="charts.html">
+                <a class="nav-link" href="../chat">
                     <i class="fa-solid fa-message"></i>
                     <span>Chat</span></a>
             </li>
 
             <!-- Nav Item - Users -->
             <li class="nav-item">
-                <a class="nav-link" href="charts.html">
+                <a class="nav-link" href="../users/users.php">
                     <i class="fa-solid fa-users"></i>
                     <span>Users</span></a>
             </li>
@@ -79,7 +79,7 @@
 
             <!-- Nav Item - Users -->
             <li class="nav-item">
-                <a class="nav-link" href="charts.html">
+                <a class="nav-link" href="../setings/settings.php">
                     <i class="fa-solid fa-gear"></i>
                     <span>Settings</span></a>
             </li>

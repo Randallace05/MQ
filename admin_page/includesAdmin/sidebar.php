@@ -9,7 +9,7 @@
         <ul class="bg-color navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
             <!-- Sidebar - Brand -->
-            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.php">
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="../dashboard/index.php">
                 <div class="sidebar-brand-icon rotate-n-15">
                     <i class="fa-solid fa-pepper-hot"></i>
                 </div>
@@ -21,13 +21,13 @@
 
             <!-- Nav Item - Dashboard -->
             <li class="nav-item active">
-                <a class="nav-link" href="index.php">
+                <a class="nav-link" href="../dashboard/index.php">
                     <i class="fas fa-fw fa-tachometer-alt"></i>
                     <span>Dashboard</span></a>
             </li>
 
             <!-- Divider -->
-            <hr class="sidebar-divider">
+            <!-- <hr class="sidebar-divider"> -->
 
             <!-- Heading -->
             <div class="sidebar-heading">
@@ -79,7 +79,7 @@
 
             <!-- Nav Item - Users -->
             <li class="nav-item">
-                <a class="nav-link" href="../setings/settings.php">
+                <a class="nav-link" href="../settings/settings.php">
                     <i class="fa-solid fa-gear"></i>
                     <span>Settings</span></a>
             </li>

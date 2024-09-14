@@ -39,7 +39,7 @@
             <div id="content">
 
                 <!-- Topbar -->
-            <?php include("../includesAdmin/topbar.php"); ?>
+                <?php include("../includesAdmin/topbar.php"); ?>
                 <!-- End of Topbar -->
 
                 <!-- Begin Page Content -->
@@ -47,14 +47,21 @@
 
                     <!-- Page Heading -->
                     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                        <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+                        <h1 class="h3 mb-0 text-gray-800"style="color:#AB1616 !important;" >Products Management</h1>
                     </div>
 
                     <!-- Content Row -->
                     <div class="row">
 
-                       
-                    
+                       <!-- Food Menu Add -->
+                       <?php include("foodMenuBackend.php"); ?>
+                       <!-- End of Food Menu CRUD -->
+
+                       <!-- Food Menu Read -->
+                       <?php include("readMenu.php"); ?>
+                       <!-- End of Food Menu CRUD -->
+                    </div>
+                        
 
                 </div>
                 <!-- /.container-fluid -->

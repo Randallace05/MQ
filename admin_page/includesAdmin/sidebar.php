@@ -1,7 +1,11 @@
+<head></head>
+
+
+
 <style>
     .bg-color {
         background-color: #d24444 !important; /* Override the background color */
-        background-image: none !important;    /* Remove the gradient */
+        background-image: none !important;
     }
 </style>
 
@@ -95,3 +99,6 @@
             </div>
         </ul>
         <!-- End of Sidebar -->
+
+
+        

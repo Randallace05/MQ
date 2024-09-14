@@ -49,7 +49,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .card {
-            width: 250px;
+            width: 200px;
             height: 300px !important; 
             display: flex;
             justify-content: center;
@@ -62,10 +62,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             cursor: pointer;
             text-align: center;
             color: #007bff;
+            margin-top: 80px;
         }
 
         .fa-color{
-            color: #d24444;
+            color: #EA7C69;
+        }
+
+        .card-title{
+            font-family: "Barlow";
+            color: #EA7C69 !important; 
         }
 
     </style>
@@ -73,13 +79,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <body>
 
 <div class="container mt-5">
-    <!-- Card with Plus Icon -->
     <div class="card text-center">
         <div class="card-body">
-            <h5 class="card-title">Add New Product</h5>
             <div class="card-icon" data-bs-toggle="modal" data-bs-target="#formModal">
                 <i class="fas fa-plus-circle fa-color"></i>
             </div>
+            <h5 class="card-title">Add New Product</h5>
         </div>
     </div>
 </div>
@@ -125,6 +130,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </div>
     </div>
 </div>
+
 
 <!-- Bootstrap JS and dependencies (Popper.js and jQuery) -->
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>

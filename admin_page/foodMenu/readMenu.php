@@ -43,13 +43,13 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <div class="col-md-4">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title"><?= $product['name']; ?></h5>
                         <img src="uploads/<?= $product['image']; ?>" class="product-img mb-3"><br>
+                        <h5 class="card-title"><?= $product['name']; ?></h5>
                         <h5 class="card-title">&#8369; <?= $product['price']; ?></h5>
                         <?php
                         $toggle_action = $product['is_disabled'] == 1 ? "Enable" : "Disable";
                         ?>
-
+                         
                         <!-- Edit and Disable Buttons -->
                         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editFormModal<?= $product['id']; ?>">Edit Dish</button>
                         <a href="disableMenu.php?id=<?= $product['id']; ?>" class="btn btn-danger"><?= $toggle_action; ?></a>

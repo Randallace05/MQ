@@ -14,9 +14,31 @@
     <link href="css/styles.css" rel="stylesheet" />
 </head>
 <style>
-    .img-size {
+    .img-size{
         width: 50px;
         height: 50px;
+    }
+    .chili-rating{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 15px;
+    }
+
+    .chili {
+        cursor: pointer;
+        margin: 0 5px;
+        transition: transform 0.3s ease;
+    }
+
+    .chili.selected, .chili:hover{
+        transform: scale(1.2);
+    }
+
+    #rating-display{
+        margin-top: 20px;
+        text-align: center;
+        font-size: 1.5em;
     }
 </style>
 <body>
@@ -58,6 +80,7 @@
 
     <!-- Section -->
     <section class="py-5">
+        <h2>Most Popular Bagoong</h2>
         <div class="container px-4 px-lg-5 mt-5">
             <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
                 <?php
@@ -84,6 +107,13 @@
                                     <!-- Product price -->
                                     <p>&#8369;<?php echo number_format($product['price'], 2); ?></p> <!-- Displaying the price with Peso sign -->
                                 </div>
+                                <div class="chili-rating" id="chili-rating">
+                                    <span class="chili" data-value="1">🌶️</span>
+                                    <span class="chili" data-value="2">🌶️</span>
+                                    <span class="chili" data-value="3">🌶️</span>
+                                    <span class="chili" data-value="4">🌶️</span>
+                                    <span class="chili" data-value="5">🌶️</span>
+                                </div>
                             </div>
                             <!-- Product actions -->
                             <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
@@ -97,6 +127,7 @@
             </div>
         </div>
     </section>
+    
 
     <!-- Footer -->
     <?php include("../includes/footer.php"); ?>
@@ -105,5 +136,43 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Core theme JS -->
     <script src="js/scripts.js"></script>
+    <script>
+    const chilies = document.querySelectorAll('.chili');
+    const ratingDisplay = document.getElementById('rating-display');
+    let selectedRating = 0;
+
+    chilies.forEach(chili => {
+        chili.addEventListener('mouseover', () => {
+            resetChilies();
+            highlightChilies(chili.dataset.value);
+        });
+
+        chili.addEventListener('click', () => {
+            selectedRating = chili.dataset.value;
+            highlightChilies(selectedRating);
+            ratingDisplay.textContent = `You selected ${selectedRating} chili(s)`;
+        });
+
+        chili.addEventListener('mouseout', () => {
+            if (selectedRating == 0) {
+                resetChilies();
+            } else {
+                highlightChilies(selectedRating);
+            }
+        });
+    });
+
+    function highlightChilies(rating) {
+        for (let i = 0; i < rating; i++) {
+            chilies[i].classList.add('selected');
+        }
+    }
+
+    function resetChilies() {
+        chilies.forEach(chili => {
+            chili.classList.remove('selected');
+        });
+    }
+</script>
 </body>
 </html>

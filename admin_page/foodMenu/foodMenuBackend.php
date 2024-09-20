@@ -109,7 +109,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <input type="number" name="price" step="0.01" class="form-control" id="price">
                     </div>
                     <div class="mb-3">
-                        <label for="image" class="form-label">Image</label>
+                        <label for="image" class="form-label">Main Image</label>
                         <input type="file" name="image" class="form-control" id="image">
                     </div>
                     <div class="mb-3">

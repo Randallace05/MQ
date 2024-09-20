@@ -78,6 +78,8 @@
         </div>
     </header>
 
+    <hr>
+
     <!-- Section -->
     <section class="py-5">
         <h2>Most Popular Bagoong</h2>
@@ -85,9 +87,8 @@
             <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
                 <?php
                 include '../conn/conn.php';
-
                 // Query to fetch products
-                $sql = "SELECT name, price, image FROM products WHERE is_disabled = 0";
+                $sql = "SELECT id, name, price, image FROM products WHERE is_disabled = 0";
                 $stmt = $conn->prepare($sql);
                 $stmt->execute();
                 $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -117,7 +118,9 @@
                             </div>
                             <!-- Product actions -->
                             <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-                                <div class="text-center"><a class="btn btn-outline-dark mt-auto" href="items.php">View options</a></div>
+                                <div class="text-center">
+                                <a class="btn btn-outline-dark mt-auto" href="items.php?id=<?php echo $product['id']; ?>">View options</a>
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -1,4 +1,5 @@
 <?php
+session_start();
 include '../../conn/conn.php'; 
 
 $id = $_GET['id'];
@@ -10,10 +11,13 @@ $stmt->execute([':id' => $id]);
 $product = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$product) {
-    die('Error: Product not found.');
+    $_SESSION['message'] = 'Error: Product not found.';
+    $_SESSION['alert_type'] = 'danger'; // red bar for errors
+    header("Location: foodMenu.php");
+    exit();
 }
 
-// Toggle the 'is_disabled' status (if 1, set to 0; if 0, set to 1)
+// Toggle the 'is_disabled' status
 $new_status = $product['is_disabled'] == 1 ? 0 : 1;
 
 // Update the product's 'is_disabled' status
@@ -24,6 +28,13 @@ $stmt->execute([
     ':id' => $id
 ]);
 
+// Set session for notification
 $status = $new_status == 1 ? "disabled" : "enabled";
-echo "Product {$status} successfully!";
+$_SESSION['message'] = "Product {$status} successfully!";
+$_SESSION['alert_type'] = $new_status == 1 ? 'danger' : 'success'; // red for disabled, green for enabled
+
+// Redirect to the admin page
+header("Location: foodMenu.php");
+exit();
 ?>
+

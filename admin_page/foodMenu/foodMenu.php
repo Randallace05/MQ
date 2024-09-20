@@ -1,3 +1,7 @@
+<?php
+session_start();
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -20,8 +24,39 @@
     <!-- Custom styles for this template-->
     <link href="../dashboard/css/sb-admin-2.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
+    <!-- Add this in the <head> section of your HTML -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
+
+<style>
+    .custom-alert {
+        position: fixed;
+        top: 20px;
+        left: 1000px;
+        width: 20%; /* Set the width to 30% */
+        z-index: 4; /* Ensure it's on top of other content */
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Optional: Add shadow */
+    }
+
+        #progress-bar {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background-color: #ff4d4d; /* Line color (can be adjusted) */
+        animation: shrinkLine 1s linear forwards; /* 1-second animation */
+    }
+
+    @keyframes shrinkLine {
+        0% {
+            width: 100%;
+        }
+        100% {
+            width: 0;
+        }
+    }
+</style>
 
 <body id="page-top">
 
@@ -44,40 +79,49 @@
 
                 <!-- Begin Page Content -->
                 <div class="container-fluid">
+                    
 
                     <!-- Page Heading -->
                     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                        <h1 class="h3 mb-0 text-gray-800"style="color:#AB1616 !important;" >Products Management</h1>
+                        <h1 class="h3 mb-0 text-gray-800" style="color:#AB1616 !important;">Products Management</h1>
                     </div>
+
+                    <!-- Alert Message Section -->
+                    <?php
+                    if (isset($_SESSION['message'])) {
+                        echo "
+                        <div class='alert alert-{$_SESSION['alert_type']} alert-dismissible fade show custom-alert' role='alert'>
+                            {$_SESSION['message']}
+                            <div class='progress-bar' id='progress-bar'></div> <!-- Animated line -->
+                        </div>";
+                        
+                        unset($_SESSION['message']);
+                        unset($_SESSION['alert_type']);
+                    }
+                    ?>
+                    <!-- End of Alert Message Section -->
 
                     <!-- Content Row -->
                     <div class="row">
+                        <!-- <div class="card-body"> -->
+                            <!-- <div class="card"> -->
 
-                       <!-- Food Menu Add -->
-                       <?php include("foodMenuBackend.php"); ?>
-                       <!-- End of Food Menu CRUD -->
+                                <!-- Food Menu Add -->
+                                <?php include("foodMenuBackend.php"); ?>
+                                <!-- End of Food Menu CRUD -->
 
-                       <!-- Food Menu Read -->
-                       <?php include("readMenu.php"); ?>
-                       <!-- End of Food Menu CRUD -->
+                                <!-- Food Menu Read -->
+                                <?php include("readMenu.php"); ?>
+                                <!-- End of Food Menu CRUD -->
+                            </div>
+                       </div>
                     </div>
-                        
 
                 </div>
                 <!-- /.container-fluid -->
 
             </div>
             <!-- End of Main Content -->
-
-            <!-- Footer -->
-            <footer class="sticky-footer bg-white">
-                <div class="container my-auto">
-                    <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; Your Website 2024</span>
-                    </div>
-                </div>
-            </footer>
-            <!-- End of Footer -->
 
         </div>
         <!-- End of Content Wrapper -->
@@ -89,26 +133,6 @@
     <a class="scroll-to-top rounded" href="#page-top">
         <i class="fas fa-angle-up"></i>
     </a>
-
-    <!-- Logout Modal-->
-    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
-                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                    <a class="btn btn-primary" href="login.html">Logout</a>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Bootstrap core JavaScript-->
     <script src="vendor/jquery/jquery.min.js"></script>
@@ -126,6 +150,20 @@
     <!-- Page level custom scripts -->
     <script src="js/demo/chart-area-demo.js"></script>
     <script src="js/demo/chart-pie-demo.js"></script>
+
+    <script>
+    // Time before auto-close (1 second)
+    const timeBeforeClose = 1000;
+
+    // Automatically close the alert after the set time
+    setTimeout(() => {
+        const alertBox = document.querySelector('.custom-alert');
+        if (alertBox) {
+            const bsAlert = new bootstrap.Alert(alertBox);
+            bsAlert.close(); // Dismiss the alert
+        }
+    }, timeBeforeClose);
+    </script>
 
 </body>
 

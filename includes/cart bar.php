@@ -81,7 +81,7 @@
 <div class="header">
     <img src="uploads/bgMQ.png" alt="MO Kitchen Logo">
         <div class="nav-links">
-            <a href="#contact">Cart</a>
+            <a href="cart.php">Cart</a>
         </div>
     <input type="text" class="search-bar" placeholder="What are you looking for?">    
 </div>

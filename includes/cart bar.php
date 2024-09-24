@@ -26,11 +26,6 @@
             font-size: 40px;
             
     }
-
-    .nav-links a:hover {
-            text-decoration: underline;
-    }
-
     .search-bar {
             padding: 5px;
             width: 200px;

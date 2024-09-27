@@ -5,7 +5,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = $_POST['username'];
     $password = $_POST['password'];
 
-    // Fetch the user's password and role from the database
+    // Fetch the user's hashed password and role from the database
     $stmt = $conn->prepare("SELECT `password`, `username` FROM `tbl_user` WHERE `username` = :username");
     $stmt->bindParam(':username', $username);
     $stmt->execute();
@@ -15,8 +15,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stored_password = $row['password'];
         $stored_username = $row['username'];
 
-        // Check if the entered password matches the stored password
-        if ($password === $stored_password) {
+        // Check if the entered password matches the hashed password in the database
+        if (password_verify($password, $stored_password)) {
 
             // Check if the user is "admin" and redirect accordingly
             if ($stored_username === 'admin') {
@@ -53,5 +53,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         ";
     }
 }
-
 ?>

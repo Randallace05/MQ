@@ -71,13 +71,7 @@
             <!-- End of Main Content -->
 
             <!-- Footer -->
-            <footer class="sticky-footer bg-white">
-                <div class="container my-auto">
-                    <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; Your Website 2024</span>
-                    </div>
-                </div>
-            </footer>
+           <?php  include ('../includesAdmin/footer.php');?>
             <!-- End of Footer -->
 
         </div>
@@ -91,6 +85,8 @@
         <i class="fas fa-angle-up"></i>
     </a>
 
+    <!-- Logout Modal-->
+    <?php include("../includesAdmin/logoutModal.php"); ?>
     
 
     <!-- Bootstrap core JavaScript-->

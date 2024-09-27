@@ -20,6 +20,12 @@ if (isset($_POST['register'])) {
         $password = $_POST['password'];
         $user_role = $_POST['us'];
         
+        // Generate a unique user ID
+        $uniqueID = rand(time(), 100000000); // Using a combination of time and random numbers
+
+        // Hash the password
+        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
         $conn->beginTransaction();
     
         $stmt = $conn->prepare("SELECT `first_name`, `last_name` FROM `tbl_user` WHERE `first_name` = :first_name AND `last_name` = :last_name");
@@ -32,14 +38,16 @@ if (isset($_POST['register'])) {
         if (empty($nameExist)) {
             $verificationCode = rand(100000, 999999);
     
-            $insertStmt = $conn->prepare("INSERT INTO `tbl_user` (`tbl_user_id`, `first_name`, `last_name`, `contact_number`, `email`, `username`, `password`, `verification_code`) VALUES (NULL, :first_name, :last_name, :contact_number, :email, :username, :password, :verification_code)");
+            $insertStmt = $conn->prepare("INSERT INTO `tbl_user` (`tbl_user_id`, `first_name`, `last_name`, `contact_number`, `email`, `username`, `password`, `verification_code`, `unique_id`) 
+                VALUES (NULL, :first_name, :last_name, :contact_number, :email, :username, :password, :verification_code, :unique_id)");
             $insertStmt->bindParam(':first_name', $firstName, PDO::PARAM_STR);
             $insertStmt->bindParam(':last_name', $lastName, PDO::PARAM_STR);
             $insertStmt->bindParam(':contact_number', $contactNumber, PDO::PARAM_INT);
             $insertStmt->bindParam(':email', $email, PDO::PARAM_STR);
             $insertStmt->bindParam(':username', $username, PDO::PARAM_STR);
-            $insertStmt->bindParam(':password', $password, PDO::PARAM_STR);
+            $insertStmt->bindParam(':password', $hashedPassword, PDO::PARAM_STR); // Store hashed password
             $insertStmt->bindParam(':verification_code', $verificationCode, PDO::PARAM_INT);
+            $insertStmt->bindParam(':unique_id', $uniqueID, PDO::PARAM_INT); // Store unique ID
             $insertStmt->execute();
     
             //Server settings
@@ -47,10 +55,10 @@ if (isset($_POST['register'])) {
             $mail->Host       = 'smtp.gmail.com'; 
             $mail->SMTPAuth   = true; 
             $mail->Username   = 'lorem.ipsum.sample.email@gmail.com';
-            $mail->Password   = 'novtycchbrhfyddx';
+            $mail->Password   = 'novtycchbrhfyddx'; // SMTP password
             $mail->SMTPSecure = 'ssl';
             $mail->Port       = 465;                                    
-        
+    
             //Recipients
             $mail->setFrom('MQKitchen@gmail.com', 'MQ Kitchen');
             $mail->addAddress($email);   
@@ -58,8 +66,6 @@ if (isset($_POST['register'])) {
         
             // Content
             $mail->isHTML(true);  // Enable HTML content
-
-            // Long message in the body
             $mail->Subject = 'Verification Code';
             $mail->Body    = '
                 <html>
@@ -79,8 +85,7 @@ if (isset($_POST['register'])) {
                 </html>
             ';
 
-            
-            // Success sent message alert
+            // Send verification email
             $mail->send();
             
             session_start();

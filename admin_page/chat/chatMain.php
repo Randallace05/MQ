@@ -1,20 +1,34 @@
 <?php 
-  session_start();
-  include_once "php/config.php";
-  if(!isset($_SESSION['unique_id'])){
-    header("location: login.php");
-  }
+session_start();
+include_once "../../conn/conn.php";
+include_once "header.php"; 
+
+// Check if the user is logged in
+if (!isset($_SESSION['unique_id'])) {
+    echo "Session not set. Please log in.";
+    exit();
+}
+
+$outgoing_id = $_SESSION['unique_id'];
+
 ?>
-<?php include_once "header.php"; ?>
 <body>
   <div class="wrapper">
     <section class="users">
       <header>
         <div class="content">
           <?php 
-            $sql = mysqli_query($conn, "SELECT * FROM users WHERE unique_id = {$_SESSION['unique_id']}");
-            if(mysqli_num_rows($sql) > 0){
-              $row = mysqli_fetch_assoc($sql);
+            // Use PDO for the query
+            $sql = "SELECT * FROM tbl_user WHERE unique_id = :unique_id";
+            $stmt = $conn->prepare($sql);
+            $stmt->bindParam(':unique_id', $outgoing_id, PDO::PARAM_INT);
+            $stmt->execute();
+
+            if ($stmt->rowCount() > 0) {
+                $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            } else {
+                echo "User not found.";
+                exit();
             }
           ?>
           <img src="php/images/<?php echo $row['img']; ?>" alt="">
@@ -26,17 +40,16 @@
         <a href="php/logout.php?logout_id=<?php echo $row['unique_id']; ?>" class="logout">Logout</a>
       </header>
       <div class="search">
-        <span class="text">Select an user to start chat</span>
+        <span class="text">Select a user to start chat</span>
         <input type="text" placeholder="Enter name to search...">
         <button><i class="fas fa-search"></i></button>
       </div>
       <div class="users-list">
-  
+        <!-- Users list will be populated here -->
       </div>
     </section>
   </div>
 
   <script src="javascript/users.js"></script>
-
 </body>
 </html>

@@ -1,5 +1,4 @@
 <?php
-session_start();
 include "../../../conn/conn.php";
 
 // Enable error reporting for debugging (remove in production)

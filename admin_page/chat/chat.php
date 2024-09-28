@@ -11,8 +11,8 @@
     <section class="chat-area">
       <header>
         <?php 
-          $user_id = mysqli_real_escape_string($conn, $_GET['user_id']);
-          $sql = mysqli_query($conn, "SELECT * FROM users WHERE unique_id = {$user_id}");
+          $user_id = mysqli_real_escape_string($conn, $_GET['tbl_user_id']);
+          $sql = mysqli_query($conn, "SELECT * FROM tbl_user WHERE unique_id = {$tbl_user_id}");
           if(mysqli_num_rows($sql) > 0){
             $row = mysqli_fetch_assoc($sql);
           }else{
@@ -30,7 +30,7 @@
 
       </div>
       <form action="#" class="typing-area">
-        <input type="text" class="incoming_id" name="incoming_id" value="<?php echo $user_id; ?>" hidden>
+        <input type="text" class="incoming_id" name="incoming_id" value="<?php echo $tbl_user_id; ?>" hidden>
         <input type="text" name="message" class="input-field" placeholder="Type a message here..." autocomplete="off">
         <button><i class="fab fa-telegram-plane"></i></button>
       </form>

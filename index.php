@@ -75,7 +75,7 @@
                     <input type="password" class="form-control" id="registerPassword" name="password">
                 </div>
                 <div class="radio-group">
-                    <label><input type="radio" name="user_role" value="customer" checked> Customer</label>
+                    <label><input type="radio" name="user_role" value="customer"> Customer</label>
                     <label><input type="radio" name="user_role" value="distributor"> Distributor</label>
                 </div>
                 <p>Already have an account? Login <span class="switch-form-link" onclick="showLoginForm()">Here.</span></p>

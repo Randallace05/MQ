@@ -18,11 +18,11 @@ if (isset($_POST['register'])) {
         $email = $_POST['email'];
         $username = $_POST['username'];
         $password = $_POST['password'];
-        $user_role = $_POST['user_role'];
-        
-        // Generate a unique user ID
-        $uniqueID = rand(time(), 100000000); // Using a combination of time and random numbers
+        $user_role = $_POST['user_role']; 
 
+        // Generate a unique user ID
+        $uniqueID = rand(time(), 100000000); // Incorrect
+        
         // Hash the password
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
@@ -38,8 +38,32 @@ if (isset($_POST['register'])) {
         if (empty($nameExist)) {
             $verificationCode = rand(100000, 999999);
     
-            $insertStmt = $conn->prepare("INSERT INTO `tbl_user` (`tbl_user_id`, `first_name`, `last_name`, `contact_number`, `email`, `username`, `password`, `verification_code`, `unique_id`,`user_role`) 
-                VALUES (NULL, :first_name, :last_name, :contact_number, :email, :username, :password, :verification_code, :unique_id, :user_role)");
+            $insertStmt = $conn->prepare("
+                INSERT INTO `tbl_user` (
+                    `tbl_user_id`, 
+                    `first_name`, 
+                    `last_name`, 
+                    `contact_number`, 
+                    `email`, 
+                    `username`, 
+                    `password`, 
+                    `verification_code`, 
+                    `unique_id`,
+                    `user_role` 
+                ) 
+                VALUES (
+                    NULL, 
+                    :first_name, 
+                    :last_name, 
+                    :contact_number, 
+                    :email, 
+                    :username, 
+                    :password, 
+                    :verification_code, 
+                    :unique_id,
+                    :user_role  
+                )
+            ");
             $insertStmt->bindParam(':first_name', $firstName, PDO::PARAM_STR);
             $insertStmt->bindParam(':last_name', $lastName, PDO::PARAM_STR);
             $insertStmt->bindParam(':contact_number', $contactNumber, PDO::PARAM_INT);
@@ -47,11 +71,11 @@ if (isset($_POST['register'])) {
             $insertStmt->bindParam(':username', $username, PDO::PARAM_STR);
             $insertStmt->bindParam(':password', $hashedPassword, PDO::PARAM_STR); // Store hashed password
             $insertStmt->bindParam(':verification_code', $verificationCode, PDO::PARAM_INT);
-            $insertStmt->bindParam(':unique_id', $uniqueID, PDO::PARAM_INT);
-            $insertStmt->bindParam(':user_role', $user_role, PDO::PARAM_INT); // user role
+            $insertStmt->bindParam(':unique_id', $uniqueID, PDO::PARAM_STR); // Changed to string if using uniqid
+            $insertStmt->bindParam(':user_role', $user_role, PDO::PARAM_STR); 
             $insertStmt->execute();
     
-            //Server settings
+            // Server settings
             $mail->isSMTP(); 
             $mail->Host       = 'smtp.gmail.com'; 
             $mail->SMTPAuth   = true; 
@@ -59,8 +83,8 @@ if (isset($_POST['register'])) {
             $mail->Password   = 'novtycchbrhfyddx'; // SMTP password
             $mail->SMTPSecure = 'ssl';
             $mail->Port       = 465;                                    
-    
-            //Recipients
+
+            // Recipients
             $mail->setFrom('MQKitchen@gmail.com', 'MQ Kitchen');
             $mail->addAddress($email);   
             $mail->addReplyTo('MQKitchen@gmail.com', 'MQ Kitchen'); 
@@ -72,10 +96,10 @@ if (isset($_POST['register'])) {
                 <html>
                 <body>
                     <h1>Welcome to MQ Kitchen!</h1>
-                    <p>Dear ' . $firstName . ' ' . $lastName . ',</p>
+                    <p>Dear ' . htmlspecialchars($firstName . ' ' . $lastName) . ',</p>
                     <p>Thank you for registering with us.</p>
                     <p>Your verification code is: 
-                        <strong><span style="font-size:24px; color: #d24444;">' . $verificationCode . '</span></strong>
+                        <strong><span style="font-size:24px; color: #d24444;">' . htmlspecialchars($verificationCode) . '</span></strong>
                     </p>
                     <p>Please enter this code in the verification page to complete your registration process.</p>
                     <p>If you did not register for this service, please disregard this email.</p>

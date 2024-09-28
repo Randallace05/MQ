@@ -86,11 +86,6 @@
 <div class="topbar"></div>
 <div class="header">
     <img src="uploads/bgMQ.png" alt="MO Kitchen Logo">
-        <div class="nav-links">
-            <a href="#news">Home</a>
-            <a href="#contact">Contact</a>
-            <a href="#contact">Sign Up</a>
-        </div>
     <input type="text" class="search-bar" placeholder="What are you looking for?">    
 </div>
 <hr>

@@ -18,7 +18,7 @@ if (isset($_POST['register'])) {
         $email = $_POST['email'];
         $username = $_POST['username'];
         $password = $_POST['password'];
-        $user_role = $_POST['us'];
+        $user_role = $_POST['user_role'];
         
         // Generate a unique user ID
         $uniqueID = rand(time(), 100000000); // Using a combination of time and random numbers
@@ -38,8 +38,8 @@ if (isset($_POST['register'])) {
         if (empty($nameExist)) {
             $verificationCode = rand(100000, 999999);
     
-            $insertStmt = $conn->prepare("INSERT INTO `tbl_user` (`tbl_user_id`, `first_name`, `last_name`, `contact_number`, `email`, `username`, `password`, `verification_code`, `unique_id`) 
-                VALUES (NULL, :first_name, :last_name, :contact_number, :email, :username, :password, :verification_code, :unique_id)");
+            $insertStmt = $conn->prepare("INSERT INTO `tbl_user` (`tbl_user_id`, `first_name`, `last_name`, `contact_number`, `email`, `username`, `password`, `verification_code`, `unique_id`,`user_role`) 
+                VALUES (NULL, :first_name, :last_name, :contact_number, :email, :username, :password, :verification_code, :unique_id, :user_role)");
             $insertStmt->bindParam(':first_name', $firstName, PDO::PARAM_STR);
             $insertStmt->bindParam(':last_name', $lastName, PDO::PARAM_STR);
             $insertStmt->bindParam(':contact_number', $contactNumber, PDO::PARAM_INT);
@@ -47,7 +47,8 @@ if (isset($_POST['register'])) {
             $insertStmt->bindParam(':username', $username, PDO::PARAM_STR);
             $insertStmt->bindParam(':password', $hashedPassword, PDO::PARAM_STR); // Store hashed password
             $insertStmt->bindParam(':verification_code', $verificationCode, PDO::PARAM_INT);
-            $insertStmt->bindParam(':unique_id', $uniqueID, PDO::PARAM_INT); // Store unique ID
+            $insertStmt->bindParam(':unique_id', $uniqueID, PDO::PARAM_INT);
+            $insertStmt->bindParam(':user_role', $user_role, PDO::PARAM_INT); // user role
             $insertStmt->execute();
     
             //Server settings

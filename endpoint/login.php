@@ -30,7 +30,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 echo "
                 <script>
                     alert('Login Successful!');
-                    window.location.href = ''; // Regular user dashboard
+                    window.location.href = '../user_page/shop.php'; // Regular user dashboard
                 </script>
                 ";
             }

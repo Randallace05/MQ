@@ -70,7 +70,7 @@
             <li class="nav-item">
                 <a class="nav-link" href="../users/users.php">
                     <i class="fa-solid fa-users"></i>
-                    <span>Users</span></a>
+                    <span>User List</span></a>
             </li>
 
             <!-- Divider -->

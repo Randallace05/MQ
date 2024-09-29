@@ -80,10 +80,10 @@
                         <h1 class="h3 mb-0 text-gray-800">Accounts</h1>
                     </div>
                     
-                    <!-- Search Bar -->
+                    <!-- Search Bar 
                     <div class="search-bar" style="text-align:right;">
                         <input type="text" placeholder="Search">
-                    </div>
+                    </div>-->
 
                     <!-- Table Container -->
                     <div class="table-container">

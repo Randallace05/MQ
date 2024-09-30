@@ -21,6 +21,108 @@
     <link href="../dashboard/css/sb-admin-2.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 80%;
+            margin: 50px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .menu {
+            width: 200px;
+            float: left;
+            margin-right: 20px;
+        }
+
+        .menu ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .menu ul li {
+            margin: 10px 0;
+        }
+
+        .menu ul li a {
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+            display: block;
+            padding: 10px;
+            background-color: #f8f8f8;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .menu ul li a:hover {
+            background-color: #e8e8e8;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f4f4f4;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .profile-pic {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            vertical-align: middle;
+            margin-right: 10px;
+        }
+
+        .customer-name {
+            display: flex;
+            align-items: center;
+        }
+
+        .total {
+            font-weight: bold;
+        }
+
+        .payment-gcash {
+            color: green;
+            font-weight: bold;
+        }
+
+        .payment-cod {
+            color: #d9534f;
+            font-weight: bold;
+        }
+    </style>
 </head>
 
 <body id="page-top">
@@ -47,17 +149,97 @@
 
                     <!-- Page Heading -->
                     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                        <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+                        <h1 class="h3 mb-0 text-gray-800">Order</h1>
                     </div>
 
-                    <!-- Content Row -->
-                    <div class="row">
+                    <div class="container">
+        <h2>Order List</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Customer</th>
+                    <th>Menu</th>
+                    <th>Total Payment</th>
+                    <th>Payment</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="customer-name">
+                        <img src="eren.png" alt="Eren" class="profile-pic"> Eren Jaeger
+                    </td>
+                    <td>Resellers Package</td>
+                    <td class="total">₱ 2,110</td>
+                    <td class="payment-gcash">GCash</td>
+                </tr>
+                <tr>
+                    <td class="customer-name">
+                        <img src="reiner.png" alt="Reiner" class="profile-pic"> Reiner Braum
+                    </td>
+                    <td>Chili Garlic, Salmon Belly (2), Chicken Bagoong</td>
+                    <td class="total">₱ 1,223</td>
+                    <td class="payment-gcash">GCash</td>
+                </tr>
+                <tr>
+                    <td class="customer-name">
+                        <img src="levi.png" alt="Levi" class="profile-pic"> Levi Ackerman
+                    </td>
+                    <td>Chili Garlic, Salmon Belly (2), Chicken Bagoong</td>
+                    <td class="total">₱ 1,234</td>
+                    <td class="payment-gcash">GCash</td>
+                </tr>
+                <tr>
+                    <td class="customer-name">
+                        <img src="historia.png" alt="Historia" class="profile-pic"> Historia
+                    </td>
+                    <td>Salmon Belly (2)</td>
+                    <td class="total">₱ 788</td>
+                    <td class="payment-gcash">GCash</td>
+                </tr>
+                <tr>
+                    <td class="customer-name">
+                        <img src="armin.png" alt="Armin" class="profile-pic"> Armin Arlet
+                    </td>
+                    <td>Pork Binagoongan (2)</td>
+                    <td class="total">₱ 678</td>
+                    <td class="payment-gcash">GCash</td>
+                </tr>
+                <tr>
+                    <td class="customer-name">
+                        <img src="hanji.png" alt="Hanji" class="profile-pic"> Hanji Zoe
+                    </td>
+                    <td>Pork Binagoongan (2)</td>
+                    <td class="total">₱ 678</td>
+                    <td class="payment-cod">COD</td>
+                </tr>
+                <tr>
+                    <td class="customer-name">
+                        <img src="erwin.png" alt="Erwin" class="profile-pic"> Erwin Smith
+                    </td>
+                    <td>Chili Garlic, Salmon Belly (2)</td>
+                    <td class="total">₱ 678</td>
+                    <td class="payment-cod">COD</td>
+                </tr>
+                <tr>
+                    <td class="customer-name">
+                        <img src="ymir.png" alt="Ymir" class="profile-pic"> Ymir
+                    </td>
+                    <td>Chili Garlic, Salmon Belly (2)</td>
+                    <td class="total">₱ 586</td>
+                    <td class="payment-cod">COD</td>
+                </tr>
+                <tr>
+                    <td class="customer-name">
+                        <img src="annie.png" alt="Annie" class="profile-pic"> Annie Leonhart
+                    </td>
+                    <td>Chili Garlic</td>
+                    <td class="total">₱ 345</td>
+                    <td class="payment-cod">COD</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 
-                       
-                    
-
-                </div>
-                <!-- /.container-fluid -->
 
             </div>
             <!-- End of Main Content -->

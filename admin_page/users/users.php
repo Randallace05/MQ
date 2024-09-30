@@ -22,6 +22,7 @@
         body {
             font-family: Arial, sans-serif;
         }
+
         .table-container {
             width: 60%;
             margin: 20px auto;
@@ -30,7 +31,9 @@
             border-radius: 8px;
             overflow: hidden;
         }
-        .table-header, .table-row {
+
+        .table-header,
+        .table-row {
             display: flex;
             justify-content: space-between;
             background-color: #f5e6e7;
@@ -38,15 +41,19 @@
             color: #e84949;
             padding: 10px;
         }
+
         .table-row {
             background-color: #f9eaea;
         }
+
         .table-row:nth-child(even) {
             background-color: #f7dada;
         }
+
         .table-cell {
             width: 48%;
         }
+
         .avatar {
             width: 30px;
             height: 30px;
@@ -54,6 +61,40 @@
             background-color: #d3d3d3;
             margin-right: 10px;
             display: inline-block;
+        }
+
+        /* Media Query for Smaller Screens */
+        @media (max-width: 768px) {
+            .table-container {
+                width: 100%;
+            }
+
+            .table-header,
+            .table-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .table-cell {
+                width: 100%;
+                padding: 5px 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .table-header,
+            .table-row {
+                padding: 8px;
+            }
+
+            .table-cell {
+                font-size: 14px;
+            }
+
+            .avatar {
+                width: 20px;
+                height: 20px;
+            }
         }
     </style>
 </head>
@@ -79,11 +120,6 @@
                     <div class="d-sm-flex align-items-center justify-content-between mb-4">
                         <h1 class="h3 mb-0 text-gray-800">Accounts</h1>
                     </div>
-                    
-                    <!-- Search Bar 
-                    <div class="search-bar" style="text-align:right;">
-                        <input type="text" placeholder="Search">
-                    </div>-->
 
                     <!-- Table Container -->
                     <div class="table-container">
@@ -152,4 +188,5 @@
     <script src="js/demo/chart-pie-demo.js"></script>
 
 </body>
+
 </html>

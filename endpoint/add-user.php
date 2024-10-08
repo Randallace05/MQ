@@ -21,7 +21,7 @@ if (isset($_POST['register'])) {
         $user_role = $_POST['user_role']; 
 
         // Generate a unique user ID
-        $uniqueID = rand(time(), 100000000); // Incorrect
+        $uniqueID = rand(time(), 100000000);
         
         // Hash the password
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);

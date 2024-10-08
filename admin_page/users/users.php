@@ -122,31 +122,36 @@
                     </div>
 
                     <!-- Table Container -->
+                    <?php
+                    // Include the connection file
+                    include '../../conn/conn.php';
+
+                    // Prepare the SQL query to exclude "admin" user_role
+                    $query = "SELECT first_name, last_name, user_role FROM tbl_user WHERE user_role != 'admin'";
+                    $stmt = $conn->prepare($query);
+                    $stmt->execute();
+                    $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                    ?>
+
+                    <!-- Table Container -->
                     <div class="table-container">
                         <div class="table-header">
                             <span class="table-cell">Name</span>
                             <span class="table-cell">Type</span>
                         </div>
-                        <div class="table-row">
-                            <div class="table-cell">
-                                <div class="avatar"></div> Lorem Ipsum
+
+                        <?php foreach($users as $row) { ?>
+                            <div class="table-row">
+                                <div class="table-cell">
+                                    <div class="avatar"></div> 
+                                    <?php echo htmlspecialchars($row['first_name'] . ' ' . $row['last_name']); ?>
+                                </div>
+                                <div class="table-cell">
+                                    <?php echo htmlspecialchars($row['user_role']); ?>
+                                </div>
                             </div>
-                            <div class="table-cell">Customer</div>
-                        </div>
-                        <div class="table-row">
-                            <div class="table-cell">
-                                <div class="avatar"></div> Lorem Ipsum
-                            </div>
-                            <div class="table-cell">Customer</div>
-                        </div>
-                        <div class="table-row">
-                            <div class="table-cell">
-                                <div class="avatar"></div> Lorem Ipsum
-                            </div>
-                            <div class="table-cell">Distributor</div>
-                        </div>
+                        <?php } ?>
                     </div>
-                </div>
                 <!-- /.container-fluid -->
             </div>
             <!-- End of Main Content -->

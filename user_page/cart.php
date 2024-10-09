@@ -1,11 +1,11 @@
 
 
 <!-- start include header -->
-<?php include("includes/header.php"); ?> 
+<?php include("../includes/header.php"); ?> 
 <!-- end include header -->
 
     <!-- Top Bar Section -->
-        <?php include("includes/cart bar.php"); ?>
+        <?php include("../includes/cartBar.php"); ?>
     <!-- End Top Bar Section -->
 
     <!-- Main Container -->
@@ -13,12 +13,14 @@
         <div class="flex-container">
             <!-- Image Section -->
 
+                <?php include("cartItems.php"); ?>
+
             <!-- Form Section -->
             <div class="main">
-
+    </div>
        
 
 <!-- Footer Section -->
-    <?php include("includes/footer.php"); ?>
+    <?php include("../includes/footer.php"); ?>
 <!-- End Footer Section -->
 

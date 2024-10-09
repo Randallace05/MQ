@@ -80,7 +80,7 @@
 </style>
 
 <!-- start include header -->
-<?php include("../includes/header.php"); ?> 
+<?php include("header.php"); ?> 
 <!-- end include header -->
 
 <div class="topbar"></div>

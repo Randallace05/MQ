@@ -1,4 +1,5 @@
 <?php
+// Include database connection
 include ('../conn/conn.php');
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -6,7 +7,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = $_POST['password'];
 
     // Fetch the user's hashed password and role from the database
-    $stmt = $conn->prepare("SELECT `password`, `username` FROM `tbl_user` WHERE `username` = :username");
+    $stmt = $conn->prepare("SELECT `password`, `username`, `user_role` FROM `tbl_user` WHERE `username` = :username");
     $stmt->bindParam(':username', $username);
     $stmt->execute();
 
@@ -14,23 +15,44 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $row = $stmt->fetch();
         $stored_password = $row['password'];
         $stored_username = $row['username'];
+        $user_role = $row['user_role'];
 
         // Check if the entered password matches the hashed password in the database
         if (password_verify($password, $stored_password)) {
 
-            // Check if the user is "admin" and redirect accordingly
-            if ($stored_username === 'admin') {
+            // Set session variables upon successful login
+            $_SESSION['loggedin'] = true;  // Indicates the user is logged in
+            $_SESSION['username'] = $stored_username;  // Store the username in the session
+            $_SESSION['user_role'] = $user_role;  // Store the user role in the session
+
+            // Redirect based on the user role
+            if ($user_role === 'admin') {
                 echo "
                 <script>
                     alert('Welcome Admin, Login Successful!');
                     window.location.href = '../admin_page/dashboard/index.php'; // Admin dashboard
                 </script>
                 ";
-            } else {
+            } elseif ($user_role === 'customer') {
                 echo "
                 <script>
-                    alert('Login Successful!');
-                    window.location.href = '../user_page/shop.php'; // Regular user dashboard
+                    alert('Welcome {$stored_username}, Login Successful!'); 
+                    window.location.href = '../user_page/shop.php'; // Customer dashboard
+                </script>
+                ";
+            } elseif ($user_role === 'distributor') {
+                echo "
+                <script>
+                    alert('Welcome Distributor, Login Successful!');
+                    window.location.href = '../distributor_page/dashboard.php'; // Distributor dashboard
+                </script>
+                ";
+            } else {
+                // Handle unexpected roles, if needed
+                echo "
+                <script>
+                    alert('Login Failed, Unknown Role!');
+                    window.location.href = '../index.php';
                 </script>
                 ";
             }
@@ -39,7 +61,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             echo "
             <script>
                 alert('Login Failed, Incorrect Password!');
-                window.location.href = 'index.php';
+                window.location.href = '../index.php';
             </script>
             ";
         }
@@ -48,7 +70,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         echo "
         <script>
             alert('Login Failed, User Not Found!');
-            window.location.href = 'http://localhost/system/login.php';
+            window.location.href = '../index.php';
         </script>
         ";
     }

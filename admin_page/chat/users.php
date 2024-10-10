@@ -1,8 +1,8 @@
 <?php 
 
 
-include_once "../../conn/conn.php"; // Ensure the path is correct
-include_once "header.php"; // Ensure the path is correct
+include_once "../../conn/conn.php"; 
+include_once "header.php"; 
 
 ?>
 <!DOCTYPE html>
@@ -46,12 +46,11 @@ include_once "header.php"; // Ensure the path is correct
                 <button><i class="fas fa-search"></i></button>
             </div>
             <div class="users-list">
-                <!-- Users list will be populated here via AJAX or other methods -->
+                
             </div>
         </section>
     </div>
 
-    <!-- Include your JavaScript files here -->
     <script src="javascript/users.js"></script>
 </body>
 </html>

@@ -1,7 +1,9 @@
-
+<!-- session -->
+    <?php include("includes/authentication.php"); ?> 
+<!-- end of session -->
 
 <!-- start include header -->
-<?php include("includes/header.php"); ?> 
+    <?php include("includes/header.php"); ?> 
 <!-- end include header -->
 
     <!-- Top Bar Section -->

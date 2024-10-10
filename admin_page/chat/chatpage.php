@@ -3,7 +3,7 @@
 <!-- end of header -->
 
 <body id="page-top">
-    
+
     <!-- Page Wrapper -->
     <div id="wrapper">
 
@@ -34,13 +34,9 @@
                     <!-- Content Row -->
                     <div class="row">
 
-                        <!-- Cards -->
-                        <?php include("cards.php"); ?>
-                        <!-- End of Cards -->
-
-                        <!-- Content -->
-                            <?php include("content.php"); ?>
-                        <!-- End of Content Row -->
+                        <!-- chat -->
+                            <?php include("users.php"); ?> 
+                        <!-- end of chat -->
                     
 
                 </div>
@@ -50,7 +46,13 @@
             <!-- End of Main Content -->
 
             <!-- Footer -->
-                <?php  include ('../includesAdmin/footer.php');?>
+            <footer class="sticky-footer bg-white">
+                <div class="container my-auto">
+                    <div class="copyright text-center my-auto">
+                        <span>Copyright &copy; Your Website 2024</span>
+                    </div>
+                </div>
+            </footer>
             <!-- End of Footer -->
 
         </div>
@@ -59,10 +61,11 @@
     </div>
     <!-- End of Page Wrapper -->
 
+<!-- script -->
+ <?php include("../includesAdmin/script.php");?>
 
-    <!-- script -->
-        <?php include("../includesAdmin/script.php"); ?>
-    <!-- end of script -->
 </body>
+
+
 
 </html>

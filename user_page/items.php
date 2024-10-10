@@ -1,9 +1,8 @@
 <?php
-// Assuming you already have a database connection setup in `db.php`
 include '../conn/conn.php';
 
 // Fetch product details from the database based on the given product ID
-$product_id = $_GET['id']; // Assuming you're getting the product ID from the URL
+$product_id = $_GET['id'];
 
 // Fetch the current product details
 $query = "SELECT name, price, image, description, stock FROM products WHERE id = :id";
@@ -36,21 +35,7 @@ $related_products = $related_stmt->fetchAll(PDO::FETCH_ASSOC); // Fetch all rela
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="container px-4 px-lg-5">
-            <a class="navbar-brand" href="#!">Shop Name</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
-                    <li class="nav-item"><a class="nav-link active" aria-current="page" href="#!">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#!">About</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#!">Shop</a></li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+    <?php include("../includes/topbar.php"); ?>
 
     <!-- Product section -->
     <section class="py-5">

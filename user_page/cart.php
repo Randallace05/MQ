@@ -5,7 +5,7 @@
 <!-- end include header -->
 
     <!-- Top Bar Section -->
-        <?php include("../includes/cartBar.php"); ?>
+        <?php include("../includes/topbar.php"); ?>
     <!-- End Top Bar Section -->
 
     <!-- Main Container -->
@@ -21,6 +21,6 @@
        
 
 <!-- Footer Section -->
-    <?php include("../includes/footer.php"); ?>
+    <?php //include("../includes/footer.php"); ?>
 <!-- End Footer Section -->
 

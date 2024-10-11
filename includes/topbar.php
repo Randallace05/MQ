@@ -137,7 +137,7 @@
             cursor: pointer;
         }
     </style>
-    <title>Dropdown Example</title>
+    <title> </title>
 </head>
 <body>
 
@@ -153,7 +153,7 @@
     <nav class="nav-links">
         <a href="../user_page/shop.php">Home</a>
         <a href="#">Contact</a>
-        <a href="index.php">Sign Up</a>
+        <a href="../index.php">Sign Up</a>
     </nav>
     <div class="header-icons">
         <div class="search-container">

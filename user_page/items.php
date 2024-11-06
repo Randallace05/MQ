@@ -1,6 +1,34 @@
 <?php
 include '../conn/conn.php';
 
+if (isset($_POST['add_to_cart'])) {
+    $products_name = $_POST['product_name'];
+    $products_price = $_POST['product_price'];
+    $products_image = $_POST['product_image'];
+    $product_quantity = isset($_POST['product_quantity']) ? $_POST['product_quantity'] : 1; // Set default to 1 if not provided
+
+    // Prepare a SELECT statement to check if the product is already in the cart
+    $select_cart = $conn->prepare("SELECT COUNT(*) FROM `cart` WHERE name = :name");
+    $select_cart->bindParam(':name', $products_name);
+    $select_cart->execute();
+
+    // Check if product already exists in the cart
+    if ($select_cart->fetchColumn() > 0) {
+        echo "Product already added to cart";
+    } else {
+        // Prepare an SQL statement to prevent SQL injection
+        $insert_products = $conn->prepare("INSERT INTO `cart` (name, price, image, quantity) VALUES (:name, :price, :image, :quantity)");
+        $insert_products->bindParam(':name', $products_name);
+        $insert_products->bindParam(':price', $products_price);
+        $insert_products->bindParam(':image', $products_image);
+        $insert_products->bindParam(':quantity', $product_quantity);
+        echo "Product added to cart";
+        // Execute the query
+        $insert_products->execute();
+    }
+}
+
+
 // Fetch product details from the database based on the given product ID
 $product_id = $_GET['id'];
 
@@ -38,31 +66,47 @@ $related_products = $related_stmt->fetchAll(PDO::FETCH_ASSOC); // Fetch all rela
     <?php include("../includes/topbar.php"); ?>
 
     <!-- Product section -->
-    <section class="py-5">
-        <div class="container px-4 px-lg-5 my-5">
+    <?php
+// Modify the query to fetch only one product
+$select_product = $conn->query("SELECT * FROM `products` LIMIT 1");
+
+if ($select_product->rowCount() > 0) {
+    $fetch_product = $select_product->fetch(PDO::FETCH_ASSOC);
+?>
+<section class="py-5">
+    <div class="container px-4 px-lg-5 my-5">
+        <form method="post" action="">
             <div class="row gx-4 gx-lg-5 align-items-center">
                 <div class="col-md-6">
-                    <img class="card-img-top mb-5 mb-md-0" src="../admin_page/foodMenu/uploads/<?php echo htmlspecialchars($product['image']); ?>" alt="Main Image" />
+                    <img class="card-img-top mb-5 mb-md-0" src="../admin_page/foodMenu/uploads/<?php echo htmlspecialchars($fetch_product['image']); ?>" alt="Main Image" />
                 </div>
 
                 <div class="col-md-6">
-                    <h1 class="display-5 fw-bolder"><?php echo htmlspecialchars($product['name']); ?></h1>
+                    <h1 class="display-5 fw-bolder"><?php echo htmlspecialchars($fetch_product['name']); ?></h1>
                     <div class="fs-5 mb-5">
-                        <span>$<?php echo number_format($product['price'], 2); ?></span>
+                        <span>$<?php echo number_format($fetch_product['price'], 2); ?></span>
                     </div>
-                    <p class="lead"><?php echo htmlspecialchars($product['description']); ?></p>
-                    <p>Stock: <?php echo $product['stock']; ?></p>
+                    <p class="lead"><?php echo htmlspecialchars($fetch_product['description']); ?></p>
+                    <p>Stock: <?php echo $fetch_product['stock']; ?></p>
                     <div class="d-flex">
-                        <input class="form-control text-center me-3" id="inputQuantity" type="number" value="1" style="max-width: 3rem" />
-                        <button class="btn btn-outline-dark flex-shrink-0" type="button">
-                            <i class="bi-cart-fill me-1"></i>
-                            <a href="../cart.php">Add to cart</a>
-                        </button>
+                        <input type="hidden" name="product_name" value="<?php echo htmlspecialchars($fetch_product['name']); ?>">
+                        <input type="hidden" name="product_price" value="<?php echo htmlspecialchars($fetch_product['price']); ?>">
+                        <input type="hidden" name="product_image" value="<?php echo htmlspecialchars($fetch_product['image']); ?>">
+                        <input type="number" name="product_quantity" value="1" min="1" class="form-control text-center me-3" id="inputQuantity" style="max-width: 6rem" />
+                        <input type="submit" class="btn btn-outline-dark flex-shrink-0" value="Add to Cart" name="add_to_cart">
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </form>
+    </div>
+</section>
+<?php
+} else {
+    echo "<div class='empty_text'>No Products Available</div>";
+}
+?>
+
+
 
     <!-- Related Products Section -->
     <h2>Related Products</h2>

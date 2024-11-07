@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -13,16 +12,13 @@
     <!-- Custom fonts for this template-->
     <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
-
-    <!-- Custom styles for this template-->
     <link href="../dashboard/css/sb-admin-2.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
+    
     <style>
         body {
             font-family: Arial, sans-serif;
         }
-
         .table-container {
             width: 60%;
             margin: 20px auto;
@@ -31,9 +27,7 @@
             border-radius: 8px;
             overflow: hidden;
         }
-
-        .table-header,
-        .table-row {
+        .table-header, .table-row {
             display: flex;
             justify-content: space-between;
             background-color: #f5e6e7;
@@ -41,19 +35,15 @@
             color: #e84949;
             padding: 10px;
         }
-
         .table-row {
             background-color: #f9eaea;
         }
-
         .table-row:nth-child(even) {
             background-color: #f7dada;
         }
-
         .table-cell {
             width: 48%;
         }
-
         .avatar {
             width: 30px;
             height: 30px;
@@ -62,35 +52,27 @@
             margin-right: 10px;
             display: inline-block;
         }
-
         /* Media Query for Smaller Screens */
         @media (max-width: 768px) {
             .table-container {
                 width: 100%;
             }
-
-            .table-header,
-            .table-row {
+            .table-header, .table-row {
                 flex-direction: column;
                 align-items: flex-start;
             }
-
             .table-cell {
                 width: 100%;
                 padding: 5px 0;
             }
         }
-
         @media (max-width: 480px) {
-            .table-header,
-            .table-row {
+            .table-header, .table-row {
                 padding: 8px;
             }
-
             .table-cell {
                 font-size: 14px;
             }
-
             .avatar {
                 width: 20px;
                 height: 20px;
@@ -121,14 +103,37 @@
                         <h1 class="h3 mb-0 text-gray-800">Accounts</h1>
                     </div>
 
-                    <!-- Table Container -->
+                    <!-- Dropdown for Filtering -->
+                    <form method="GET" action="">
+                        <label for="userRoleFilter">Filter by Role:</label>
+                        <select name="user_role" id="userRoleFilter" onchange="this.form.submit()">
+                            <option value="all" <?php echo isset($_GET['user_role']) && $_GET['user_role'] == 'all' ? 'selected' : ''; ?>>All</option>
+                            <option value="customer" <?php echo isset($_GET['user_role']) && $_GET['user_role'] == 'customer' ? 'selected' : ''; ?>>Customer</option>
+                            <option value="distributor" <?php echo isset($_GET['user_role']) && $_GET['user_role'] == 'distributor' ? 'selected' : ''; ?>>Distributor</option>
+                            <!-- Add more options as needed -->
+                        </select>
+                    </form>
+
                     <?php
-                    // Include the connection file
                     include '../../conn/conn.php';
 
-                    // Prepare the SQL query to exclude "admin" user_role
-                    $query = "SELECT first_name, last_name, user_role FROM tbl_user WHERE user_role != 'admin'";
+                    // Get selected user role
+                    $selectedRole = isset($_GET['user_role']) ? $_GET['user_role'] : 'all';
+
+                    // Adjust SQL query based on selected role
+                    if ($selectedRole == 'all') {
+                        $query = "SELECT first_name, last_name, user_role FROM tbl_user WHERE user_role != 'admin'";
+                    } else {
+                        $query = "SELECT first_name, last_name, user_role FROM tbl_user WHERE user_role = :user_role AND user_role != 'admin'";
+                    }
+
                     $stmt = $conn->prepare($query);
+
+                    // Bind the parameter if a specific role is selected
+                    if ($selectedRole != 'all') {
+                        $stmt->bindParam(':user_role', $selectedRole, PDO::PARAM_STR);
+                    }
+
                     $stmt->execute();
                     $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     ?>
@@ -152,6 +157,7 @@
                             </div>
                         <?php } ?>
                     </div>
+                </div>
                 <!-- /.container-fluid -->
             </div>
             <!-- End of Main Content -->
@@ -178,20 +184,9 @@
     <!-- Bootstrap core JavaScript-->
     <script src="vendor/jquery/jquery.min.js"></script>
     <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
     <!-- Core plugin JavaScript-->
     <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
-
     <!-- Custom scripts for all pages-->
     <script src="js/sb-admin-2.min.js"></script>
-
-    <!-- Page level plugins -->
-    <script src="vendor/chart.js/Chart.min.js"></script>
-
-    <!-- Page level custom scripts -->
-    <script src="js/demo/chart-area-demo.js"></script>
-    <script src="js/demo/chart-pie-demo.js"></script>
-
 </body>
-
 </html>

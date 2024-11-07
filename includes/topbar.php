@@ -143,6 +143,8 @@
 
 <!-- start include header -->
 <?php include("header.php"); ?> 
+
+
 <!-- end include header -->
 
 <div class="topbar"></div>
@@ -155,16 +157,45 @@
         <a href="#">Contact</a>
         <a href="../index.php">Sign Up</a>
     </nav>
+
+    <?php
+    // Include the connection file if not already included
+    if (file_exists('../conn/conn.php')) {
+        include_once '../conn/conn.php'; // use include_once to avoid redundant inclusions
+    } else {
+        echo "Connection file not found.";
+        // Set a fallback to avoid errors if connection fails
+        $conn = null;
+    }
+
+    // Ensure $conn is defined before using it
+    if ($conn) {
+        // Select query using PDO
+        $select_product = $conn->query("SELECT COUNT(*) FROM `cart`");
+        $row_count = $select_product->fetchColumn();
+    } else {
+        // Fallback value if connection is not established
+        $row_count = 0;
+        echo "Database connection not established.";
+    }
+
+    echo $row_count;
+    ?>
+    
     <div class="header-icons">
         <div class="search-container">
             <input type="text" class="search-bar" placeholder="What are you looking for?">
             <button class="search-btn"><i class="fa fa-search"></i></button>
         </div>
         <a href="#"><i class="fa-regular fa-heart"></i>
-            <span class="icon-badge">4</span></a>
+            <span class="icon-badge">4</span>
+        </a>
         <a href="../user_page/cart.php"><i class="fa-solid fa-cart-shopping"></i>
-            <span class="icon-badge">2</span></a>
-        
+            <span class="icon-badge"><?php echo $row_count; ?></span>
+        </a>
+    </div>
+</div>
+
         <!-- User Icon with Dropdown -->
         <div class="user-dropdown">
             <a href="#" class="user-icon" onclick="toggleDropdown(event)">

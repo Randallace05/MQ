@@ -105,7 +105,7 @@
 
                     <!-- Dropdown for Filtering -->
                     <form method="GET" action="">
-                        <label for="userRoleFilter">Filter by Role:</label>
+                        <label for="userRoleFilter">Filter:</label>
                         <select name="user_role" id="userRoleFilter" onchange="this.form.submit()">
                             <option value="all" <?php echo isset($_GET['user_role']) && $_GET['user_role'] == 'all' ? 'selected' : ''; ?>>All</option>
                             <option value="customer" <?php echo isset($_GET['user_role']) && $_GET['user_role'] == 'customer' ? 'selected' : ''; ?>>Customer</option>

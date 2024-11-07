@@ -72,26 +72,53 @@ $select_product = $conn->query("SELECT * FROM `products` LIMIT 1");
 
 if ($select_product->rowCount() > 0) {
     $fetch_product = $select_product->fetch(PDO::FETCH_ASSOC);
+
+    // Check if the form was submitted
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_cart'])) {
+        $product_name = $_POST['product_name'];
+        $product_price = $_POST['product_price'];
+        $product_image = $_POST['product_image'];
+        $product_quantity = $_POST['product_quantity'];
+
+        // Check if the product already exists in the cart
+        $check_cart = $conn->prepare("SELECT * FROM `cart` WHERE name = ?");
+        $check_cart->execute([$product_name]);
+
+        if ($check_cart->rowCount() > 0) {
+            // If product exists, set the quantity to the submitted value
+            $update_cart = $conn->prepare("UPDATE `cart` SET quantity = ? WHERE name = ?");
+            $update_cart->execute([$product_quantity, $product_name]);
+
+            echo "<div class='alert alert-success'>Product quantity updated in cart successfully!</div>";
+        } else {
+            // If product doesn't exist, insert new entry
+            $insert_cart = $conn->prepare("INSERT INTO `cart` (name, price, image, quantity) VALUES (?, ?, ?, ?)");
+            $insert_cart->execute([$product_name, $product_price, $product_image, $product_quantity]);
+
+            echo "<div class='alert alert-success'>Product added to cart successfully!</div>";
+        }
+    }
 ?>
+
 <section class="py-5">
     <div class="container px-4 px-lg-5 my-5">
         <form method="post" action="">
             <div class="row gx-4 gx-lg-5 align-items-center">
                 <div class="col-md-6">
-                    <img class="card-img-top mb-5 mb-md-0" src="../admin_page/foodMenu/uploads/<?php echo htmlspecialchars($fetch_product['image']); ?>" alt="Main Image" />
+                    <img class="card-img-top mb-5 mb-md-0" src="../admin_page/foodMenu/uploads/<?php echo htmlspecialchars($product['image']); ?>" alt="Main Image" />
                 </div>
 
                 <div class="col-md-6">
-                    <h1 class="display-5 fw-bolder"><?php echo htmlspecialchars($fetch_product['name']); ?></h1>
+                    <h1 class="display-5 fw-bolder"><?php echo htmlspecialchars($product['name']); ?></h1>
                     <div class="fs-5 mb-5">
-                        <span>$<?php echo number_format($fetch_product['price'], 2); ?></span>
+                        <span>$<?php echo number_format($product['price'], 2); ?></span>
                     </div>
-                    <p class="lead"><?php echo htmlspecialchars($fetch_product['description']); ?></p>
-                    <p>Stock: <?php echo $fetch_product['stock']; ?></p>
+                    <p class="lead"><?php echo htmlspecialchars($product['description']); ?></p>
+                    <p>Stock: <?php echo $product['stock']; ?></p>
                     <div class="d-flex">
-                        <input type="hidden" name="product_name" value="<?php echo htmlspecialchars($fetch_product['name']); ?>">
-                        <input type="hidden" name="product_price" value="<?php echo htmlspecialchars($fetch_product['price']); ?>">
-                        <input type="hidden" name="product_image" value="<?php echo htmlspecialchars($fetch_product['image']); ?>">
+                        <input type="hidden" name="product_name" value="<?php echo htmlspecialchars($product['name']); ?>">
+                        <input type="hidden" name="product_price" value="<?php echo htmlspecialchars($product['price']); ?>">
+                        <input type="hidden" name="product_image" value="<?php echo htmlspecialchars($product['image']); ?>">
                         <input type="number" name="product_quantity" value="1" min="1" class="form-control text-center me-3" id="inputQuantity" style="max-width: 6rem" />
                         <input type="submit" class="btn btn-outline-dark flex-shrink-0" value="Add to Cart" name="add_to_cart">
                     </div>
@@ -100,11 +127,16 @@ if ($select_product->rowCount() > 0) {
         </form>
     </div>
 </section>
+
 <?php
 } else {
     echo "<div class='empty_text'>No Products Available</div>";
 }
 ?>
+
+
+
+
 
 
 

@@ -9,7 +9,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Inventory</title>
+    <title>Uploading</title>
 
     <!-- Custom fonts for this template-->
     <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -22,6 +22,120 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
 </head>
+<style>
+    .row {
+  display: -ms-flexbox; /* IE10 */
+  display: flex;
+  -ms-flex-wrap: wrap; /* IE10 */
+  flex-wrap: wrap;
+  margin: 0 -16px;
+}
+
+.col-25 {
+  -ms-flex: 25%; /* IE10 */
+  flex: 25%;
+}
+
+.col-50 {
+  -ms-flex: 50%; /* IE10 */
+  flex: 50%;
+}
+
+.col-75 {
+  -ms-flex: 75%; /* IE10 */
+  flex: 75%;
+}
+
+.col-25,
+.col-50,
+.col-75 {
+  padding: 0 16px;
+}
+
+.container {
+  background-color: #f2f2f2;
+  padding: 5px 20px 15px 20px;
+  border: 1px solid lightgrey;
+  border-radius: 3px;
+}
+
+input[type=text] {
+  width: 100%;
+  margin-bottom: 20px;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+
+label {
+  margin-bottom: 10px;
+  display: block;
+}
+
+.icon-container {
+  margin-bottom: 20px;
+  padding: 7px 0;
+  font-size: 24px;
+}
+
+.btn {
+  background-color: #04AA6D;
+  color: white;
+  padding: 12px;
+  margin: 10px 0;
+  border: none;
+  width: 100%;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 17px;
+}
+
+.btn:hover {
+  background-color: #45a049;
+}
+
+span.price {
+  float: right;
+  color: grey;
+}
+
+/* Responsive layout - when the screen is less than 800px wide, make the two columns stack on top of each other instead of next to each other (and change the direction - make the "cart" column go on top) */
+@media (max-width: 800px) {
+  .row {
+    flex-direction: column-reverse;
+  }
+  .col-25 {
+    margin-bottom: 20px;
+  }
+}
+.upload-form-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* This centers it vertically within the viewport */
+}
+
+.upload-form-container form {
+    background-color: #f2f2f2;
+    padding: 20px;
+    border: 1px solid lightgrey;
+    border-radius: 5px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.btn {
+    width: 100%;
+}
+
+
+</style>
 
 <body id="page-top">
 
@@ -29,77 +143,28 @@
     <div id="wrapper">
 
         <!-- Sidebar -->
-        <?php include("../includesAdmin/sidebar.php"); ?>
+        <?php include("sidebar.php"); ?>
         <!-- End of Sidebar -->
 
         <!-- Content Wrapper -->
         <div id="content-wrapper" class="d-flex flex-column">
-
-            <!-- Main Content -->
-            <div id="content">
-
                 <!-- Topbar -->
             <?php include("../includesAdmin/topbar.php"); ?>
                 <!-- End of Topbar -->
 
                 <!-- Begin Page Content -->
                 <div class="container-fluid">
-
-
-                <!-- Content Row -->
-                    <div class="row">
-
-                       
-                    
-
-                </div>
-                <div class="container-fluid">
-    <!-- Inventory Table -->
-    <h2 class="mt-4">Inventory</h2>
-    <div class="table-responsive">
-        <table class="table table-bordered">
-            <thead class="thead-dark">
-                <tr>
-                    <th scope="col">Name of Customer</th>
-                    <th scope="col">Quantity of Order</th>
-                    <th scope="col">Price</th>
-                    <th scope="col">Reference Number</th>
-                    <th scope="col">Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>John Doe</td>
-                    <td>5</td>
-                    <td>$100</td>
-                    <td>
-
-                    </td>
-                    <td>
-                        <button class="btn btn-primary btn-sm">Arrange Order</button>
-                        <button class="btn btn-danger btn-sm">Cancel Order</button>
-                    </td>
-                </tr>
-                <!-- Additional rows can be added here -->
-            </tbody>
-        </table>
-    </div>
-</div>
-
-
-            </div>
-            <!-- End of Main Content -->
-
-            <!-- Footer -->
-            <footer class="sticky-footer bg-white">
-                <div class="container my-auto">
-                    <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; Your Website 2024</span>
+                    <div class="upload-form-container">
+                            <!-- File Upload Form -->
+                            <form action="upload.php" method="POST" enctype="multipart/form-data">
+                                <div class="form-group">
+                                    <label for="fileUpload">Upload File:</label>
+                                    <input type="file" name="fileUpload" id="fileUpload" required>
+                                </div>
+                                <button type="submit" class="btn">Upload</button>
+                            </form>
+                        </div>
                     </div>
-                </div>
-            </footer>
-            <!-- End of Footer -->
-
         </div>
         <!-- End of Content Wrapper -->
 

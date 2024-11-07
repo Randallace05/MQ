@@ -51,6 +51,12 @@
                     <i class="fa-solid fa-cart-shopping"></i>
                     <span>Manage Order</span></a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link" href="../inventory/inventory.php">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <span>Inventory</span></a>
+            </li>
+
 
             <!-- Nav Item - Customer Review -->
             <li class="nav-item">

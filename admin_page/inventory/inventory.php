@@ -57,7 +57,39 @@
                     
 
                 </div>
-                <!-- /.container-fluid -->
+                <div class="container-fluid">
+    <!-- Inventory Table -->
+    <h2 class="mt-4">Inventory</h2>
+    <div class="table-responsive">
+        <table class="table table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">Name of Customer</th>
+                    <th scope="col">Quantity of Order</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Reference Number</th>
+                    <th scope="col">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>John Doe</td>
+                    <td>5</td>
+                    <td>$100</td>
+                    <td>
+
+                    </td>
+                    <td>
+                        <button class="btn btn-primary btn-sm">Arrange Order</button>
+                        <button class="btn btn-danger btn-sm">Cancel Order</button>
+                    </td>
+                </tr>
+                <!-- Additional rows can be added here -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
 
             </div>
             <!-- End of Main Content -->

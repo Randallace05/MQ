@@ -5,7 +5,7 @@
 <!-- end include header -->
 
     <!-- Top Bar Section -->
-        <?php include("../includes/cartBar.php"); ?>
+        <?php include("../includes/topbar1.php"); ?>
     <!-- End Top Bar Section -->
 
     <!-- Main Container -->

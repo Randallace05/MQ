@@ -52,7 +52,7 @@ if (isset($_POST['update_product_quantity'])) {
             <td>
               <img src="../admin_page/foodMenu/uploads/<?php echo htmlspecialchars($fetch_cart_products['image']); ?>" alt="" style="width: 100px; height: auto;">
             </td>
-            <td><?php echo htmlspecialchars($fetch_cart_products['price']); ?></td>
+            <td><?php echo "₱". htmlspecialchars($fetch_cart_products['price']); ?></td>
             <td>
               <form action="" method="POST">
                 <input type="hidden" value="<?php echo htmlspecialchars($fetch_cart_products['cart_id']); ?>" name="update_quantity_id">
@@ -62,7 +62,7 @@ if (isset($_POST['update_product_quantity'])) {
                 </div>
               </form>
             </td>
-            <td><?php echo htmlspecialchars($fetch_cart_products['price'] * $fetch_cart_products['quantity']); ?></td>
+            <td><?php echo "₱". htmlspecialchars($fetch_cart_products['price'] * $fetch_cart_products['quantity']); ?></td>
             <td>
               <a href="delete_cart_item.php?id=<?php echo htmlspecialchars($fetch_cart_products['cart_id']); ?>">
                 <i class="fas fa-trash"></i> Remove

@@ -2,7 +2,7 @@
 $servername = "localhost";  // Your server host (localhost in most cases)
 $username = "root";  // Replace with your MySQL username
 $password = "";  // Replace with your MySQL password
-$dbname = "checkout_db";      // Database name created above
+$dbname = "login_email_verification";      // Database name created above
 
 // Create a connection to the MySQL server
 $conn = new mysqli($servername, $username, $password, $dbname);
@@ -25,7 +25,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $payment_method = "Gcash";  // Since payment method is pre-defined
 
     // Insert data into the checkout_info table
-    $sql = "INSERT INTO checkout_info (first_name, middle_name, last_name, address, city, zip_code, contact_number, payment_method)
+    $sql = "INSERT INTO checkout (firstname, middlename, lastname, address, city, zip_code, contact_number, payment_method)
             VALUES ('$first_name', '$middle_name', '$last_name', '$address', '$city', '$zip_code', '$contact_number', '$payment_method')";
 
     if ($conn->query($sql) === TRUE) {

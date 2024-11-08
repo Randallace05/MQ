@@ -111,7 +111,7 @@ if ($select_product->rowCount() > 0) {
                 <div class="col-md-6">
                     <h1 class="display-5 fw-bolder"><?php echo htmlspecialchars($product['name']); ?></h1>
                     <div class="fs-5 mb-5">
-                        <span>$<?php echo number_format($product['price'], 2); ?></span>
+                        <span>₱<?php echo number_format($product['price'], 2); ?></span>
                     </div>
                     <p class="lead"><?php echo htmlspecialchars($product['description']); ?></p>
                     <p>Stock: <?php echo $product['stock']; ?></p>

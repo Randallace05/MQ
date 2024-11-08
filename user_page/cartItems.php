@@ -84,7 +84,7 @@ if (isset($_POST['update_product_quantity'])) {
         Total: 
         <?php
           $total = $conn->query("SELECT SUM(price * quantity) AS total_price FROM `cart`")->fetch(PDO::FETCH_ASSOC)['total_price'] ?? 0;
-          echo "$" . number_format($total, 2);
+          echo "₱" . number_format($total, 2);
         ?>
       </h3>
       <a href="checkout.php" class="bottom_btn">Proceed to checkout</a>

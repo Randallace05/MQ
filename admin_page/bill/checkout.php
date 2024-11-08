@@ -1,12 +1,29 @@
 <?php
-    include ('action_page.php')
+include ('action_page.php');
+
+// Database connection (adjust the credentials as necessary)
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "login_email_verification";  // replace with your actual database name
+
+// Create connection
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// Query to get all items from cart
+$sql = "SELECT * FROM cart";
+$result = $conn->query($sql);
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
-    <meta charset="utf-8">
+<meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
@@ -23,7 +40,6 @@
     <!-- Custom styles for this template-->
     <link href="../dashboard/css/sb-admin-2.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
 </head>
 <style>
     .row {
@@ -112,7 +128,6 @@ span.price {
   }
 }
 </style>
-
 <body id="page-top">
 
     <!-- Page Wrapper -->
@@ -140,11 +155,15 @@ span.price {
  
 
                 </div>
-                       
-                   
+<body>
     <div class="container-fluid">
-    <!-- Inventory Table -->
-    <h2 class="mt-4">Check Out</h2>
+        <h2 class="mt-4">Check Out</h2>
+        <div class="row">
+            <div class="col-75">
+                <div class="container">
+                    <form action="action_page.php" method="POST">
+                        <!-- Your billing address and payment sections here -->
+                        <h2 class="mt-4">Check Out</h2>
     <div class="row">
   <div class="col-75">
     <div class="container">
@@ -183,80 +202,45 @@ span.price {
       </form>
     </div>
   </div>
-
-  <div class="col-25">
-    <div class="container">
-      <h4>Cart
-        <span class="price" style="color:black">
-          <i class="fa fa-shopping-cart"></i>
-          <b>4</b>
-        </span>
-      </h4>
-      <p><a href="#">Product 1</a> <span class="price">$15</span></p>
-      <p><a href="#">Product 2</a> <span class="price">$5</span></p>
-      <p><a href="#">Product 3</a> <span class="price">$8</span></p>
-      <p><a href="#">Product 4</a> <span class="price">$2</span></p>
-      <hr>
-      <p>Total <span class="price" style="color:black"><b>$30</b></span></p>
-    </div>
-  </div>
-</div>
-    </div>
-</div>
-
-
-        </div>
-            <!-- End of Main Content -->
-
-
-        </div>
-        <!-- End of Content Wrapper -->
-
-    </div>
-    <!-- End of Page Wrapper -->
-
-    <!-- Scroll to Top Button-->
-    <a class="scroll-to-top rounded" href="#page-top">
-        <i class="fas fa-angle-up"></i>
-    </a>
-
-    <!-- Logout Modal-->
-    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
-                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
+                    </form>
                 </div>
-                <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                    <a class="btn btn-primary" href="login.html">Logout</a>
+            </div>
+
+            <div class="col-25">
+                <div class="container">
+                    <h4>Cart
+                        <span class="price" style="color:black">
+                            <i class="fa fa-shopping-cart"></i>
+                            <b><?php echo $result->num_rows; ?></b>
+                        </span>
+                    </h4>
+                    <?php
+                    // Check if there are any items in the cart
+                    if ($result->num_rows > 0) {
+                      $grandTotal = 0;
+                      // Output each row
+                      while ($row = $result->fetch_assoc()) {
+                          // Calculate total price for each item (price * quantity)
+                          $itemTotal = $row["price"] * $row["quantity"];
+                          echo "<p><a href='#'>" . $row["name"] . " (x" . $row["quantity"] . ")</a> <span class='price'>₱" . $itemTotal . "</span></p>";
+                          $grandTotal += $itemTotal;  // Add to grand total
+                      }
+                      echo "<hr>";
+                      echo "<p>Total <span class='price' style='color:black'><b>₱" . $grandTotal . "</b></span></p>";
+                  } else {
+                      echo "<p>Your cart is empty.</p>";
+                  }
+                    ?>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Bootstrap core JavaScript-->
-    <script src="vendor/jquery/jquery.min.js"></script>
-    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Core plugin JavaScript-->
-    <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
-
-    <!-- Custom scripts for all pages-->
-    <script src="js/sb-admin-2.min.js"></script>
-
-    <!-- Page level plugins -->
-    <script src="vendor/chart.js/Chart.min.js"></script>
-
-    <!-- Page level custom scripts -->
-    <script src="js/demo/chart-area-demo.js"></script>
-    <script src="js/demo/chart-pie-demo.js"></script>
-
+    <!-- Your scripts here -->
 </body>
-
 </html>
+
+<?php
+// Close the database connection
+$conn->close();
+?>

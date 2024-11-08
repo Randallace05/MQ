@@ -63,7 +63,7 @@ $related_products = $related_stmt->fetchAll(PDO::FETCH_ASSOC); // Fetch all rela
 </head>
 <body>
     <!-- Navigation -->
-    <?php include("../includes/topbar.php"); ?>
+    <?php include("../includes/topbar1.php"); ?>
 
     <!-- Product section -->
     <?php

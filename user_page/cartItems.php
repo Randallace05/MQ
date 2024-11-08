@@ -1,204 +1,99 @@
-<style>
-    /* .gradient-custom {
-background: #6a11cb;
+<?php
+include '../conn/conn.php'; // Ensure that this file establishes a connection using PDO
 
-background: -webkit-linear-gradient(to right, rgba(106, 17, 203, 1), rgba(37, 117, 252, 1));
+if (isset($_POST['update_product_quantity'])) {
+    $update_value = intval($_POST['update_quantity']); // Sanitize input to prevent SQL injection
+    $update_id = intval($_POST['update_quantity_id']); // Sanitize input to prevent SQL injection
 
-background: linear-gradient(to right, rgba(106, 17, 203, 1), rgba(37, 117, 252, 1))
-} */
-</style>
+    // Use prepared statements for safer queries
+    $update_quantity_query = $conn->prepare("UPDATE `cart` SET quantity = :quantity WHERE cart_id = :cart_id");
+    $update_quantity_query->bindParam(':quantity', $update_value, PDO::PARAM_INT);
+    $update_quantity_query->bindParam(':cart_id', $update_id, PDO::PARAM_INT);
+    $update_quantity_query->execute();
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>Cart</title>
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" />
+    <link href="css/styles.css" rel="stylesheet" />
+</head>
+<body>
+<div class="container">
+  <section class="shopping_cart">
+    <h1 class="heading">My Cart</h1>
+    <table>
+      <?php
+      $select_cart_products = $conn->query("SELECT * FROM `cart`");
+      if ($select_cart_products->rowCount() > 0) {
+        echo "<thead>
+          <th>Sl No</th>
+          <th>Product Name</th>
+          <th>Product Image</th>
+          <th>Product Price</th>
+          <th>Product Quantity</th>
+          <th>Total Price</th>
+          <th>Action</th>
+        </thead>
+        <tbody>";
 
-
-
-<section class="h-100 gradient-custom">
-  <div class="container py-5">
-    <div class="row d-flex justify-content-center my-4">
-      <div class="col-md-8">
-        <div class="card mb-4">
-          <div class="card-header py-3">
-            <h5 class="mb-0">Cart - 2 items</h5>
-          </div>
-          <div class="card-body">
-            <!-- Single item -->
-            <div class="row">
-              <div class="col-lg-3 col-md-12 mb-4 mb-lg-0">
-                <!-- Image -->
-                <div class="bg-image hover-overlay hover-zoom ripple rounded" data-mdb-ripple-color="light">
-                  <img src="https://mdbcdn.b-cdn.net/img/Photos/Horizontal/E-commerce/Vertical/12a.webp"
-                    class="w-100" alt="Blue Jeans Jacket" />
-                  <a href="#!">
-                    <div class="mask" style="background-color: rgba(251, 251, 251, 0.2)"></div>
-                  </a>
+        $sl_no = 1;
+        while ($fetch_cart_products = $select_cart_products->fetch(PDO::FETCH_ASSOC)) {
+          ?>
+          <tr>
+            <td><?php echo $sl_no++; ?></td>
+            <td><?php echo htmlspecialchars($fetch_cart_products['name']); ?></td>
+            <td>
+              <img src="../admin_page/foodMenu/uploads/<?php echo htmlspecialchars($fetch_cart_products['image']); ?>" alt="" style="width: 100px; height: auto;">
+            </td>
+            <td><?php echo htmlspecialchars($fetch_cart_products['price']); ?></td>
+            <td>
+              <form action="" method="POST">
+                <input type="hidden" value="<?php echo htmlspecialchars($fetch_cart_products['cart_id']); ?>" name="update_quantity_id">
+                <div class="quantity_box">
+                  <input type="number" min="1" value="<?php echo htmlspecialchars($fetch_cart_products['quantity']); ?>" name="update_quantity">
+                  <input type="submit" class="update_quantity" value="Update" name="update_product_quantity">
                 </div>
-                <!-- Image -->
-              </div>
+              </form>
+            </td>
+            <td><?php echo htmlspecialchars($fetch_cart_products['price'] * $fetch_cart_products['quantity']); ?></td>
+            <td>
+              <a href="delete_cart_item.php?id=<?php echo htmlspecialchars($fetch_cart_products['cart_id']); ?>">
+                <i class="fas fa-trash"></i> Remove
+              </a>
+            </td>
+          </tr>
+          <?php
+        }
+        echo "</tbody>";
+      } else {
+        echo "<tr><td colspan='7'>No products in the cart</td></tr>";
+      }
+      ?>  
+    </table>
 
-              <div class="col-lg-5 col-md-6 mb-4 mb-lg-0">
-                <!-- Data -->
-                <p><strong>Blue denim shirt</strong></p>
-                <p>Color: blue</p>
-                <p>Size: M</p>
-                <button  type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-sm me-1 mb-2" data-mdb-tooltip-init
-                  title="Remove item">
-                  <i class="fas fa-trash"></i>
-                </button>
-                <button  type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-danger btn-sm mb-2" data-mdb-tooltip-init
-                  title="Move to the wish list">
-                  <i class="fas fa-heart"></i>
-                </button>
-                <!-- Data -->
-              </div>
-
-              <div class="col-lg-4 col-md-6 mb-4 mb-lg-0">
-                <!-- Quantity -->
-                <div class="d-flex mb-4" style="max-width: 300px">
-                  <button data-mdb-button-init data-mdb-ripple-init class="btn btn-primary px-3 me-2"
-                    onclick="this.parentNode.querySelector('input[type=number]').stepDown()">
-                    <i class="fas fa-minus"></i>
-                  </button>
-
-                  <div data-mdb-input-init class="form-outline">
-                    <input id="form1" min="0" name="quantity" value="1" type="number" class="form-control" />
-                    <label class="form-label" for="form1">Quantity</label>
-                  </div>
-
-                  <button data-mdb-button-init data-mdb-ripple-init class="btn btn-primary px-3 ms-2"
-                    onclick="this.parentNode.querySelector('input[type=number]').stepUp()">
-                    <i class="fas fa-plus"></i>
-                  </button>
-                </div>
-                <!-- Quantity -->
-
-                <!-- Price -->
-                <p class="text-start text-md-center">
-                  <strong>$17.99</strong>
-                </p>
-                <!-- Price -->
-              </div>
-            </div>
-            <!-- Single item -->
-
-            <hr class="my-4" />
-
-            <!-- Single item -->
-            <div class="row">
-              <div class="col-lg-3 col-md-12 mb-4 mb-lg-0">
-                <!-- Image -->
-                <div class="bg-image hover-overlay hover-zoom ripple rounded" data-mdb-ripple-color="light">
-                  <img src="https://mdbcdn.b-cdn.net/img/Photos/Horizontal/E-commerce/Vertical/13a.webp"
-                    class="w-100" />
-                  <a href="#!">
-                    <div class="mask" style="background-color: rgba(251, 251, 251, 0.2)"></div>
-                  </a>
-                </div>
-                <!-- Image -->
-              </div>
-
-              <div class="col-lg-5 col-md-6 mb-4 mb-lg-0">
-                <!-- Data -->
-                <p><strong>Red hoodie</strong></p>
-                <p>Color: red</p>
-                <p>Size: M</p>
-
-                <button  type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-sm me-1 mb-2" data-mdb-tooltip-init
-                  title="Remove item">
-                  <i class="fas fa-trash"></i>
-                </button>
-                <button  type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-danger btn-sm mb-2" data-mdb-tooltip-init
-                  title="Move to the wish list">
-                  <i class="fas fa-heart"></i>
-                </button>
-                <!-- Data -->
-              </div>
-
-              <div class="col-lg-4 col-md-6 mb-4 mb-lg-0">
-                <!-- Quantity -->
-                <div class="d-flex mb-4" style="max-width: 300px">
-                  <button data-mdb-button-init data-mdb-ripple-init class="btn btn-primary px-3 me-2"
-                    onclick="this.parentNode.querySelector('input[type=number]').stepDown()">
-                    <i class="fas fa-minus"></i>
-                  </button>
-
-                  <div data-mdb-input-init class="form-outline">
-                    <input id="form1" min="0" name="quantity" value="1" type="number" class="form-control" />
-                    <label class="form-label" for="form1">Quantity</label>
-                  </div>
-
-                  <button data-mdb-button-init data-mdb-ripple-init class="btn btn-primary px-3 ms-2"
-                    onclick="this.parentNode.querySelector('input[type=number]').stepUp()">
-                    <i class="fas fa-plus"></i>
-                  </button>
-                </div>
-                <!-- Quantity -->
-
-                <!-- Price -->
-                <p class="text-start text-md-center">
-                  <strong>$17.99</strong>
-                </p>
-                <!-- Price -->
-              </div>
-            </div>
-            <!-- Single item -->
-          </div>
-        </div>
-        <div class="card mb-4">
-          <div class="card-body">
-            <p><strong>Expected shipping delivery</strong></p>
-            <p class="mb-0">12.10.2020 - 14.10.2020</p>
-          </div>
-        </div>
-        <div class="card mb-4 mb-lg-0">
-          <div class="card-body">
-            <p><strong>We accept</strong></p>
-            <img class="me-2" width="45px"
-              src="https://mdbcdn.b-cdn.net/wp-content/plugins/woocommerce-gateway-stripe/assets/images/visa.svg"
-              alt="Visa" />
-            <img class="me-2" width="45px"
-              src="https://mdbcdn.b-cdn.net/wp-content/plugins/woocommerce-gateway-stripe/assets/images/amex.svg"
-              alt="American Express" />
-            <img class="me-2" width="45px"
-              src="https://mdbcdn.b-cdn.net/wp-content/plugins/woocommerce-gateway-stripe/assets/images/mastercard.svg"
-              alt="Mastercard" />
-            <img class="me-2" width="45px"
-              src="https://mdbcdn.b-cdn.net/wp-content/plugins/woocommerce/includes/gateways/paypal/assets/images/paypal.webp"
-              alt="PayPal acceptance mark" />
-          </div>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="card mb-4">
-          <div class="card-header py-3">
-            <h5 class="mb-0">Summary</h5>
-          </div>
-          <div class="card-body">
-            <ul class="list-group list-group-flush">
-              <li
-                class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 pb-0">
-                Products
-                <span>$53.98</span>
-              </li>
-              <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                Shipping
-                <span>Gratis</span>
-              </li>
-              <li
-                class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 mb-3">
-                <div>
-                  <strong>Total amount</strong>
-                  <strong>
-                    <p class="mb-0">(including VAT)</p>
-                  </strong>
-                </div>
-                <span><strong>$53.98</strong></span>
-              </li>
-            </ul>
-
-            <button  type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-lg btn-block">
-              Go to checkout
-            </button>
-          </div>
-        </div>
-      </div>
+    <div class="table_bottom">
+      <a href="shop.php" class="bottom_btn">Continue Shopping</a>
+      <h3 class="bottom_btn">
+        Total: 
+        <?php
+          $total = $conn->query("SELECT SUM(price * quantity) AS total_price FROM `cart`")->fetch(PDO::FETCH_ASSOC)['total_price'] ?? 0;
+          echo "$" . number_format($total, 2);
+        ?>
+      </h3>
+      <a href="checkout.php" class="bottom_btn">Proceed to checkout</a>
     </div>
-  </div>
-</section>
+
+    <a href="delete_all_cart_items.php" class="delete_all_btn">
+      <i class="fas fa-trash"></i> Delete All
+    </a>
+  </section>
+</div>
+</body>
+</html>

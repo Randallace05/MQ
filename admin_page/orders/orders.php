@@ -2,8 +2,7 @@
 <html lang="en">
 
 <head>
-
-    <meta charset="utf-8">
+<meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
@@ -150,17 +149,45 @@
                     <!-- Page Heading -->
                     <div class="d-sm-flex align-items-center justify-content-between mb-4">
                         <h1 class="h3 mb-0 text-gray-800">Order</h1>
-                    </div>
+                    </div><!-- (Include your existing <head> content here) -->
 
-                    <div class="container">
+    <style>
+        /* (Include your existing styles here) */
+        
+        .action-button {
+            padding: 3px 2px;
+            margin-right: 5px;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+
+        }
+
+        .arrange-button {
+            background-color: #4CAF50; /* Green */
+        }
+
+        .cancel-button {
+            background-color: #f44336; /* Red */
+        }
+    </style>
+</head>
+
+<body id="page-top">
+    <!-- (Your existing structure up to the table section) -->
+
+    <div class="container">
         <h2>Order List</h2>
         <table>
             <thead>
                 <tr>
                     <th>Customer</th>
-                    <th>Menu</th>
+                    <th>Items</th>
+                    <th>Quantity</th>
                     <th>Total Payment</th>
                     <th>Payment</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -169,83 +196,33 @@
                         <img src="eren.png" alt="Eren" class="profile-pic"> Eren Jaeger
                     </td>
                     <td>Resellers Package</td>
+                    <td>1</td>
                     <td class="total">₱ 2,110</td>
                     <td class="payment-gcash">GCash</td>
+                    <td>
+                        <button class="action-button arrange-button">Arrange Order</button>
+                        <button class="action-button cancel-button">Cancel Order</button>
+                    </td>
                 </tr>
                 <tr>
                     <td class="customer-name">
                         <img src="reiner.png" alt="Reiner" class="profile-pic"> Reiner Braum
                     </td>
                     <td>Chili Garlic, Salmon Belly (2), Chicken Bagoong</td>
+                    <td>3</td> <!-- Quantity updated here -->
                     <td class="total">₱ 1,223</td>
                     <td class="payment-gcash">GCash</td>
-                </tr>
-                <tr>
-                    <td class="customer-name">
-                        <img src="levi.png" alt="Levi" class="profile-pic"> Levi Ackerman
+                    <td>
+                        <button class="action-button arrange-button">Arrange Order</button>
+                        <button class="action-button cancel-button">Cancel Order</button>
                     </td>
-                    <td>Chili Garlic, Salmon Belly (2), Chicken Bagoong</td>
-                    <td class="total">₱ 1,234</td>
-                    <td class="payment-gcash">GCash</td>
-                </tr>
-                <tr>
-                    <td class="customer-name">
-                        <img src="historia.png" alt="Historia" class="profile-pic"> Historia
-                    </td>
-                    <td>Salmon Belly (2)</td>
-                    <td class="total">₱ 788</td>
-                    <td class="payment-gcash">GCash</td>
-                </tr>
-                <tr>
-                    <td class="customer-name">
-                        <img src="armin.png" alt="Armin" class="profile-pic"> Armin Arlet
-                    </td>
-                    <td>Pork Binagoongan (2)</td>
-                    <td class="total">₱ 678</td>
-                    <td class="payment-gcash">GCash</td>
-                </tr>
-                <tr>
-                    <td class="customer-name">
-                        <img src="hanji.png" alt="Hanji" class="profile-pic"> Hanji Zoe
-                    </td>
-                    <td>Pork Binagoongan (2)</td>
-                    <td class="total">₱ 678</td>
-                    <td class="payment-cod">COD</td>
-                </tr>
-                <tr>
-                    <td class="customer-name">
-                        <img src="erwin.png" alt="Erwin" class="profile-pic"> Erwin Smith
-                    </td>
-                    <td>Chili Garlic, Salmon Belly (2)</td>
-                    <td class="total">₱ 678</td>
-                    <td class="payment-cod">COD</td>
-                </tr>
-                <tr>
-                    <td class="customer-name">
-                        <img src="ymir.png" alt="Ymir" class="profile-pic"> Ymir
-                    </td>
-                    <td>Chili Garlic, Salmon Belly (2)</td>
-                    <td class="total">₱ 586</td>
-                    <td class="payment-cod">COD</td>
-                </tr>
-                <tr>
-                    <td class="customer-name">
-                        <img src="annie.png" alt="Annie" class="profile-pic"> Annie Leonhart
-                    </td>
-                    <td>Chili Garlic</td>
-                    <td class="total">₱ 345</td>
-                    <td class="payment-cod">COD</td>
                 </tr>
             </tbody>
         </table>
     </div>
 
-
-            </div>
-            <!-- End of Main Content -->
-
-            <!-- Footer -->
-            <footer class="sticky-footer bg-white">
+    <!-- (Your existing footer and scripts) -->
+    <footer class="sticky-footer bg-white">
                 <div class="container my-auto">
                     <div class="copyright text-center my-auto">
                         <span>Copyright &copy; Your Website 2024</span>

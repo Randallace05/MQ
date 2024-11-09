@@ -150,7 +150,7 @@
 <div class="topbar"></div>
 <div class="header">
     <div class="logo">
-        <img src="uploads/bgMQ.png" alt="MO Kitchen Logo">
+        <img src="../uploads/bgMQ.png" alt="MO Kitchen Logo">
     </div>
     <nav class="nav-links">
         <a href="../user_page/shop.php">Home</a>

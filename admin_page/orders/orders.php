@@ -1,8 +1,31 @@
+<?php
+// Database connection
+$servername = "127.0.0.1";
+$username = "root";
+$password = ""; // Adjust if your database password is different
+$dbname = "login_email_verification";
+
+// Create connection
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// SQL query to join tbl_user and cart based on unique id and display required fields
+$sql = "SELECT tbl_user.unique_id AS customer, cart.name AS items, cart.quantity, cart.total_price
+        FROM tbl_user
+        INNER JOIN cart ON tbl_user.unique_id = cart.cart_id";
+
+$result = $conn->query($sql);
+?>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-<meta charset="utf-8">
+
+    <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
@@ -149,136 +172,41 @@
                     <!-- Page Heading -->
                     <div class="d-sm-flex align-items-center justify-content-between mb-4">
                         <h1 class="h3 mb-0 text-gray-800">Order</h1>
-                    </div><!-- (Include your existing <head> content here) -->
-
-    <style>
-        /* (Include your existing styles here) */
-        
-        .action-button {
-            padding: 3px 2px;
-            margin-right: 5px;
-            border: none;
-            border-radius: 4px;
-            color: white;
-            cursor: pointer;
-
-        }
-
-        .arrange-button {
-            background-color: #4CAF50; /* Green */
-        }
-
-        .cancel-button {
-            background-color: #f44336; /* Red */
-        }
-    </style>
-</head>
-
-<body id="page-top">
-    <!-- (Your existing structure up to the table section) -->
-
-    <div class="container">
-        <h2>Order List</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Customer</th>
-                    <th>Items</th>
-                    <th>Quantity</th>
-                    <th>Total Payment</th>
-                    <th>Payment</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td class="customer-name">
-                        <img src="eren.png" alt="Eren" class="profile-pic"> Eren Jaeger
-                    </td>
-                    <td>Resellers Package</td>
-                    <td>1</td>
-                    <td class="total">₱ 2,110</td>
-                    <td class="payment-gcash">GCash</td>
-                    <td>
-                        <button class="action-button arrange-button">Arrange Order</button>
-                        <button class="action-button cancel-button">Cancel Order</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="customer-name">
-                        <img src="reiner.png" alt="Reiner" class="profile-pic"> Reiner Braum
-                    </td>
-                    <td>Chili Garlic, Salmon Belly (2), Chicken Bagoong</td>
-                    <td>3</td> <!-- Quantity updated here -->
-                    <td class="total">₱ 1,223</td>
-                    <td class="payment-gcash">GCash</td>
-                    <td>
-                        <button class="action-button arrange-button">Arrange Order</button>
-                        <button class="action-button cancel-button">Cancel Order</button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-
-    <!-- (Your existing footer and scripts) -->
-    <footer class="sticky-footer bg-white">
-                <div class="container my-auto">
-                    <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; Your Website 2024</span>
                     </div>
-                </div>
-            </footer>
-            <!-- End of Footer -->
 
-        </div>
-        <!-- End of Content Wrapper -->
-
-    </div>
-    <!-- End of Page Wrapper -->
-
-    <!-- Scroll to Top Button-->
-    <a class="scroll-to-top rounded" href="#page-top">
-        <i class="fas fa-angle-up"></i>
-    </a>
-
-    <!-- Logout Modal-->
-    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
-                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                    <a class="btn btn-primary" href="login.html">Logout</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Bootstrap core JavaScript-->
-    <script src="vendor/jquery/jquery.min.js"></script>
-    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Core plugin JavaScript-->
-    <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
-
-    <!-- Custom scripts for all pages-->
-    <script src="js/sb-admin-2.min.js"></script>
-
-    <!-- Page level plugins -->
-    <script src="vendor/chart.js/Chart.min.js"></script>
-
-    <!-- Page level custom scripts -->
-    <script src="js/demo/chart-area-demo.js"></script>
-    <script src="js/demo/chart-pie-demo.js"></script>
+                    <div class="container">
+    <h2>Order List</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Customer</th>
+                <th>Items</th>
+                <th>Quantity</th>
+                <th>Total Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php
+            if ($result->num_rows > 0) {
+                while($row = $result->fetch_assoc()) {
+                    echo "<tr>";
+                    echo "<td>" . $row["customer"] . "</td>";
+                    echo "<td>" . $row["items"] . "</td>";
+                    echo "<td>" . $row["quantity"] . "</td>";
+                    echo "<td>₱ " . number_format($row["total_price"], 2) . "</td>";
+                    echo "</tr>";
+                }
+            } else {
+                echo "<tr><td colspan='4'>No orders found</td></tr>";
+            }
+            ?>
+        </tbody>
+    </table>
+</div>
 
 </body>
-
 </html>
+
+<?php
+$conn->close();
+?>`

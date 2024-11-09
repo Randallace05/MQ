@@ -21,70 +21,70 @@
             <!-- Form Section -->
             <div class="main">
 
-        <!-- Login Area -->
-        <div class="login-container">
-            <div class="login-form" id="loginForm">
-                <h2 class="text-center">Welcome to MQ Kitchen!</h2>
-                <p class="text-center">Fill your login details.</p>
-                <form action="./endpoint/login.php" method="POST">
-                    <div class="form-group">
-                        <label for="username">Username:</label>
-                        <input type="text" class="form-control" id="username" name="username">
+                <!-- Login Area -->
+                <div class="login-container">
+                    <div class="login-form" id="loginForm">
+                        <h2 class="text-center">Welcome to MQ Kitchen!</h2>
+                        <p class="text-center">Fill your login details.</p>
+                        <form action="./endpoint/login.php" method="POST">
+                            <div class="form-group">
+                                <label for="username">Username:</label>
+                                <input type="text" class="form-control" id="username" name="username">
+                            </div>
+                            <div class="form-group">
+                                <label for="password">Password:</label>
+                                <input type="password" class="form-control" id="password" name="password">
+                            </div>
+                            <p>No Account? Register <span  class="switch-form-link" onclick="showRegistrationForm()">Here.</span></p>
+                            <button type="submit" class="btn btn-secondary login-btn form-control" >Login</button>
+                        </form>
                     </div>
-                    <div class="form-group">
-                        <label for="password">Password:</label>
-                        <input type="password" class="form-control" id="password" name="password">
-                    </div>
-                    <p>No Account? Register <span  class="switch-form-link" onclick="showRegistrationForm()">Here.</span></p>
-                    <button type="submit" class="btn btn-secondary login-btn form-control" >Login</button>
-                </form>
-            </div>
-        </div>
-        <!-- End Login Area -->
+                </div>
+                <!-- End Login Area -->
 
 
-        <!-- Registration Area -->
-        <div class="registration-form" id="registrationForm">
-            <h2 class="text-center">Registration Form</h2>
-            <p class="text-center">Fill in you personal details.</p>
-            <form action="./endpoint/add-user.php" method="POST">
-                <div class="form-group registration row">
-                    <div class="col-6">
-                        <label for="firstName">First Name:</label>
-                        <input type="text" class="form-control" id="firstName" name="first_name">
-                    </div>
-                    <div class="col-6">
-                        <label for="lastName">Last Name:</label>
-                        <input type="text" class="form-control" id="lastName" name="last_name">
-                    </div>
+                <!-- Registration Area -->
+                <div class="registration-form" id="registrationForm">
+                    <h2 class="text-center">Registration Form</h2>
+                    <p class="text-center">Fill in you personal details.</p>
+                    <form action="./endpoint/add-user.php" method="POST">
+                        <div class="form-group registration row">
+                            <div class="col-6">
+                                <label for="firstName">First Name:</label>
+                                <input type="text" class="form-control" id="firstName" name="first_name">
+                            </div>
+                            <div class="col-6">
+                                <label for="lastName">Last Name:</label>
+                                <input type="text" class="form-control" id="lastName" name="last_name">
+                            </div>
+                        </div>
+                        <div class="form-group registration row">
+                            <div class="col-5">
+                                <label for="contactNumber">Contact Number:</label>
+                                <input type="number" class="form-control" id="contactNumber" name="contact_number" maxlength="11">
+                            </div>
+                            <div class="col-7">
+                                <label for="email">Email:</label>
+                                <input type="text" class="form-control" id="email" name="email">
+                            </div>
+                        </div>
+                        <div class="form-group registration">
+                            <label for="registerUsername">Username:</label>
+                            <input type="text" class="form-control" id="registerUsername" name="username">
+                        </div>
+                        <div class="form-group registration">
+                            <label for="registerPassword">Password:</label>
+                            <input type="password" class="form-control" id="registerPassword" name="password">
+                        </div>
+                        <div class="radio-group">
+                            <label><input type="radio" name="user_role" value="customer"> Customer</label>
+                            <label><input type="radio" name="user_role" value="distributor"> Distributor</label>
+                        </div>
+                        <p>Already have an account? Login <span class="switch-form-link" onclick="showLoginForm()">Here.</span></p>
+                        <button type="submit" class="btn btn-dark login-register form-control" name="register">Register</button>
+                    </form>
                 </div>
-                <div class="form-group registration row">
-                    <div class="col-5">
-                        <label for="contactNumber">Contact Number:</label>
-                        <input type="number" class="form-control" id="contactNumber" name="contact_number" maxlength="11">
-                    </div>
-                    <div class="col-7">
-                        <label for="email">Email:</label>
-                        <input type="text" class="form-control" id="email" name="email">
-                    </div>
-                </div>
-                <div class="form-group registration">
-                    <label for="registerUsername">Username:</label>
-                    <input type="text" class="form-control" id="registerUsername" name="username">
-                </div>
-                <div class="form-group registration">
-                    <label for="registerPassword">Password:</label>
-                    <input type="password" class="form-control" id="registerPassword" name="password">
-                </div>
-                <div class="radio-group">
-                    <label><input type="radio" name="user_role" value="customer"> Customer</label>
-                    <label><input type="radio" name="user_role" value="distributor"> Distributor</label>
-                </div>
-                <p>Already have an account? Login <span class="switch-form-link" onclick="showLoginForm()">Here.</span></p>
-                <button type="submit" class="btn btn-dark login-register form-control" name="register">Register</button>
-            </form>
-        </div>
-        <!-- Registration Area -->
+                <!-- Registration Area -->
             </div>
         </div>
     </div>

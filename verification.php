@@ -36,6 +36,8 @@
             background-repeat: no-repeat;
             background-attachment: fixed;
             height: 100vh;
+            background-image:url('uploads/try.png');
+            
         }
 
         .verification-form {
@@ -51,6 +53,7 @@
 <body>
     
     <div class="main">
+    
         <!-- Email Verification Area -->
         <div class="verification-container">
             <div class="verification-form" id="loginForm">

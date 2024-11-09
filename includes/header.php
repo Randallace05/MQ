@@ -152,6 +152,11 @@
             cursor: pointer;
             color: rgb(100, 100, 200);
         }
+
+        .topbar {
+            background-color: black;
+            height: 40px; 
+        }
     </style>
 </head>
 <body>

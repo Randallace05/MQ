@@ -7,7 +7,11 @@
 <!-- end include header -->
 
     <!-- Top Bar Section -->
-        <?php include("includes/topbar.php"); ?>
+        <div class="topbar">
+            <marquee>
+                <p></p>
+            </marquee>
+        </div>
     <!-- End Top Bar Section -->
 
     <!-- Main Container -->
@@ -15,7 +19,7 @@
         <div class="flex-container">
             <!-- Image Section -->
             <div class="image-container">
-                <img src="uploads/mq-kitchen.png" alt="MO Kitchen">
+                <img src="uploads/try3.png" alt="MO Kitchen">
             </div>
 
             <!-- Form Section -->
@@ -24,7 +28,8 @@
                 <!-- Login Area -->
                 <div class="login-container">
                     <div class="login-form" id="loginForm">
-                        <h2 class="text-center">Welcome to MQ Kitchen!</h2>
+                        <!-- <h2 class="text-center">Welcome to      </h2> -->
+                        <img src="uploads/welcome to.png" alt="MO Kitchen" style="width: 250px; margin-top:60px;">
                         <p class="text-center">Fill your login details.</p>
                         <form action="./endpoint/login.php" method="POST">
                             <div class="form-group">

@@ -21,7 +21,9 @@ if (isset($_POST['register'])) {
         $user_role = $_POST['user_role']; 
 
         // Generate a unique user ID
-        $uniqueID = rand(time(), 100000000);
+        // $uniqueID = rand(time(), 100000000);
+        $uniqueID = uniqid();
+
         
         // Hash the password
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
@@ -36,7 +38,8 @@ if (isset($_POST['register'])) {
         $nameExist = $stmt->fetch(PDO::FETCH_ASSOC);
     
         if (empty($nameExist)) {
-            $verificationCode = rand(100000, 999999);
+            $verificationCode = rand(1000, 9999); // 4 digits
+            //$verificationCode = rand(100000, 999999); // 6 digits
     
             $insertStmt = $conn->prepare("
                 INSERT INTO `tbl_user` (
@@ -141,39 +144,48 @@ if (isset($_POST['register'])) {
 }
 
 if (isset($_POST['verify'])) {
-
     try {
-        $userVerificationID = $_POST['user_verification_id'];
+        session_start();
+        $userVerificationID = $_SESSION['user_verification_id'] ?? null; // Retrieve ID from session
         $verificationCode = $_POST['verification_code'];
     
-        $stmt = $conn->prepare("SELECT `verification_code` FROM `tbl_user` WHERE `tbl_user_id` = :user_verification_id");
-        $stmt->execute([
-            'user_verification_id' => $userVerificationID,
-        ]);
-        $codeExist = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($codeExist && $codeExist['verification_code'] == $verificationCode) {
-            session_destroy();
-            echo "
-            <script>
-                alert('Registered Successfully.');
-                window.location.href = '../index.php';
-            </script>
-            ";
-        } else {
-            $conn->prepare("DELETE FROM `tbl_user` WHERE `tbl_user_id` = :user_verification_id")->execute([
-                'user_verification_id' => $userVerificationID
+        // Check for a valid user ID and verification code
+        if ($userVerificationID) {
+            $stmt = $conn->prepare("SELECT `verification_code` FROM `tbl_user` WHERE `tbl_user_id` = :user_verification_id");
+            $stmt->execute([
+                'user_verification_id' => $userVerificationID,
             ]);
+            $codeExist = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            echo "
-            <script>
-                alert('Incorrect Verification Code. Register Again.');
-                window.location.href = '../index.php';
-            </script>
-            ";
+            if ($codeExist && $codeExist['verification_code'] == $verificationCode) {
+                session_destroy();
+                echo "
+                <script>
+                    alert('Registered Successfully.');
+                    window.location.href = '../index.php';
+                </script>
+                ";
+            } else {
+                // If verification code is incorrect, delete user entry
+                $deleteStmt = $conn->prepare("DELETE FROM `tbl_user` WHERE `tbl_user_id` = :user_verification_id");
+                if ($deleteStmt->execute(['user_verification_id' => $userVerificationID])) {
+                    echo "
+                    <script>
+                        alert('Incorrect Verification Code. Register Again.');
+                        window.location.href = '../index.php';
+                    </script>
+                    ";
+                } else {
+                    echo "Error: Unable to delete unverified user.";
+                }
+            }
+        } else {
+            echo "Error: User verification session not found.";
         }
     } catch (PDOException $e) {
         echo "Error: " . $e->getMessage();
     }
 }
+
 ?>
+

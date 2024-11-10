@@ -96,8 +96,7 @@
 
 <!-- Footer Section -->
     <?php include("includes/footer.php"); ?>
-<!-- End Footer Section -->
-    
+<!-- End Footer Section -->   
 
 
 <script>

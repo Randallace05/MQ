@@ -1,3 +1,9 @@
+<head>
+    <title>MQ Kitchen</title>
+    <link rel="icon" type="image/x-icon" href="/uploads/sili.ico" />
+</head>
+
+
 <!-- session -->
     <?php include("includes/authentication.php"); ?> 
 <!-- end of session -->

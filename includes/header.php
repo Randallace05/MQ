@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MQ-asdasdasd</title>
+    <title>MQ-Kitchen</title>
     <!-- Favicon-->
     <link rel="icon" type="image/x-icon" href="../user_page/assets/sili.ico" />
 

@@ -1,6 +1,6 @@
 <head>
     <title>MQ Kitchen</title>
-    <link rel="icon" type="image/x-icon" href="/uploads/sili.ico" />
+    <link rel="icon" type="image/x-icon" href="uploads/sili.ico" />
 </head>
 
 

@@ -87,7 +87,7 @@ if (isset($_POST['update_product_quantity'])) {
           echo "₱" . number_format($total, 2);
         ?>
       </h3>
-      <a href="checkout.php" class="bottom_btn">Proceed to checkout</a>
+      <a href="../admin_page/bill/checkout.php" class="bottom_btn">Proceed to checkout</a>
     </div>
 
     <a href="delete_all_cart_items.php" class="delete_all_btn">

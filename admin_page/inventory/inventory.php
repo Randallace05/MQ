@@ -54,40 +54,39 @@
 
                 </div>
                 <div class="container-fluid">
-    <!-- Inventory Table -->
-    <h2 class="mt-4">Inventory</h2>
-    <div class="table-responsive">
-        <table class="table table-bordered">
-            <thead class="thead-dark">
-                <tr>
-                    <th scope="col">Name of Customer</th>
-                    <th scope="col">Quantity of Order</th>
-                    <th scope="col">Price</th>
-                    <th scope="col">Reference Number</th>
-                    <th scope="col">Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>John Doe</td>
-                    <td>5</td>
-                    <td>$100</td>
-                    <td>
-
-                    </td>
-                    <td>
-                        <button class="btn btn-primary btn-sm">Arrange Order</button>
-                        <button class="btn btn-danger btn-sm">Cancel Order</button>
-                    </td>
-                </tr>
-                <!-- Additional rows can be added here -->
-            </tbody>
-        </table>
+                        <!-- Inventory Table -->
+<div class="container-fluid">
+    <h1 class="h3 mb-2 text-gray-800">Inventory</h1>
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="inventoryTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Product Name</th>
+                            <th>Stocks</th>
+                            <th>Number of Ordered</th>
+                            <th>Batch</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Product A</td>
+                            <td>50</td>
+                            <td>10</td>
+                            <td>Batch 1</td>
+                            <td><button class="btn btn-primary btn-sm">Add Stocks</button> <button class="btn btn-danger btn-sm">Delete</button></td>
+                        </tr>
+                        <!-- Add more rows as needed -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
 
-
-            </div>
+                 </div>
             <!-- End of Main Content -->
 
             <!-- Footer -->

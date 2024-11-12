@@ -87,22 +87,10 @@
                         <td>$25.00</td>
                         <td>$50.00</td>
                     </tr>
-                    <tr>
-                        <td>Product 2</td>
-                        <td>1</td>
-                        <td>$15.00</td>
-                        <td>$15.00</td>
-                    </tr>
-                    <tr>
-                        <td>Product 3</td>
-                        <td>3</td>
-                        <td>$10.00</td>
-                        <td>$30.00</td>
-                    </tr>
+
                 </tbody>
             </table>
             <p class="total">Subtotal: $95.00</p>
-            <p class="total">Tax (8%): $7.60</p>
             <p class="total">Total: $102.60</p>
         </div>
         <div class="footer">

@@ -185,6 +185,7 @@ $result = $conn->query($sql);
                             <th>Items</th>
                             <th>Quantity</th>
                             <th>Total Price</th>
+                            <th>Reference Number</th>
                             <th>Actions</th>
                         </tr>
                         </thead>
@@ -196,6 +197,7 @@ $result = $conn->query($sql);
                                 echo "<td>" . $row["customer"] . "</td>";
                                 echo "<td>" . $row["items"] . "</td>";
                                 echo "<td>" . $row["quantity"] . "</td>";
+                                echo "<td>" . $row["file_path"] . "</td>";
                                 echo "<td>₱ " . number_format($row["total_price"], 2) . "</td>";
                                 echo "<td>";
                                 echo "<a href='arrange_order.php?cart_id=" . $row["cart_id"] . "' class='btn btn-arrange'>Arrange Order</a> ";

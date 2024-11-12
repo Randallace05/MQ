@@ -1,3 +1,20 @@
+<?php
+include ('uploadcon.php');
+
+// Database connection (adjust the credentials as necessary)
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "login_email_verification";  // replace with your actual database name
+
+// Create connection
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -154,17 +171,19 @@ span.price {
 
                 <!-- Begin Page Content -->
                 <div class="container-fluid">
-                    <div class="upload-form-container">
-                            <!-- File Upload Form -->
-                            <form action="upload.php" method="POST" enctype="multipart/form-data">
-                                <div class="form-group">
-                                    <label for="fileUpload">Upload File:</label>
-                                    <input type="file" name="fileUpload" id="fileUpload" required>
-                                </div>
-                                <button type="submit" class="btn">Upload</button>
-                            </form>
-                        </div>
-                    </div>
+                <div class="upload-form-container">
+                      <form action="uploadcon.php" method="POST" enctype="multipart/form-data">
+                          <h2>Upload File</h2>
+                          <div class="form-group">
+                              <label for="file">Choose File</label>
+                              <input type="file" name="file" id="file" required>
+                          </div>
+                          <button type="submit" class="btn">Upload</button>
+                      </form>
+                  </div>
+
+
+                </div>
         </div>
         <!-- End of Content Wrapper -->
 

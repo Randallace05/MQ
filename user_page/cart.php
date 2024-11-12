@@ -19,6 +19,6 @@
        
 
 <!-- Footer Section -->
-
+    <?php include("../includes/footer.php"); ?>
 <!-- End Footer Section -->
 

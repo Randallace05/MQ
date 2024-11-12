@@ -1,6 +1,6 @@
 <?php
 // Database connection
-$servername = "127.0.0.1";
+$servername = "localhost";
 $username = "root";
 $password = ""; // Adjust if your database password is different
 $dbname = "login_email_verification";
@@ -175,34 +175,44 @@ $result = $conn->query($sql);
                     </div>
 
                     <div class="container">
-    <h2>Order List</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Customer</th>
-                <th>Items</th>
-                <th>Quantity</th>
-                <th>Total Price</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php
-            if ($result->num_rows > 0) {
-                while($row = $result->fetch_assoc()) {
-                    echo "<tr>";
-                    echo "<td>" . $row["customer"] . "</td>";
-                    echo "<td>" . $row["items"] . "</td>";
-                    echo "<td>" . $row["quantity"] . "</td>";
-                    echo "<td>₱ " . number_format($row["total_price"], 2) . "</td>";
-                    echo "</tr>";
-                }
-            } else {
-                echo "<tr><td colspan='4'>No orders found</td></tr>";
-            }
-            ?>
-        </tbody>
-    </table>
-</div>
+                    <body id="page-top">
+
+                    <h2>Order List</h2>
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Customer</th>
+                            <th>Items</th>
+                            <th>Quantity</th>
+                            <th>Total Price</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php
+                        if ($result->num_rows > 0) {
+                            while($row = $result->fetch_assoc()) {
+                                echo "<tr>";
+                                echo "<td>" . $row["customer"] . "</td>";
+                                echo "<td>" . $row["items"] . "</td>";
+                                echo "<td>" . $row["quantity"] . "</td>";
+                                echo "<td>₱ " . number_format($row["total_price"], 2) . "</td>";
+                                echo "<td>";
+                                echo "<a href='arrange_order.php?cart_id=" . $row["cart_id"] . "' class='btn btn-arrange'>Arrange Order</a> ";
+                                echo "<a href='cancel_order.php?cart_id=" . $row["cart_id"] . "' class='btn btn-cancel'>Cancel Order</a>";
+                                echo "</td>";
+                                echo "</tr>";
+                            }
+                        } else {
+                            echo "<tr><td colspan='5'>No orders found</td></tr>";
+                        }
+                        ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </body>
 </html>

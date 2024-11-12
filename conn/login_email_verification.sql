@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 08, 2024 at 04:37 PM
+-- Generation Time: Nov 12, 2024 at 01:36 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -20,6 +20,53 @@ SET time_zone = "+00:00";
 --
 -- Database: `login_email_verification`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `cart`
+--
+
+CREATE TABLE `cart` (
+  `cart_id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `price` varchar(100) NOT NULL,
+  `image` varchar(100) NOT NULL,
+  `quantity` int(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `cart`
+--
+
+INSERT INTO `cart` (`cart_id`, `name`, `price`, `image`, `quantity`) VALUES
+(0, 'Chili Garlic Bagoong', '278.00', 'chili garlic bagoong.jpg', 1),
+(0, 'Plain Alamang', '218.00', 'Plain Alamang.jpg', 4);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `checkout`
+--
+
+CREATE TABLE `checkout` (
+  `id` int(11) NOT NULL,
+  `firstname` varchar(50) NOT NULL,
+  `middlename` varchar(50) DEFAULT NULL,
+  `lastname` varchar(50) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  `city` varchar(50) NOT NULL,
+  `zip_code` varchar(10) NOT NULL,
+  `contact_number` varchar(15) NOT NULL,
+  `payment_method` varchar(50) DEFAULT 'Gcash'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `checkout`
+--
+
+INSERT INTO `checkout` (`id`, `firstname`, `middlename`, `lastname`, `address`, `city`, `zip_code`, `contact_number`, `payment_method`) VALUES
+(1, '', '', '', '', '', '', '', 'Gcash');
 
 -- --------------------------------------------------------
 
@@ -88,12 +135,18 @@ CREATE TABLE `tbl_user` (
 INSERT INTO `tbl_user` (`tbl_user_id`, `unique_id`, `first_name`, `last_name`, `contact_number`, `email`, `username`, `password`, `verification_code`, `user_role`) VALUES
 (25, 578381648, 'admin', 'admin', '1', 'zaedrickalvarico@gmail.com', 'admin', '$2y$10$6M9R7ZqbWrwvPOnbnUr.pey/y./.wxDxHSb2eZfAGVMktNnfnI9gS', 128065, 'admin'),
 (28, 634632955, 'rick', 'rick', '123123', 'zaedrick.alvarico@cvsu.edu.ph', 'rick', '$2y$10$xFM3tftPVNHWRJq4brcRn.sEb3ELyDEBvGrK703QE/CHYfxsTykuG', 880859, 'customer'),
-(29, 616748332, 'zaed', 'zaed', '234234', 'zaedalvarico@gmail.com', 'zaed', '$2y$10$d7Bf5ZARfdXyjs1UY6kcOu8vc7gEcCwPbQdocxtbRF6Bhd6r9qMia', 839819, 'distributor'),
-(30, 167290355, 'randall', 'randall', '123123', 'randallace05@gmail.com', 'randall', '$2y$10$hRYUvfqMpxZi0KuFtMm1t.8Ci0/.6qAWzqQzLdApHm8cTdDDdilTC', 516985, 'customer');
+(30, 167290355, 'randall', 'randall', '123123', 'randallace05@gmail.com', 'randall', '$2y$10$hRYUvfqMpxZi0KuFtMm1t.8Ci0/.6qAWzqQzLdApHm8cTdDDdilTC', 516985, 'customer'),
+(64, 6731, 'zaed', 'zaed', '1', 'zaedalvarico@gmail.com', 'zaed', '$2y$10$HfAZVliVi1K3av0qj9GBK.W/cbrhqDrLfsKWVv2SC0nGtoVq9db3W', 7790, 'customer');
 
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `checkout`
+--
+ALTER TABLE `checkout`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `products`
@@ -112,6 +165,12 @@ ALTER TABLE `tbl_user`
 --
 
 --
+-- AUTO_INCREMENT for table `checkout`
+--
+ALTER TABLE `checkout`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
@@ -121,7 +180,7 @@ ALTER TABLE `products`
 -- AUTO_INCREMENT for table `tbl_user`
 --
 ALTER TABLE `tbl_user`
-  MODIFY `tbl_user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+  MODIFY `tbl_user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=65;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

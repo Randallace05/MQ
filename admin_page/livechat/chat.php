@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Live Chat</title>
     <style>
-        /* Basic styling for the chat interface */
         #chat-box {
             width: 300px;
             height: 400px;
@@ -14,13 +13,29 @@
             border: 1px solid #ccc;
             padding: 10px;
             margin-bottom: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
+
         #message-input {
             width: 80%;
             padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
         }
+
         #send-button {
             padding: 5px;
+            border: none;
+            border-radius: 5px; 
+            background-color: #4CAF50;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        #send-button:hover {
+            background-color: #3e8e41;
         }
     </style>
 </head>

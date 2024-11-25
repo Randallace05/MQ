@@ -146,48 +146,30 @@
     </style>
 </head>
 <body>
+    <!-- Include static header -->
+    <?php include("header.php"); ?>
 
-<!-- start include header -->
-<?php include("header.php"); ?> 
-
-
-<!-- end include header -->
-
-<div class="topbar"></div>
-<div class="header">
-    <div class="logo">
-        <img src="../uploads/bgMQ.png" alt="MO Kitchen Logo">
-    </div>
-    <nav class="nav-links">
-        <a href="../user_page/shop.php">Home</a>
-        <a href="#">Contact</a>
-        <a href="../index.php">Sign Up</a>
-    </nav>
-
+    <!-- Database connection -->
     <?php
-    // Include the connection file if not already included
+    // Include connection file
     if (file_exists('../conn/conn.php')) {
-        include_once '../conn/conn.php'; // use include_once to avoid redundant inclusions
+        include_once '../conn/conn.php'; // Ensure only one inclusion
     } else {
-        echo "Connection file not found.";
-        // Set a fallback to avoid errors if connection fails
-        $conn = null;
+        die("Connection file not found.");
     }
 
-    // Ensure $conn is defined before using it
+    // Initialize cart count
+    $row_count = 0;
     if ($conn) {
-        // Select query using PDO
-        $select_product = $conn->query("SELECT COUNT(*) FROM `cart`");
-        $row_count = $select_product->fetchColumn();
-    } else {
-        // Fallback value if connection is not established
-        $row_count = 0;
-        echo "Database connection not established.";
+        $result = $conn->query("SELECT COUNT(*) as count FROM `cart`");
+        if ($result) {
+            $data = $result->fetch_assoc();
+            $row_count = $data['count'] ?? 0;
+        }
     }
-
-    echo $row_count;
     ?>
-    
+
+    <div class="topbar"></div>
     <div class="header-icons">
         <div class="search-container">
             <input type="text" class="search-bar" placeholder="What are you looking for?">
@@ -200,46 +182,37 @@
             <span class="icon-badge"><?php echo $row_count; ?></span>
         </a>
     </div>
-</div>
 
-        <!-- User Icon with Dropdown -->
-        <div class="user-dropdown">
-            <a href="#" class="user-icon" onclick="toggleDropdown(event)">
-                <i class="fa-regular fa-user"></i>
-            </a>
-            <div class="dropdown-content">
-                <a href="../user_page/profile.php">Profile</a>
-                <a href="../user_page/settings.php">Settings</a>
-                <a href="logout.php">Logout</a>
-
-            </div>
+    <div class="user-dropdown">
+        <a href="#" class="user-icon" onclick="toggleDropdown(event)">
+            <i class="fa-regular fa-user"></i>
+        </a>
+        <div class="dropdown-content">
+            <a href="../user_page/profile.php">Profile</a>
+            <a href="../user_page/settings.php">Settings</a>
+            <a href="logout.php">Logout</a>
         </div>
     </div>
-</div>
-<hr>
+    <hr>
 
-<script>
-    function toggleDropdown(event) {
-        event.stopPropagation(); // Prevent the click event from bubbling up to the window
-        const dropdown = document.querySelector('.dropdown-content');
-        
-        // Toggle visibility of dropdown
-        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-    }
+    <script>
+        function toggleDropdown(event) {
+            event.stopPropagation();
+            const dropdown = document.querySelector('.dropdown-content');
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        }
 
-    // Close dropdown if clicking outside of it
-    window.onclick = function(event) {
-        if (!event.target.matches('.user-icon')) {
-            const dropdowns = document.getElementsByClassName("dropdown-content");
-            for (let i = 0; i < dropdowns.length; i++) {
-                const openDropdown = dropdowns[i];
-                if (openDropdown.style.display === 'block') {
-                    openDropdown.style.display = 'none';
+        window.onclick = function(event) {
+            if (!event.target.matches('.user-icon')) {
+                const dropdowns = document.getElementsByClassName("dropdown-content");
+                for (let i = 0; i < dropdowns.length; i++) {
+                    const openDropdown = dropdowns[i];
+                    if (openDropdown.style.display === 'block') {
+                        openDropdown.style.display = 'none';
+                    }
                 }
             }
-        }
-    }
-</script>
-
+        };
+    </script>
 </body>
 </html>

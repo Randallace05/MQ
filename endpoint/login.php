@@ -6,13 +6,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = $_POST['username'];
     $password = $_POST['password'];
 
-    // Fetch the user's hashed password and role from the database
-    $stmt = $conn->prepare("SELECT `password`, `username`, `user_role` FROM `tbl_user` WHERE `username` = :username");
-    $stmt->bindParam(':username', $username);
+    // Prepare the SQL statement to prevent SQL injection
+    $stmt = $conn->prepare("SELECT `password`, `username`, `user_role` FROM `tbl_user` WHERE `username` = ?");
+    $stmt->bind_param("s", $username); // "s" indicates the type is string
     $stmt->execute();
+    $result = $stmt->get_result(); // Get the result set from the prepared statement
 
-    if ($stmt->rowCount() > 0) {
-        $row = $stmt->fetch();
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc(); // Fetch the associative array
         $stored_password = $row['password'];
         $stored_username = $row['username'];
         $user_role = $row['user_role'];
@@ -21,6 +22,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if (password_verify($password, $stored_password)) {
 
             // Set session variables upon successful login
+            session_start(); // Start the session if not already started
             $_SESSION['loggedin'] = true;  // Indicates the user is logged in
             $_SESSION['username'] = $stored_username;  // Store the username in the session
             $_SESSION['user_role'] = $user_role;  // Store the user role in the session
@@ -74,5 +76,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </script>
         ";
     }
+
+    // Close the statement
+    $stmt->close();
 }
+
+// Close the connection when done
+$conn->close();
 ?>

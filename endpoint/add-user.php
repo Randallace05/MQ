@@ -21,29 +21,25 @@ if (isset($_POST['register'])) {
         $user_role = $_POST['user_role']; 
 
         // Generate a unique user ID
-        // $uniqueID = rand(time(), 100000000);
         $uniqueID = uniqid();
 
-        
         // Hash the password
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-        $conn->beginTransaction();
-    
-        $stmt = $conn->prepare("SELECT `first_name`, `last_name` FROM `tbl_user` WHERE `first_name` = :first_name AND `last_name` = :last_name");
-        $stmt->execute([
-            'first_name' => $firstName,
-            'last_name' => $lastName
-        ]);
-        $nameExist = $stmt->fetch(PDO::FETCH_ASSOC);
-    
+        // Begin a transaction
+        $conn->begin_transaction();
+
+        $stmt = $conn->prepare("SELECT `first_name`, `last_name` FROM `tbl_user` WHERE `first_name` = ? AND `last_name` = ?");
+        $stmt->bind_param("ss", $firstName, $lastName);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $nameExist = $result->fetch_assoc();
+
         if (empty($nameExist)) {
-            $verificationCode = rand(1000, 9999); // 4 digits
-            //$verificationCode = rand(100000, 999999); // 6 digits
-    
+            $verificationCode = rand(100000, 999999); // 4 digits
+
             $insertStmt = $conn->prepare("
                 INSERT INTO `tbl_user` (
-                    `tbl_user_id`, 
                     `first_name`, 
                     `last_name`, 
                     `contact_number`, 
@@ -52,32 +48,24 @@ if (isset($_POST['register'])) {
                     `password`, 
                     `verification_code`, 
                     `unique_id`,
-                    `user_role` 
+                    `user_role`
                 ) 
-                VALUES (
-                    NULL, 
-                    :first_name, 
-                    :last_name, 
-                    :contact_number, 
-                    :email, 
-                    :username, 
-                    :password, 
-                    :verification_code, 
-                    :unique_id,
-                    :user_role  
-                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
-            $insertStmt->bindParam(':first_name', $firstName, PDO::PARAM_STR);
-            $insertStmt->bindParam(':last_name', $lastName, PDO::PARAM_STR);
-            $insertStmt->bindParam(':contact_number', $contactNumber, PDO::PARAM_INT);
-            $insertStmt->bindParam(':email', $email, PDO::PARAM_STR);
-            $insertStmt->bindParam(':username', $username, PDO::PARAM_STR);
-            $insertStmt->bindParam(':password', $hashedPassword, PDO::PARAM_STR); // Store hashed password
-            $insertStmt->bindParam(':verification_code', $verificationCode, PDO::PARAM_INT);
-            $insertStmt->bindParam(':unique_id', $uniqueID, PDO::PARAM_STR); // Changed to string if using uniqid
-            $insertStmt->bindParam(':user_role', $user_role, PDO::PARAM_STR); 
+            $insertStmt->bind_param(
+                "ssisssiss",
+                $firstName,
+                $lastName,
+                $contactNumber,
+                $email,
+                $username,
+                $hashedPassword,
+                $verificationCode,
+                $uniqueID,
+                $user_role
+            );
             $insertStmt->execute();
-    
+
             // Server settings
             $mail->isSMTP(); 
             $mail->Host       = 'smtp.gmail.com'; 
@@ -118,7 +106,7 @@ if (isset($_POST['register'])) {
             
             session_start();
     
-            $userVerificationID = $conn->lastInsertId();
+            $userVerificationID = $conn->insert_id;
             $_SESSION['user_verification_id'] = $userVerificationID;
 
             echo "
@@ -137,8 +125,8 @@ if (isset($_POST['register'])) {
             </script>
             ";
         }
-    } catch (PDOException $e) {
-        $conn->rollBack();
+    } catch (mysqli_sql_exception $e) {
+        $conn->rollback();
         echo "Error: " . $e->getMessage();
     }
 }
@@ -151,11 +139,11 @@ if (isset($_POST['verify'])) {
     
         // Check for a valid user ID and verification code
         if ($userVerificationID) {
-            $stmt = $conn->prepare("SELECT `verification_code` FROM `tbl_user` WHERE `tbl_user_id` = :user_verification_id");
-            $stmt->execute([
-                'user_verification_id' => $userVerificationID,
-            ]);
-            $codeExist = $stmt->fetch(PDO::FETCH_ASSOC);
+            $stmt = $conn->prepare("SELECT `verification_code` FROM `tbl_user` WHERE `tbl_user_id` = ?");
+            $stmt->bind_param("i", $userVerificationID);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $codeExist = $result->fetch_assoc();
 
             if ($codeExist && $codeExist['verification_code'] == $verificationCode) {
                 session_destroy();
@@ -167,8 +155,9 @@ if (isset($_POST['verify'])) {
                 ";
             } else {
                 // If verification code is incorrect, delete user entry
-                $deleteStmt = $conn->prepare("DELETE FROM `tbl_user` WHERE `tbl_user_id` = :user_verification_id");
-                if ($deleteStmt->execute(['user_verification_id' => $userVerificationID])) {
+                $deleteStmt = $conn->prepare("DELETE FROM `tbl_user` WHERE `tbl_user_id` = ?");
+                $deleteStmt->bind_param("i", $userVerificationID);
+                if ($deleteStmt->execute()) {
                     echo "
                     <script>
                         alert('Incorrect Verification Code. Register Again.');
@@ -182,10 +171,9 @@ if (isset($_POST['verify'])) {
         } else {
             echo "Error: User verification session not found.";
         }
-    } catch (PDOException $e) {
+    } catch (mysqli_sql_exception $e) {
         echo "Error: " . $e->getMessage();
     }
 }
 
 ?>
-

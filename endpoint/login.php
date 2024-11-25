@@ -1,5 +1,5 @@
 <?php
-// Include database connection
+session_start();
 include ('../conn/conn.php');
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {

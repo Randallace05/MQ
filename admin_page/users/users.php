@@ -1,3 +1,31 @@
+<?php
+    include '../../conn/conn.php'; // Assuming your conn.php uses MySQLi connection
+
+    // Get selected user role
+    $selectedRole = isset($_GET['user_role']) ? $_GET['user_role'] : 'all';
+
+    // Adjust SQL query based on selected role
+    if ($selectedRole == 'all') {
+        $query = "SELECT first_name, last_name, user_role FROM tbl_user WHERE user_role != 'admin'";
+    } else {
+        $query = "SELECT first_name, last_name, user_role FROM tbl_user WHERE user_role = ? AND user_role != 'admin'";
+    }
+
+    // Prepare the query
+    $stmt = $conn->prepare($query);
+
+    // Bind the parameter if a specific role is selected
+    if ($selectedRole != 'all') {
+        $stmt->bind_param('s', $selectedRole);
+    }
+
+    // Execute the query
+    $stmt->execute();
+
+    // Get the result
+    $result = $stmt->get_result();
+
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -81,6 +109,7 @@
     </style>
 </head>
 
+</head>
 <body id="page-top">
     <!-- Page Wrapper -->
     <div id="wrapper">
@@ -90,15 +119,9 @@
 
         <!-- Content Wrapper -->
         <div id="content-wrapper" class="d-flex flex-column">
-            <!-- Main Content -->
             <div id="content">
-                <!-- Topbar -->
                 <?php include("../includesAdmin/topbar.php"); ?>
-                <!-- End of Topbar -->
-
-                <!-- Begin Page Content -->
                 <div class="container-fluid">
-                    <!-- Page Heading -->
                     <div class="d-sm-flex align-items-center justify-content-between mb-4">
                         <h1 class="h3 mb-0 text-gray-800">Accounts</h1>
                     </div>
@@ -110,33 +133,8 @@
                             <option value="all" <?php echo isset($_GET['user_role']) && $_GET['user_role'] == 'all' ? 'selected' : ''; ?>>All</option>
                             <option value="customer" <?php echo isset($_GET['user_role']) && $_GET['user_role'] == 'customer' ? 'selected' : ''; ?>>Customer</option>
                             <option value="distributor" <?php echo isset($_GET['user_role']) && $_GET['user_role'] == 'distributor' ? 'selected' : ''; ?>>Distributor</option>
-                            <!-- Add more options as needed -->
                         </select>
                     </form>
-
-                    <?php
-                    include '../../conn/conn.php';
-
-                    // Get selected user role
-                    $selectedRole = isset($_GET['user_role']) ? $_GET['user_role'] : 'all';
-
-                    // Adjust SQL query based on selected role
-                    if ($selectedRole == 'all') {
-                        $query = "SELECT first_name, last_name, user_role FROM tbl_user WHERE user_role != 'admin'";
-                    } else {
-                        $query = "SELECT first_name, last_name, user_role FROM tbl_user WHERE user_role = :user_role AND user_role != 'admin'";
-                    }
-
-                    $stmt = $conn->prepare($query);
-
-                    // Bind the parameter if a specific role is selected
-                    if ($selectedRole != 'all') {
-                        $stmt->bindParam(':user_role', $selectedRole, PDO::PARAM_STR);
-                    }
-
-                    $stmt->execute();
-                    $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
-                    ?>
 
                     <!-- Table Container -->
                     <div class="table-container">
@@ -145,10 +143,10 @@
                             <span class="table-cell">Type</span>
                         </div>
 
-                        <?php foreach($users as $row) { ?>
+                        <?php while($row = $result->fetch_assoc()) { ?>
                             <div class="table-row">
                                 <div class="table-cell">
-                                    <div class="avatar"></div> 
+                                    <div class="avatar"></div>
                                     <?php echo htmlspecialchars($row['first_name'] . ' ' . $row['last_name']); ?>
                                 </div>
                                 <div class="table-cell">
@@ -158,35 +156,20 @@
                         <?php } ?>
                     </div>
                 </div>
-                <!-- /.container-fluid -->
             </div>
-            <!-- End of Main Content -->
-
-            <!-- Footer -->
-            <footer class="sticky-footer bg-white">
-                <div class="container my-auto">
-                    <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; Your Website 2024</span>
-                    </div>
-                </div>
-            </footer>
-            <!-- End of Footer -->
         </div>
-        <!-- End of Content Wrapper -->
     </div>
-    <!-- End of Page Wrapper -->
-
-    <!-- Scroll to Top Button-->
-    <a class="scroll-to-top rounded" href="#page-top">
-        <i class="fas fa-angle-up"></i>
-    </a>
-
+    
     <!-- Bootstrap core JavaScript-->
     <script src="vendor/jquery/jquery.min.js"></script>
     <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <!-- Core plugin JavaScript-->
-    <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
     <!-- Custom scripts for all pages-->
     <script src="js/sb-admin-2.min.js"></script>
 </body>
 </html>
+
+<?php
+// Close the statement and connection
+$stmt->close();
+$conn->close();
+?>

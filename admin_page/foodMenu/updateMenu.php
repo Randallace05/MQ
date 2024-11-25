@@ -19,8 +19,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         ':stock' => $stock,
         ':id' => $id
     ]);
-    
-    echo "Product updated successfully!";
+
+    // Use JavaScript for the alert and redirect
+    echo "<script>
+        alert('Product updated successfully!');
+        window.location.href = 'FoodMenu.php';
+    </script>";
+    exit(); // Ensure no further code is executed
 }
 
 // Fetch the product data

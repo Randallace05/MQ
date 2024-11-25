@@ -24,7 +24,7 @@
 
         .topbar {
             background-color: black;
-            height: 40px; 
+            height: 30px; 
         }
 
         .header {
@@ -55,7 +55,7 @@
         .nav-links a {
             text-decoration: none;
             color: black;
-            font-weight: 500;
+            font-weight: 300;
         }
 
         .header-icons {
@@ -74,7 +74,7 @@
         .search-bar {
             padding: 10px 40px 10px 20px;
             border: 1px solid #ccc;
-            border-radius: 20px;
+            border-radius: 10px;
             width: 250px; 
             background-color: #f7f7f7;
         }
@@ -143,10 +143,24 @@
         .user-icon {
             cursor: pointer;
         }
+
+        .left-space, .right-space {
+            background-color: #f1f1f1;
+            width: 200px;
+            height: auto;
+        }
+
+        .logo img {
+            max-height: 100px;
+            
+        }
+        .hr {
+            color: aqua;
+            width: max-content;
+        }
     </style>
 </head>
 <body>
-    <!-- Include static header -->
     <?php include("header.php"); ?>
 
     <!-- Database connection -->
@@ -168,32 +182,42 @@
         }
     }
     ?>
-
+    
     <div class="topbar"></div>
+    
     <div class="header-icons">
+        <div class="left-space"></div>
+        <div class="logo">
+            <img src="../uploads/bgMQ.png" alt="MO Kitchen Logo">
+        </div>
+        <nav class="nav-links">
+            <a href="../user_page/shop.php">Home</a>
+            <a href="#">Contact</a>
+            <a href="../index.php">Sign Up</a>
+        </nav>
         <div class="search-container">
             <input type="text" class="search-bar" placeholder="What are you looking for?">
             <button class="search-btn"><i class="fa fa-search"></i></button>
         </div>
-        <a href="#"><i class="fa-regular fa-heart"></i>
-            <span class="icon-badge">4</span>
-        </a>
-        <a href="../user_page/cart.php"><i class="fa-solid fa-cart-shopping"></i>
-            <span class="icon-badge"><?php echo $row_count; ?></span>
-        </a>
-    </div>
-
-    <div class="user-dropdown">
-        <a href="#" class="user-icon" onclick="toggleDropdown(event)">
-            <i class="fa-regular fa-user"></i>
-        </a>
-        <div class="dropdown-content">
-            <a href="../user_page/profile.php">Profile</a>
-            <a href="../user_page/settings.php">Settings</a>
-            <a href="logout.php">Logout</a>
+            <a href="#"><i class="fa-regular fa-heart"></i>
+                <span class="icon-badge">4</span>
+            </a>
+            <a href="../user_page/cart.php"><i class="fa-solid fa-cart-shopping"></i>
+                <span class="icon-badge"><?php echo $row_count; ?></span>
+            </a>
+        <div class="user-dropdown">
+            <a href="#" class="user-icon" onclick="toggleDropdown(event)">
+                <i class="fa-regular fa-user"></i>
+            </a>
+            <div class="dropdown-content">
+                <a href="../user_page/profile.php">Profile</a>
+                <a href="../user_page/settings.php">Settings</a>
+                <a href="logout.php">Logout</a>
+            </div> 
         </div>
+        <div class="right-space"></div>
+        <hr>
     </div>
-    <hr>
 
     <script>
         function toggleDropdown(event) {

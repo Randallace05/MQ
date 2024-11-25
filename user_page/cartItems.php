@@ -1,16 +1,14 @@
 <?php
-include '../conn/conn.php'; // Ensure that this file establishes a connection using PDO
+include '../conn/conn.php'; // Ensure that this file establishes a connection using MySQLi
 
 if (isset($_POST['update_product_quantity'])) {
     $update_value = intval($_POST['update_quantity']); // Sanitize input to prevent SQL injection
     $update_id = intval($_POST['update_quantity_id']); // Sanitize input to prevent SQL injection
 
     // Use prepared statements for safer queries
-    $update_quantity_query = $conn->prepare("UPDATE `cart` SET quantity = :quantity WHERE cart_id = :cart_id");
-    $update_quantity_query->bindParam(':quantity', $update_value, PDO::PARAM_INT);
-    $update_quantity_query->bindParam(':cart_id', $update_id, PDO::PARAM_INT);
+    $update_quantity_query = $conn->prepare("UPDATE `cart` SET quantity = ? WHERE cart_id = ?");
+    $update_quantity_query->bind_param("ii", $update_value, $update_id);
     $update_quantity_query->execute();
-
 }
 ?>
 <!DOCTYPE html>
@@ -32,7 +30,7 @@ if (isset($_POST['update_product_quantity'])) {
     <table>
       <?php
       $select_cart_products = $conn->query("SELECT * FROM `cart`");
-      if ($select_cart_products->rowCount() > 0) {
+      if ($select_cart_products->num_rows > 0) {
         echo "<thead>
           <th>Sl No</th>
           <th>Product Name</th>
@@ -45,7 +43,7 @@ if (isset($_POST['update_product_quantity'])) {
         <tbody>";
 
         $sl_no = 1;
-        while ($fetch_cart_products = $select_cart_products->fetch(PDO::FETCH_ASSOC)) {
+        while ($fetch_cart_products = $select_cart_products->fetch_assoc()) {
           ?>
           <tr>
             <td><?php echo $sl_no++; ?></td>
@@ -80,25 +78,26 @@ if (isset($_POST['update_product_quantity'])) {
     </table>
 
     <?php
-// Check if the cart is empty
-$cart_empty = $conn->query("SELECT COUNT(*) AS total_items FROM `cart`")->fetch(PDO::FETCH_ASSOC)['total_items'] == 0;
-?>
-<div class="table_bottom">
-  <a href="shop.php" class="bottom_btn">Continue Shopping</a>
-  <h3 class="bottom_btn">
-    Total: 
-    <?php
-      $total = $conn->query("SELECT SUM(price * quantity) AS total_price FROM `cart`")->fetch(PDO::FETCH_ASSOC)['total_price'] ?? 0;
-      echo "₱" . number_format($total, 2);
+    // Check if the cart is empty
+    $cart_empty_result = $conn->query("SELECT COUNT(*) AS total_items FROM `cart`");
+    $cart_empty = $cart_empty_result->fetch_assoc()['total_items'] == 0;
     ?>
-  </h3>
-  <a href="../admin_page/bill/checkout.php" 
-     class="bottom_btn<?php echo $cart_empty ? ' disabled' : ''; ?>" 
-     <?php echo $cart_empty ? 'onclick="return false;" style="pointer-events: none; opacity: 0.5;"' : ''; ?>>
-     Proceed to checkout
-  </a>
-</div>
-
+    <div class="table_bottom">
+      <a href="shop.php" class="bottom_btn">Continue Shopping</a>
+      <h3 class="bottom_btn">
+        Total: 
+        <?php
+          $total_result = $conn->query("SELECT SUM(price * quantity) AS total_price FROM `cart`");
+          $total = $total_result->fetch_assoc()['total_price'] ?? 0;
+          echo "₱" . number_format($total, 2);
+        ?>
+      </h3>
+      <a href="../admin_page/bill/checkout.php" 
+         class="bottom_btn<?php echo $cart_empty ? ' disabled' : ''; ?>" 
+         <?php echo $cart_empty ? 'onclick="return false;" style="pointer-events: none; opacity: 0.5;"' : ''; ?>>
+         Proceed to checkout
+      </a>
+    </div>
 
     <a href="delete_all_cart_items.php" class="delete_all_btn">
       <i class="fas fa-trash"></i> Delete All

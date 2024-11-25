@@ -143,13 +143,6 @@ if ($select_product && $select_product->num_rows > 0) {
     echo "<div class='empty_text'>No Products Available</div>";
 }
 ?>
-
-
-
-
-
-
-
     <!-- Related Products Section -->
     <h2>Related Products</h2>
     <section class="py-5 bg-light related-products">

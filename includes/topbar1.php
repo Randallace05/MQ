@@ -158,6 +158,10 @@
             color: aqua;
             width: max-content;
         }
+
+        .z-index{
+            z-index: 1;
+        }
     </style>
 </head>
 <body>
@@ -183,40 +187,41 @@
     }
     ?>
     
-    <div class="topbar"></div>
-    
-    <div class="header-icons">
-        <div class="left-space"></div>
-        <div class="logo">
-            <img src="../uploads/bgMQ.png" alt="MO Kitchen Logo">
+    <div class="z-index">
+        <div class="topbar"></div>
+        <div class="header-icons">
+            <div class="left-space"></div>
+            <div class="logo">
+                <img src="../uploads/bgMQ.png" alt="MO Kitchen Logo">
+            </div>
+            <nav class="nav-links">
+                <a href="../user_page/shop.php">Home</a>
+                <a href="#">Contact</a>
+                <a href="../index.php">Sign Up</a>
+            </nav>
+            <div class="search-container">
+                <input type="text" class="search-bar" placeholder="What are you looking for?">
+                <button class="search-btn"><i class="fa fa-search"></i></button>
+            </div>
+                <a href="#"><i class="fa-regular fa-heart"></i>
+                    <span class="icon-badge">4</span>
+                </a>
+                <a href="../user_page/cart.php"><i class="fa-solid fa-cart-shopping"></i>
+                    <span class="icon-badge"><?php echo $row_count; ?></span>
+                </a>
+            <div class="user-dropdown">
+                <a href="#" class="user-icon" onclick="toggleDropdown(event)">
+                    <i class="fa-regular fa-user"></i>
+                </a>
+                <div class="dropdown-content">
+                    <a href="../user_page/profile.php">Profile</a>
+                    <a href="../user_page/settings.php">Settings</a>
+                    <a href="logout.php">Logout</a>
+                </div> 
+            </div>
+            <div class="right-space"></div>
+            <hr>
         </div>
-        <nav class="nav-links">
-            <a href="../user_page/shop.php">Home</a>
-            <a href="#">Contact</a>
-            <a href="../index.php">Sign Up</a>
-        </nav>
-        <div class="search-container">
-            <input type="text" class="search-bar" placeholder="What are you looking for?">
-            <button class="search-btn"><i class="fa fa-search"></i></button>
-        </div>
-            <a href="#"><i class="fa-regular fa-heart"></i>
-                <span class="icon-badge">4</span>
-            </a>
-            <a href="../user_page/cart.php"><i class="fa-solid fa-cart-shopping"></i>
-                <span class="icon-badge"><?php echo $row_count; ?></span>
-            </a>
-        <div class="user-dropdown">
-            <a href="#" class="user-icon" onclick="toggleDropdown(event)">
-                <i class="fa-regular fa-user"></i>
-            </a>
-            <div class="dropdown-content">
-                <a href="../user_page/profile.php">Profile</a>
-                <a href="../user_page/settings.php">Settings</a>
-                <a href="logout.php">Logout</a>
-            </div> 
-        </div>
-        <div class="right-space"></div>
-        <hr>
     </div>
 
     <script>

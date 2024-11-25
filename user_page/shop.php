@@ -40,23 +40,56 @@
         text-align: center;
         font-size: 1.5em;
     }
+
+    /* picture sizing */
+    .head{
+        background-color: white !important;
+        width: 90%;
+        margin: auto;
+        margin-top: -80px;
+    }
+
+    .right-box, .left-box{
+        width: 89% !important;
+        height: 250px !important;
+        background-color: red;
+        margin-top: -30px;
+    }
+    
+    .grid-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* Two equal columns */
+        justify-items: center; /* Center items horizontally */
+        margin-top: 10px;
+    }
+
+    .top-picture{
+        height: 300px ;
+        background-color: red;
+        width: 100%;
+    }
+
 </style>
 <body>
     <!-- Navigation -->
         <?php include("../includes/topbar1.php"); ?> 
     <!-- end Navigation -->
-
+    
     <!-- Header -->
-    <header class="bg-dark py-5">
-        <div class="container px-4 px-lg-5 my-5">
-            <div class="text-center text-white">
-                <h1 class="display-4 fw-bolder">MQ Kitchen</h1>
-                <p class="lead fw-normal text-white-50 mb-0">The Best Spicy Condiments!</p>
-            </div>
+    <header class="py-5 head">
+        <div class="container px-4 px-lg-5 my-5 top-picture">
+            top picture
+        </div>
+        <div class="grid-container">
+            <div class="container left-box">left box pic</div>
+            <div class="container right-box">right box pic</div>
         </div>
     </header>
 
-    <hr>
+            <!-- <div class="text-center text-white">
+                <h1 class="display-4 fw-bolder">MQ Kitchen</h1>
+                <p class="lead fw-normal text-white-50 mb-0">The Best Spicy Condiments!</p>
+            </div> -->
 
     <!-- Section -->
     <section class="py-5">

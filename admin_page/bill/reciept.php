@@ -83,7 +83,6 @@
                 <tbody>
                     <tr>
                         <td>Product 1</td>
-                        <td>2</td>
                         <td>$25.00</td>
                         <td>$50.00</td>
                     </tr>
@@ -97,8 +96,7 @@
             <p>If you have any questions about your order, please contact us at support@example.com.</p>
         </div>
     </div>
-
-    <div class="button-container">
+<div class="button-container">
         <button onclick="printReceipt()">Print Receipt</button>
         <button onclick="downloadPDF()">Download as PDF</button>
     </div>

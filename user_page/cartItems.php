@@ -10,6 +10,7 @@ if (isset($_POST['update_product_quantity'])) {
     $update_quantity_query->bindParam(':quantity', $update_value, PDO::PARAM_INT);
     $update_quantity_query->bindParam(':cart_id', $update_id, PDO::PARAM_INT);
     $update_quantity_query->execute();
+
 }
 ?>
 <!DOCTYPE html>
@@ -78,17 +79,26 @@ if (isset($_POST['update_product_quantity'])) {
       ?>  
     </table>
 
-    <div class="table_bottom">
-      <a href="shop.php" class="bottom_btn">Continue Shopping</a>
-      <h3 class="bottom_btn">
-        Total: 
-        <?php
-          $total = $conn->query("SELECT SUM(price * quantity) AS total_price FROM `cart`")->fetch(PDO::FETCH_ASSOC)['total_price'] ?? 0;
-          echo "₱" . number_format($total, 2);
-        ?>
-      </h3>
-      <a href="../admin_page/bill/checkout.php" class="bottom_btn">Proceed to checkout</a>
-    </div>
+    <?php
+// Check if the cart is empty
+$cart_empty = $conn->query("SELECT COUNT(*) AS total_items FROM `cart`")->fetch(PDO::FETCH_ASSOC)['total_items'] == 0;
+?>
+<div class="table_bottom">
+  <a href="shop.php" class="bottom_btn">Continue Shopping</a>
+  <h3 class="bottom_btn">
+    Total: 
+    <?php
+      $total = $conn->query("SELECT SUM(price * quantity) AS total_price FROM `cart`")->fetch(PDO::FETCH_ASSOC)['total_price'] ?? 0;
+      echo "₱" . number_format($total, 2);
+    ?>
+  </h3>
+  <a href="../admin_page/bill/checkout.php" 
+     class="bottom_btn<?php echo $cart_empty ? ' disabled' : ''; ?>" 
+     <?php echo $cart_empty ? 'onclick="return false;" style="pointer-events: none; opacity: 0.5;"' : ''; ?>>
+     Proceed to checkout
+  </a>
+</div>
+
 
     <a href="delete_all_cart_items.php" class="delete_all_btn">
       <i class="fas fa-trash"></i> Delete All

@@ -9,35 +9,40 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
     // Upload main image
     $image = $_FILES['image']['name'];
-    move_uploaded_file($_FILES['image']['tmp_name'], 'uploads/' . $image);
+    if ($image) {
+        move_uploaded_file($_FILES['image']['tmp_name'], 'uploads/' . $image);
+    }
 
     // Upload other images (up to 4)
     $other_images = [];
-    foreach ($_FILES['other_images']['tmp_name'] as $key => $tmp_name) {
-        $file_name = $_FILES['other_images']['name'][$key];
-        if ($file_name) {
-            move_uploaded_file($tmp_name, 'uploads/' . $file_name);
-            $other_images[] = $file_name;
+    if (!empty($_FILES['other_images']['tmp_name'][0])) {
+        foreach ($_FILES['other_images']['tmp_name'] as $key => $tmp_name) {
+            $file_name = $_FILES['other_images']['name'][$key];
+            if ($file_name) {
+                move_uploaded_file($tmp_name, 'uploads/' . $file_name);
+                $other_images[] = $file_name;
+            }
         }
     }
     $other_images_json = json_encode($other_images);
     
+    // SQL query with MySQLi
     $sql = "INSERT INTO products (name, price, image, description, other_images, stock) 
-            VALUES (:name, :price, :image, :description, :other_images, :stock)";
+            VALUES (?, ?, ?, ?, ?, ?)";
     
     $stmt = $conn->prepare($sql);
-    $stmt->execute([
-        ':name' => $name,
-        ':price' => $price,
-        ':image' => $image,
-        ':description' => $description,
-        ':other_images' => $other_images_json,
-        ':stock' => $stock
-    ]);
-    
-    echo "Product created successfully!";
+    $stmt->bind_param('sdsssi', $name, $price, $image, $description, $other_images_json, $stock);
+    if ($stmt->execute()) {
+        echo "Product created successfully!";
+    } else {
+        echo "Error: " . $stmt->error;
+    }
+
+    $stmt->close();
+    $conn->close();
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">

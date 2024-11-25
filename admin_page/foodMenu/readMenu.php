@@ -4,7 +4,8 @@ include '../../conn/conn.php';
 $sql = "SELECT * FROM products";
 $stmt = $conn->prepare($sql);
 $stmt->execute();
-$products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$result = $stmt->get_result();
+$products = $result->fetch_all(MYSQLI_ASSOC); // Fetch all rows as an associative array
 ?>
 
 <!DOCTYPE html>

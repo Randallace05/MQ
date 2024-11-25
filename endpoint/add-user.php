@@ -36,7 +36,7 @@ if (isset($_POST['register'])) {
         $nameExist = $result->fetch_assoc();
 
         if (empty($nameExist)) {
-            $verificationCode = rand(1000, 9999); // 4 digits
+            $verificationCode = rand(100000, 999999); // 4 digits
 
             $insertStmt = $conn->prepare("
                 INSERT INTO `tbl_user` (

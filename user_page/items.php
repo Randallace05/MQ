@@ -5,49 +5,50 @@ if (isset($_POST['add_to_cart'])) {
     $products_name = $_POST['product_name'];
     $products_price = $_POST['product_price'];
     $products_image = $_POST['product_image'];
-    $product_quantity = isset($_POST['product_quantity']) ? $_POST['product_quantity'] : 1; // Set default to 1 if not provided
+    $product_quantity = isset($_POST['product_quantity']) ? $_POST['product_quantity'] : 1; // Default to 1 if not provided
 
-    // Prepare a SELECT statement to check if the product is already in the cart
-    $select_cart = $conn->prepare("SELECT COUNT(*) FROM `cart` WHERE name = :name");
-    $select_cart->bindParam(':name', $products_name);
+    // Query to check if the product is already in the cart
+    $select_cart = $conn->prepare("SELECT COUNT(*) AS count FROM cart WHERE name = ?");
+    $select_cart->bind_param("s", $products_name);
     $select_cart->execute();
+    $select_cart_result = $select_cart->get_result();
+    $row = $select_cart_result->fetch_assoc();
 
     // Check if product already exists in the cart
-    if ($select_cart->fetchColumn() > 0) {
+    if ($row['count'] > 0) {
         echo "Product already added to cart";
     } else {
-        // Prepare an SQL statement to prevent SQL injection
-        $insert_products = $conn->prepare("INSERT INTO `cart` (name, price, image, quantity) VALUES (:name, :price, :image, :quantity)");
-        $insert_products->bindParam(':name', $products_name);
-        $insert_products->bindParam(':price', $products_price);
-        $insert_products->bindParam(':image', $products_image);
-        $insert_products->bindParam(':quantity', $product_quantity);
-        echo "Product added to cart";
-        // Execute the query
-        $insert_products->execute();
+        // Insert the product into the cart
+        $insert_products = $conn->prepare("INSERT INTO cart (name, price, image, quantity) VALUES (?, ?, ?, ?)");
+        $insert_products->bind_param("sdsi", $products_name, $products_price, $products_image, $product_quantity);
+        if ($insert_products->execute()) {
+            echo "Product added to cart";
+        } else {
+            echo "Failed to add product to cart";
+        }
     }
 }
-
 
 // Fetch product details from the database based on the given product ID
 $product_id = $_GET['id'];
 
 // Fetch the current product details
-$query = "SELECT name, price, image, description, stock FROM products WHERE id = :id";
+$query = "SELECT name, price, image, description, stock FROM products WHERE id = ?";
 $stmt = $conn->prepare($query);
-$stmt->bindParam(':id', $product_id, PDO::PARAM_INT);
+$stmt->bind_param("i", $product_id);
 $stmt->execute();
-
-$product = $stmt->fetch(PDO::FETCH_ASSOC); // Fetch the product data
+$product_result = $stmt->get_result();
+$product = $product_result->fetch_assoc(); // Fetch the product data
 
 // Fetch related products from the same category (or any other criteria) excluding the current product
-$related_query = "SELECT id, name, price, image FROM products WHERE id != :id LIMIT 3"; // Fetch 3 related products
+$related_query = "SELECT id, name, price, image FROM products WHERE id != ? LIMIT 3"; // Fetch 3 related products
 $related_stmt = $conn->prepare($related_query);
-$related_stmt->bindParam(':id', $product_id, PDO::PARAM_INT);
+$related_stmt->bind_param("i", $product_id);
 $related_stmt->execute();
-
-$related_products = $related_stmt->fetchAll(PDO::FETCH_ASSOC); // Fetch all related products
+$related_products_result = $related_stmt->get_result();
+$related_products = $related_products_result->fetch_all(MYSQLI_ASSOC); // Fetch all related products
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -63,15 +64,15 @@ $related_products = $related_stmt->fetchAll(PDO::FETCH_ASSOC); // Fetch all rela
 </head>
 <body>
     <!-- Navigation -->
-    <?php include("../includes/topbar1.php"); ?>
+<?php include("../includes/topbar1.php"); ?>
 
-    <!-- Product section -->
-    <?php
-// Modify the query to fetch only one product
+<!-- Product section -->
+<?php
+// Query to fetch only one product
 $select_product = $conn->query("SELECT * FROM `products` LIMIT 1");
 
-if ($select_product->rowCount() > 0) {
-    $fetch_product = $select_product->fetch(PDO::FETCH_ASSOC);
+if ($select_product && $select_product->num_rows > 0) {
+    $fetch_product = $select_product->fetch_assoc();
 
     // Check if the form was submitted
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_cart'])) {
@@ -82,23 +83,32 @@ if ($select_product->rowCount() > 0) {
 
         // Check if the product already exists in the cart
         $check_cart = $conn->prepare("SELECT * FROM `cart` WHERE name = ?");
-        $check_cart->execute([$product_name]);
+        $check_cart->bind_param("s", $product_name);
+        $check_cart->execute();
+        $result = $check_cart->get_result();
 
-        if ($check_cart->rowCount() > 0) {
+        if ($result->num_rows > 0) {
             // If product exists, set the quantity to the submitted value
             $update_cart = $conn->prepare("UPDATE `cart` SET quantity = ? WHERE name = ?");
-            $update_cart->execute([$product_quantity, $product_name]);
-
-            echo "<div class='alert alert-success'>Product quantity updated in cart successfully!</div>";
+            $update_cart->bind_param("is", $product_quantity, $product_name);
+            if ($update_cart->execute()) {
+                echo "<div class='alert alert-success'>Product quantity updated in cart successfully!</div>";
+            } else {
+                echo "<div class='alert alert-danger'>Failed to update product quantity in cart.</div>";
+            }
         } else {
             // If product doesn't exist, insert new entry
             $insert_cart = $conn->prepare("INSERT INTO `cart` (name, price, image, quantity) VALUES (?, ?, ?, ?)");
-            $insert_cart->execute([$product_name, $product_price, $product_image, $product_quantity]);
-
-            echo "<div class='alert alert-success'>Product added to cart successfully!</div>";
+            $insert_cart->bind_param("sdsi", $product_name, $product_price, $product_image, $product_quantity);
+            if ($insert_cart->execute()) {
+                echo "<div class='alert alert-success'>Product added to cart successfully!</div>";
+            } else {
+                echo "<div class='alert alert-danger'>Failed to add product to cart.</div>";
+            }
         }
     }
 ?>
+
 
 <section class="py-5">
     <div class="container px-4 px-lg-5 my-5">

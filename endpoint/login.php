@@ -38,7 +38,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             } elseif ($user_role === 'customer') {
                 echo "
                 <script>
-                    alert('Welcome {$stored_username}, Login Successful!'); 
+                    alert('Welcome {$stored_username}, Login Successful!');
                     window.location.href = '../user_page/shop.php'; // Customer dashboard
                 </script>
                 ";
@@ -46,7 +46,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 echo "
                 <script>
                     alert('Welcome Distributor, Login Successful!');
-                    window.location.href = '../distributor_page/dashboard.php'; // Distributor dashboard
+                    window.location.href = '../distributor_page/landing_page/index.php'; // Distributor dashboard
                 </script>
                 ";
             } else {

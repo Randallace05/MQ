@@ -1,26 +1,30 @@
 <?php
-    session_start();
-    include_once "../../../conn/conn.php"; // Adjust the path as necessary
+session_start();
+include_once "../../../conn/conn.php"; // Adjust the path as necessary
 
-    $outgoing_id = $_SESSION['unique_id'];
-    
-    // Prepare the SQL query using PDO
-    $sql = "SELECT * FROM tbl_user WHERE unique_id != :outgoing_id ORDER BY tbl_user_id DESC";
-    $stmt = $conn->prepare($sql);
-    $stmt->bindParam(':outgoing_id', $outgoing_id, PDO::PARAM_INT);
-    $stmt->execute();
-    
-    // Fetch all users
-    $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$outgoing_id = $_SESSION['unique_id'];
 
-    // Include data.php to display users
-    $output = ""; // Initialize output to avoid undefined variable errors
+// Prepare the SQL query using MySQLi
+$sql = "SELECT * FROM tbl_user WHERE unique_id != ? ORDER BY tbl_user_id DESC";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $outgoing_id); // Bind the parameter (integer)
 
-    if ($stmt->rowCount() == 0) {
-        $output .= "No users are available to chat";
-    } else {
-        include_once "data.php"; // Now $users is defined and passed to data.php
-    }
+// Execute the statement
+$stmt->execute();
 
-    echo $output;
+// Get the result
+$result = $stmt->get_result();
+
+// Initialize output to avoid undefined variable errors
+$output = "";
+
+if ($result->num_rows == 0) {
+    $output .= "No users are available to chat";
+} else {
+    // Fetch all users and include the data.php file
+    $users = $result->fetch_all(MYSQLI_ASSOC); // Fetch all users as an associative array
+    include_once "data.php"; // Now $users is defined and passed to data.php
+}
+
+echo $output;
 ?>

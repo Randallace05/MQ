@@ -4,31 +4,31 @@
   
   // Redirect to login if session is not set
   if(!isset($_SESSION['unique_id'])){
-    header("location: login.php");
+    header("location: ../../index.php");
     exit();
   }
   
   // Check if user_id is set in the URL
-  if (!isset($_GET['user_id'])) {
+  if (!isset($_GET['tbl_user_id'])) {
     header("location: users.php");
     exit();
   }
   
-  $user_id = $_GET['user_id'];
+  $user_id = $_GET['tbl_user_id'];
 
   // Prepare the query to fetch user details
-  $stmt = $conn->prepare("SELECT * FROM tbl_user WHERE unique_id = :user_id");
-  $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+  $stmt = $conn->prepare("SELECT * FROM tbl_user WHERE unique_id = ?");
+  $stmt->bind_param('i', $user_id); // Bind the user_id as an integer parameter
   $stmt->execute();
+  $result = $stmt->get_result();
 
-  if($stmt->rowCount() > 0){
-    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+  if ($result->num_rows > 0) {
+    $row = $result->fetch_assoc();
   } else {
     header("location: users.php");
     exit();
   }
 ?>
-
 <?php include_once "header.php"; ?>
 <body>
   <div class="wrapper">

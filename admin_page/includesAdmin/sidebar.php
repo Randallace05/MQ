@@ -67,7 +67,7 @@
 
             <!-- Nav Item - Chat -->
             <li class="nav-item">
-                <a class="nav-link" href="../chat/chatpage.php">
+                <a class="nav-link" href="../chat/chat.php">
                     <i class="fa-solid fa-message"></i>
                     <span>Chat</span></a>
             </li>

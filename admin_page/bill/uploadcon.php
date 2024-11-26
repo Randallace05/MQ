@@ -29,10 +29,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file'])) {
         $stmt->bind_param("ss", $file['name'], $filePath);
 
         if ($stmt->execute()) {
-            echo "File uploaded and saved in database successfully!";
+            echo "<script>
+                alert('File uploaded and saved in database successfully!');
+                window.location.href = '../bill/reciept.php';
+            </script>";
         } else {
-            echo "Error saving file info to database: " . $stmt->error;
+            echo "<script>
+                alert('Error saving file info to database: " . $stmt->error . "');
+                window.history.back();
+            </script>";
         }
+        
 
         $stmt->close();
     } else {

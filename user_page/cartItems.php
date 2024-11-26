@@ -74,7 +74,7 @@ if (isset($_POST['update_product_quantity'])) {
       } else {
         echo "<tr><td colspan='7'>No products in the cart</td></tr>";
       }
-      ?>  
+      ?>
     </table>
 
     <?php
@@ -85,15 +85,15 @@ if (isset($_POST['update_product_quantity'])) {
     <div class="table_bottom">
       <a href="shop.php" class="bottom_btn">Continue Shopping</a>
       <h3 class="bottom_btn">
-        Total: 
+        Total:
         <?php
           $total_result = $conn->query("SELECT SUM(price * quantity) AS total_price FROM `cart`");
           $total = $total_result->fetch_assoc()['total_price'] ?? 0;
           echo "₱" . number_format($total, 2);
         ?>
       </h3>
-      <a href="../admin_page/bill/checkout.php" 
-         class="bottom_btn<?php echo $cart_empty ? ' disabled' : ''; ?>" 
+      <a href="../admin_page/bill/checkout.php"
+         class="bottom_btn<?php echo $cart_empty ? ' disabled' : ''; ?>"
          <?php echo $cart_empty ? 'onclick="return false;" style="pointer-events: none; opacity: 0.5;"' : ''; ?>>
          Proceed to checkout
       </a>

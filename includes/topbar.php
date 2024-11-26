@@ -17,7 +17,7 @@
 
         .topbar {
             background-color: black;
-            height: 40px; 
+            height: 40px;
         }
 
 
@@ -32,7 +32,7 @@
         }
 
         .logo {
-            margin-right: 30px; 
+            margin-right: 30px;
         }
 
         .logo img {
@@ -69,7 +69,7 @@
             padding: 10px 40px 10px 20px;
             border: 1px solid #ccc;
             border-radius: 20px;
-            width: 250px; 
+            width: 250px;
             background-color: #f7f7f7;
         }
 
@@ -115,12 +115,12 @@
         }
 
         .dropdown-content {
-            display: none; 
+            display: none;
             position: absolute;
-            right: 0; 
-            background-color: white; 
+            right: 0;
+            background-color: white;
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-            z-index: 1; 
+            z-index: 1;
         }
 
         .dropdown-content a {
@@ -131,7 +131,7 @@
         }
 
         .dropdown-content a:hover {
-            background-color: #f1f1f1; 
+            background-color: #f1f1f1;
         }
 
         .user-icon {
@@ -143,7 +143,7 @@
 <body>
 
 <!-- start include header -->
-<?php include("header.php"); ?> 
+<?php include("header.php"); ?>
 <!-- end include header -->
 
 <div class="topbar"></div>
@@ -165,7 +165,7 @@
             <span class="icon-badge">4</span></a>
         <a href="../user_page/cart.php"><i class="fa-solid fa-cart-shopping"></i>
             <span class="icon-badge">2</span></a>
-        
+
         <!-- User Icon with Dropdown -->
         <div class="user-dropdown">
             <a href="#" class="user-icon" onclick="toggleDropdown(event)">
@@ -186,7 +186,7 @@
     function toggleDropdown(event) {
         event.stopPropagation(); // Prevent the click event from bubbling up to the window
         const dropdown = document.querySelector('.dropdown-content');
-        
+
         // Toggle visibility of dropdown
         dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
     }

@@ -24,7 +24,7 @@
 
         .topbar {
             background-color: black;
-            height: 30px; 
+            height: 30px;
         }
 
         .header {
@@ -38,7 +38,7 @@
         }
 
         .logo {
-            margin-right: 30px; 
+            margin-right: 30px;
         }
 
         .logo img {
@@ -75,7 +75,7 @@
             padding: 10px 40px 10px 20px;
             border: 1px solid #ccc;
             border-radius: 10px;
-            width: 250px; 
+            width: 250px;
             background-color: #f7f7f7;
         }
 
@@ -121,12 +121,12 @@
         }
 
         .dropdown-content {
-            display: none; 
+            display: none;
             position: absolute;
-            right: 0; 
-            background-color: white; 
+            right: 0;
+            background-color: white;
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-            z-index: 1; 
+            z-index: 1;
         }
 
         .dropdown-content a {
@@ -137,7 +137,7 @@
         }
 
         .dropdown-content a:hover {
-            background-color: #f1f1f1; 
+            background-color: #f1f1f1;
         }
 
         .user-icon {
@@ -152,7 +152,7 @@
 
         .logo img {
             max-height: 100px;
-            
+
         }
         .hr {
             color: aqua;
@@ -186,7 +186,7 @@
         }
     }
     ?>
-    
+
     <div class="z-index">
         <div class="topbar"></div>
         <div class="header-icons">
@@ -217,7 +217,7 @@
                     <a href="../user_page/profile.php">Profile</a>
                     <a href="../user_page/settings.php">Settings</a>
                     <a href="logout.php">Logout</a>
-                </div> 
+                </div>
             </div>
             <div class="right-space"></div>
             <hr>

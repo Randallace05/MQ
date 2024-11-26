@@ -1,6 +1,6 @@
 <?php
 session_start();
-include ('../conn/conn.php');
+include("C:/xampp/htdocs/MQ/conn/conn.php");
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = $_POST['username'];
@@ -22,7 +22,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if (password_verify($password, $stored_password)) {
 
             // Set session variables upon successful login
-            session_start(); // Start the session if not already started
+             // Start the session if not already started
             $_SESSION['loggedin'] = true;  // Indicates the user is logged in
             $_SESSION['username'] = $stored_username;  // Store the username in the session
             $_SESSION['user_role'] = $user_role;  // Store the user role in the session

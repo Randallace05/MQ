@@ -23,7 +23,7 @@
             border: 1px solid #ccc;
             border-radius: 5px;
             font-size: 16px;
-        }
+        } 
 
         #send-button {
             padding: 5px;

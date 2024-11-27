@@ -55,7 +55,7 @@
         background-color: red;
         margin-top: -30px;
     }
-    
+
     .grid-container {
         display: grid;
         grid-template-columns: 1fr 1fr; /* Two equal columns */
@@ -72,9 +72,9 @@
 </style>
 <body>
     <!-- Navigation -->
-        <?php include("../includes/topbar1.php"); ?> 
+        <?php include("../includes/topbar1.php"); ?>
     <!-- end Navigation -->
-    
+
     <!-- Header -->
     <header class="py-5 head">
         <div class="container px-4 px-lg-5 my-5 top-picture">
@@ -150,7 +150,7 @@
             </div>
         </div>
     </section>
-    
+
 
     <!-- Footer -->
     <?php include("../includes/footer.php"); ?>

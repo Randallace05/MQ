@@ -7,8 +7,12 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Fetch data from 'products' table
-$sql = "SELECT id, name, stock, price, description FROM products";
+// Get sorting order from query parameter
+$sort_order = isset($_GET['sort']) ? $_GET['sort'] : 'asc';
+$order_by = ($sort_order === 'desc') ? 'DESC' : 'ASC';
+
+// Fetch data from 'products' table with sorting
+$sql = "SELECT id, name, stock, price, description FROM products ORDER BY stock $order_by";
 $result = $conn->query($sql);
 ?>
 
@@ -34,13 +38,20 @@ $result = $conn->query($sql);
             <div id="content">
                 <?php include("../includesAdmin/topbar.php"); ?>
                 <div class="container-fluid">
-                    <h1 class="h3 mb-2 text-gray-800">Inventory</h1>
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <h1 class="h3 text-gray-800">Inventory</h1>
+                        <select id="sortDropdown" class="form-control w-auto" onchange="sortInventory()">
+                            <option value="asc" <?php echo $sort_order === 'asc' ? 'selected' : ''; ?>>Low to High Stocks</option>
+                            <option value="desc" <?php echo $sort_order === 'desc' ? 'selected' : ''; ?>>High to Low Stocks</option>
+                        </select>
+                    </div>
                     <div class="card shadow mb-4">
                         <div class="card-body">
                             <div class="table-responsive">
                                 <table class="table table-bordered" id="inventoryTable" width="100%" cellspacing="0">
                                     <thead>
                                         <tr>
+                                            <th>Product ID</th>
                                             <th>Product Name</th>
                                             <th>Stocks</th>
                                             <th>Price</th>
@@ -51,19 +62,19 @@ $result = $conn->query($sql);
                                     <tbody>
                                         <?php
                                         if ($result->num_rows > 0) {
-                                            // Loop through and display each row
                                             while ($row = $result->fetch_assoc()) {
                                                 echo "<tr>";
+                                                echo "<td>" . $row['id'] . "</td>"; // Display Product ID
                                                 echo "<td>" . $row['name'] . "</td>";
                                                 echo "<td>" . $row['stock'] . "</td>";
                                                 echo "<td>" . $row['price'] . "</td>";
                                                 echo "<td>
                                                         <button class='btn btn-primary btn-sm' onclick='addStock(" . $row['id'] . ")'>Add Stock</button>
-                                                      </td>";
+                                                    </td>";
                                                 echo "<td>
                                                         <button class='btn btn-primary btn-sm'>Edit</button> 
                                                         <button class='btn btn-danger btn-sm'>Delete</button>
-                                                      </td>";
+                                                    </td>";
                                                 echo "</tr>";
                                             }
                                         } else {
@@ -91,6 +102,12 @@ $result = $conn->query($sql);
     <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
     <script src="js/sb-admin-2.min.js"></script>
     <script>
+        // JavaScript function to handle sorting
+        function sortInventory() {
+            const sortOrder = document.getElementById('sortDropdown').value;
+            window.location.href = '?sort=' + sortOrder;
+        }
+
         // JavaScript function to handle "Add Stock" button click
         function addStock(productId) {
             alert('Add stock functionality for Product ID: ' + productId);

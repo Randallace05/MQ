@@ -284,29 +284,34 @@
         };
 
         function fetchSearchResults(query) {
-            const resultsContainer = document.getElementById('searchResults');
-            resultsContainer.innerHTML = ''; // Clear previous results
+    const resultsContainer = document.getElementById('searchResults');
+    resultsContainer.innerHTML = ''; // Clear previous results
 
-            if (query.trim() === '') {
-                return; // Exit if the query is empty
-            }
+    if (query.trim() === '') {
+        return; // Exit if the query is empty
+    }
 
-            // Fetch results from the server
-            fetch(`search_products.php?query=${encodeURIComponent(query)}`)
-                .then(response => response.json())
-                .then(products => {
-                    products.forEach(product => {
-                        const item = document.createElement('div');
-                        item.className = 'result-item';
-                        item.innerHTML = `
-                            <img src="../admin_page/foodMenu/uploads/${product.image}" alt="${product.name}">
-                            <span>${product.name}</span>
-                        `;
-                        resultsContainer.appendChild(item);
-                    });
-            })
-            .catch(error => console.error('Error fetching search results:', error));
-        }
+    // Fetch results from the server
+    fetch(`search_products.php?query=${encodeURIComponent(query)}`)
+        .then(response => response.json())
+        .then(products => {
+            products.forEach(product => {
+                const item = document.createElement('div');
+                item.className = 'result-item';
+                item.innerHTML = `
+                    <img src="../admin_page/foodMenu/uploads/${product.image}" alt="${product.name}">
+                    <span>${product.name}</span>
+                `;
+                // Add a click event listener to redirect to the product page
+                item.onclick = () => {
+                    window.location.href = `items.php?id=${product.id}`;
+                };
+                resultsContainer.appendChild(item);
+            });
+        })
+        .catch(error => console.error('Error fetching search results:', error));
+}
+
     </script>
 </body>
 </html>

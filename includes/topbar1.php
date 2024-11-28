@@ -162,6 +162,48 @@
         .z-index{
             z-index: 1;
         }
+        .search-container {
+            position: relative; /* Make this container the reference point for absolute positioning */
+        }
+
+        .search-results {
+            position: absolute;
+            top: 100%; /* Position it directly below the search bar */
+            left: 0;
+            width: 100%; /* Match the width of the search bar */
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            z-index: 10;
+            max-height: 200px; /* Limit height for scrolling */
+            overflow-y: auto; /* Add scrolling if results exceed the height */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+        }
+
+        .search-results .result-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .search-results .result-item:last-child {
+            border-bottom: none; /* Remove the bottom border for the last item */
+        }
+
+        .search-results .result-item img {
+            width: 40px; /* Adjust image size */
+            height: 40px; /* Make it square */
+            margin-right: 10px;
+            object-fit: cover; /* Ensure the image is scaled correctly */
+            border-radius: 5px; /* Optional: round image corners */
+        }
+
+        .search-results .result-item:hover {
+            background-color: #f7f7f7; /* Add hover effect */
+        }
+
     </style>
 </head>
 <body>
@@ -195,14 +237,12 @@
                 <img src="../uploads/bgMQ.png" alt="MO Kitchen Logo">
             </div>
             <nav class="nav-links">
-                <a href="../user_page/shop.php">Home</a>
-                <a href="#">Contact</a>
-                <a href="../index.php">Sign Up</a>
-            </nav>
             <div class="search-container">
-                <input type="text" class="search-bar" placeholder="What are you looking for?">
+                <input type="text" class="search-bar" placeholder="What are you looking for?" oninput="fetchSearchResults(this.value)">
                 <button class="search-btn"><i class="fa fa-search"></i></button>
+                <div class="search-results" id="searchResults"></div>
             </div>
+            </nav>
                 <a href="#"><i class="fa-regular fa-heart"></i>
                     <span class="icon-badge">4</span>
                 </a>
@@ -242,6 +282,31 @@
                 }
             }
         };
+
+        function fetchSearchResults(query) {
+            const resultsContainer = document.getElementById('searchResults');
+            resultsContainer.innerHTML = ''; // Clear previous results
+
+            if (query.trim() === '') {
+                return; // Exit if the query is empty
+            }
+
+            // Fetch results from the server
+            fetch(`search_products.php?query=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(products => {
+                    products.forEach(product => {
+                        const item = document.createElement('div');
+                        item.className = 'result-item';
+                        item.innerHTML = `
+                            <img src="../admin_page/foodMenu/uploads/${product.image}" alt="${product.name}">
+                            <span>${product.name}</span>
+                        `;
+                        resultsContainer.appendChild(item);
+                    });
+            })
+            .catch(error => console.error('Error fetching search results:', error));
+        }
     </script>
 </body>
 </html>

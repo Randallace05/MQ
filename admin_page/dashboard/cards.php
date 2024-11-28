@@ -1,20 +1,46 @@
-                        <!-- Users Example -->
-                        <div class="col-xl-3 col-md-6 mb-4">
-                            <div class="card border-left-primary shadow h-100 py-2">
-                                <div class="card-body">
-                                    <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
-                                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                                Users</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">1000</div>
-                                        </div>
-                                        <div class="col-auto">
-                                            <i class="fas fa-solid fa-user fa-2x text-gray-300"></i>
-                                        </div>
+<?php
+// Database connection (replace with your credentials)
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "login_email_verification";
+
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// Query to get total users
+$totalUsersQuery = "SELECT COUNT(*) AS total_users FROM tbl_user";
+$totalUsersResult = $conn->query($totalUsersQuery);
+$totalUsers = $totalUsersResult->fetch_assoc()['total_users'];
+
+// Query to get total distributors
+$totalDistributorsQuery = "SELECT COUNT(*) AS total_distributors FROM tbl_user WHERE user_role = 'distributor'";
+$totalDistributorsResult = $conn->query($totalDistributorsQuery);
+$totalDistributors = $totalDistributorsResult->fetch_assoc()['total_distributors'];
+
+$conn->close();
+?>                       
+                       <!-- Users Example -->
+                       <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-left-primary shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                            Users</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $totalUsers; ?></div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-solid fa-user fa-2x text-gray-300"></i>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
                         <!-- Dish Ordered -->
                         <div class="col-xl-3 col-md-6 mb-4">
@@ -60,7 +86,7 @@
                                         <div class="col mr-2">
                                             <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
                                                 Total Distributor</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">18</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $totalDistributors; ?></div>
                                         </div>
                                         <div class="col-auto">
                                             <i class="fas fa-solid fa-user-tie fa-2x text-gray-300"></i>

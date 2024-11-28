@@ -24,7 +24,7 @@ $sql = "SELECT
             tbl_user
         INNER JOIN
             cart
-        ON
+        ONp
             tbl_user.unique_id = cart.user_id";
 
 $result = $conn->query($sql);

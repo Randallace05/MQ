@@ -1,4 +1,5 @@
 <?php
+session_start();
 include '../conn/conn.php';
 
 if (isset($_POST['add_to_cart'])) {
@@ -162,7 +163,7 @@ if ($select_product && $select_product->num_rows > 0) {
     </section>
 
     <!-- Footer -->
-    
+
 
     <!-- Bootstrap core JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>

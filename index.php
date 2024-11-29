@@ -5,7 +5,7 @@
 
 
 <!-- session -->
-    <?php include("endpoint/login.php"); ?>
+    <?php session_start(); ?>
 <!-- end of session -->
 
 <!-- start include header -->

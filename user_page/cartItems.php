@@ -1,5 +1,18 @@
 <?php
-include '../conn/conn.php'; // Ensure that this file establishes a connection using MySQLi
+
+// Include database connection
+include '../conn/conn.php';
+
+// Check if the user is logged in
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+    echo "
+    <script>
+        alert('You must log in to access the cart.');
+        window.location.href = '../index.php'; // Redirect to the login page
+    </script>
+    ";
+    exit; // Prevent further execution
+}
 
 if (isset($_POST['update_product_quantity'])) {
     $update_value = intval($_POST['update_quantity']); // Sanitize input to prevent SQL injection

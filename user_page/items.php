@@ -63,20 +63,21 @@ if (isset($_POST['add_to_cart'])) {
         $update_cart = $conn->prepare("UPDATE cart SET quantity = quantity + ? WHERE name = ? AND tbl_user_id = ?");
         $update_cart->bind_param("isi", $product_quantity, $product_name, $tbl_user_id);
         if ($update_cart->execute()) {
-            echo "<div class='alert alert-success'>Product quantity updated in cart.</div>";
+            $success_message = "Product quantity updated in cart.";
         } else {
-            echo "<div class='alert alert-danger'>Failed to update cart.</div>";
+            $error_message = "Failed to update cart.";
         }
     } else {
         // Insert new product into the cart
         $insert_cart = $conn->prepare("INSERT INTO cart (name, price, image, quantity, tbl_user_id) VALUES (?, ?, ?, ?, ?)");
         $insert_cart->bind_param("sdsii", $product_name, $product_price, $product_image, $product_quantity, $tbl_user_id);
         if ($insert_cart->execute()) {
-            echo "<div class='alert alert-success'>Product added to cart successfully.</div>";
+            $success_message = "Product added to cart successfully.";
         } else {
-            echo "<div class='alert alert-danger'>Failed to add product to cart.</div>";
+            $error_message = "Failed to add product to cart.";
         }
     }
+
 }
 
 ?>

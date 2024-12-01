@@ -203,14 +203,12 @@
         .search-results .result-item:hover {
             background-color: #f7f7f7; /* Add hover effect */
         }
-
     </style>
 </head>
 <body>
-    <?php include("header.php"); ?>
-
-    <!-- Database connection -->
     <?php
+    include("header.php");
+
     // Include connection file
     if (file_exists('../conn/conn.php')) {
         include_once '../conn/conn.php'; // Ensure only one inclusion
@@ -218,14 +216,23 @@
         die("Connection file not found.");
     }
 
+
+    // Retrieve user ID from session
+    $tbl_user_id = $_SESSION['tbl_user_id'] ?? null;
+
     // Initialize cart count
     $row_count = 0;
-    if ($conn) {
-        $result = $conn->query("SELECT COUNT(*) as count FROM `cart`");
+    if ($conn && $tbl_user_id) {
+        // Secure query to fetch cart count for the specific user
+        $stmt = $conn->prepare("SELECT COUNT(*) as count FROM cart WHERE tbl_user_id = ?");
+        $stmt->bind_param("i", $tbl_user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
         if ($result) {
             $data = $result->fetch_assoc();
             $row_count = $data['count'] ?? 0;
         }
+        $stmt->close();
     }
     ?>
 
@@ -237,18 +244,18 @@
                 <img src="../uploads/bgMQ.png" alt="MO Kitchen Logo">
             </div>
             <nav class="nav-links">
-            <div class="search-container">
-                <input type="text" class="search-bar" placeholder="What are you looking for?" oninput="fetchSearchResults(this.value)">
-                <button class="search-btn"><i class="fa fa-search"></i></button>
-                <div class="search-results" id="searchResults"></div>
-            </div>
+                <div class="search-container">
+                    <input type="text" class="search-bar" placeholder="What are you looking for?" oninput="fetchSearchResults(this.value)">
+                    <button class="search-btn"><i class="fa fa-search"></i></button>
+                    <div class="search-results" id="searchResults"></div>
+                </div>
             </nav>
-                <a href="#"><i class="fa-regular fa-heart"></i>
-                    <span class="icon-badge">4</span>
-                </a>
-                <a href="../user_page/cart.php"><i class="fa-solid fa-cart-shopping"></i>
-                    <span class="icon-badge"><?php echo $row_count; ?></span>
-                </a>
+            <a href="#"><i class="fa-regular fa-heart"></i>
+                <span class="icon-badge">4</span>
+            </a>
+            <a href="../user_page/cart.php"><i class="fa-solid fa-cart-shopping"></i>
+                <span class="icon-badge"><?php echo $row_count; ?></span>
+            </a>
             <div class="user-dropdown">
                 <a href="#" class="user-icon" onclick="toggleDropdown(event)">
                     <i class="fa-regular fa-user"></i>
@@ -284,34 +291,33 @@
         };
 
         function fetchSearchResults(query) {
-    const resultsContainer = document.getElementById('searchResults');
-    resultsContainer.innerHTML = ''; // Clear previous results
+            const resultsContainer = document.getElementById('searchResults');
+            resultsContainer.innerHTML = ''; // Clear previous results
 
-    if (query.trim() === '') {
-        return; // Exit if the query is empty
-    }
+            if (query.trim() === '') {
+                return; // Exit if the query is empty
+            }
 
-    // Fetch results from the server
-    fetch(`search_products.php?query=${encodeURIComponent(query)}`)
-        .then(response => response.json())
-        .then(products => {
-            products.forEach(product => {
-                const item = document.createElement('div');
-                item.className = 'result-item';
-                item.innerHTML = `
-                    <img src="../admin_page/foodMenu/uploads/${product.image}" alt="${product.name}">
-                    <span>${product.name}</span>
-                `;
-                // Add a click event listener to redirect to the product page
-                item.onclick = () => {
-                    window.location.href = `items.php?id=${product.id}`;
-                };
-                resultsContainer.appendChild(item);
-            });
-        })
-        .catch(error => console.error('Error fetching search results:', error));
-}
-
+            // Fetch results from the server
+            fetch(`search_products.php?query=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(products => {
+                    products.forEach(product => {
+                        const item = document.createElement('div');
+                        item.className = 'result-item';
+                        item.innerHTML = `
+                            <img src="../admin_page/foodMenu/uploads/${product.image}" alt="${product.name}">
+                            <span>${product.name}</span>
+                        `;
+                        // Add a click event listener to redirect to the product page
+                        item.onclick = () => {
+                            window.location.href = `items.php?id=${product.id}`;
+                        };
+                        resultsContainer.appendChild(item);
+                    });
+                })
+                .catch(error => console.error('Error fetching search results:', error));
+        }
     </script>
 </body>
 </html>

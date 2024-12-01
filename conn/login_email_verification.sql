@@ -43,7 +43,7 @@ INSERT INTO `cart` (`cart_id`, `name`, `price`, `image`, `quantity`) VALUES
 (0, 'Chili Garlic Bagoong', '278.00', 'chili garlic bagoong.jpg', 1),
 (0, 'Plain Alamang', '218.00', 'Plain Alamang.jpg', 4);
 
----
+---NEW CART DATABASE WITH THE USE OF FOREIGN KEY TO ACCESS THE ID
 
 CREATE TABLE `cart` (
   `cart_id` int(11) UNSIGNED NOT NULL,

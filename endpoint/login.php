@@ -1,86 +1,107 @@
 <?php
-session_start();
+session_start(); // Start the session
+
+// Include the database connection
 include("C:/xampp/htdocs/MQ/conn/conn.php");
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = $_POST['username'];
+    // Get username and password from the form
+    $username = trim($_POST['username']); // Trim whitespace
     $password = $_POST['password'];
 
-    // Prepare the SQL statement to prevent SQL injection
-    $stmt = $conn->prepare("SELECT `password`, `username`, `user_role` FROM `tbl_user` WHERE `username` = ?");
-    $stmt->bind_param("s", $username); // "s" indicates the type is string
-    $stmt->execute();
-    $result = $stmt->get_result(); // Get the result set from the prepared statement
-
-    if ($result->num_rows > 0) {
-        $row = $result->fetch_assoc(); // Fetch the associative array
-        $stored_password = $row['password'];
-        $stored_username = $row['username'];
-        $user_role = $row['user_role'];
-
-        // Check if the entered password matches the hashed password in the database
-        if (password_verify($password, $stored_password)) {
-
-            // Set session variables upon successful login
-             // Start the session if not already started
-            $_SESSION['loggedin'] = true;  // Indicates the user is logged in
-            $_SESSION['username'] = $stored_username;  // Store the username in the session
-            $_SESSION['user_role'] = $user_role;  // Store the user role in the session
-
-            // Redirect based on the user role
-            if ($user_role === 'admin') {
-                echo "
-                <script>
-                    alert('Welcome Admin, Login Successful!');
-                    window.location.href = '../admin_page/dashboard/index.php'; // Admin dashboard
-                </script>
-                ";
-            } elseif ($user_role === 'customer') {
-                echo "
-                <script>
-                    alert('Welcome {$stored_username}, Login Successful!');
-                    window.location.href = '../user_page/shop.php'; // Customer dashboard
-                </script>
-                ";
-            } elseif ($user_role === 'distributor') {
-                echo "
-                <script>
-                    alert('Welcome Distributor, Login Successful!');
-                    window.location.href = '../distributor_page/landing_page/index.php'; // Distributor dashboard
-                </script>
-                ";
-            } else {
-                // Handle unexpected roles, if needed
-                echo "
-                <script>
-                    alert('Login Failed, Unknown Role!');
-                    window.location.href = '../index.php';
-                </script>
-                ";
-            }
-        } else {
-            // Incorrect password case
-            echo "
-            <script>
-                alert('Login Failed, Incorrect Password!');
-                window.location.href = '../index.php';
-            </script>
-            ";
-        }
-    } else {
-        // No user found with that username
+    // Check if both fields are filled
+    if (empty($username) || empty($password)) {
         echo "
         <script>
-            alert('Login Failed, User Not Found!');
+            alert('Please fill in both username and password.');
             window.location.href = '../index.php';
-        </script>
-        ";
+        </script>";
+        exit;
     }
 
-    // Close the statement
+    // Prepare the SQL query to fetch user data
+    $query = "SELECT tbl_user_id, `password`, `username`, `user_role` FROM `tbl_user` WHERE `username` = ?";
+    $stmt = $conn->prepare($query);
+    if ($stmt === false) {
+        die("Error preparing statement: " . $conn->error);
+    }
+    $stmt->bind_param("s", $username); // Bind username
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    // Check if a user was found
+    if ($result->num_rows > 0) {
+        $user = $result->fetch_assoc();
+        $stored_password = $user['password'];
+        $stored_username = $user['username'];
+        $user_role = $user['user_role'];
+        $tbl_user_id = $user['tbl_user_id'];
+
+        // Verify the entered password against the stored hashed password
+        if (password_verify($password, $stored_password)) {
+            // Set session variables
+            $_SESSION['loggedin'] = true;
+            $_SESSION['username'] = $stored_username;
+            $_SESSION['user_role'] = $user_role;
+            $_SESSION['tbl_user_id'] = $tbl_user_id; // Store user ID in the session
+
+            // Redirect based on user role
+            switch ($user_role) {
+                case 'admin':
+                    echo "
+                    <script>
+                        alert('Welcome Admin, Login Successful!');
+                        window.location.href = '../admin_page/dashboard/index.php'; // Admin dashboard
+                    </script>";
+                    break;
+                case 'customer':
+                    echo "
+                    <script>
+                        alert('Welcome {$stored_username}, Login Successful!');
+                        window.location.href = '../user_page/shop.php'; // Customer dashboard
+                    </script>";
+                    break;
+                case 'distributor':
+                    echo "
+                    <script>
+                        alert('Welcome Distributor, Login Successful!');
+                        window.location.href = '../distributor_page/landing_page/index.php'; // Distributor dashboard
+                    </script>";
+                    break;
+                default:
+                    // Handle unexpected roles
+                    echo "
+                    <script>
+                        alert('Login Failed: Unknown Role!');
+                        window.location.href = '../index.php';
+                    </script>";
+                    break;
+            }
+        } else {
+            // Password mismatch
+            echo "
+            <script>
+                alert('Login Failed: Incorrect Password!');
+                window.location.href = '../index.php';
+            </script>";
+        }
+    } else {
+        // No user found with the entered username
+        echo "
+        <script>
+            alert('Login Failed: User Not Found!');
+            window.location.href = '../index.php';
+        </script>";
+    }
+
+    // Close the prepared statement
     $stmt->close();
+} else {
+    // Redirect to index if the script is accessed without a POST request
+    header("Location: ../index.php");
+    exit;
 }
 
-// Close the connection when done
+// Close the database connection
 $conn->close();
 ?>

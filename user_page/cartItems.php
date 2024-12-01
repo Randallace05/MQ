@@ -1,9 +1,9 @@
 <?php
-
 // Include database connection
 include '../conn/conn.php';
 
-// Check if the user is logged in
+// Start session and check login
+
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     echo "
     <script>
@@ -11,17 +11,36 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
         window.location.href = '../index.php'; // Redirect to the login page
     </script>
     ";
-    exit; // Prevent further execution
+    exit;
 }
 
-if (isset($_POST['update_product_quantity'])) {
-    $update_value = intval($_POST['update_quantity']); // Sanitize input to prevent SQL injection
-    $update_id = intval($_POST['update_quantity_id']); // Sanitize input to prevent SQL injection
+// Get the logged-in user's ID
+$tbl_user_id = intval($_SESSION['tbl_user_id']); // Assuming `tbl_user_id` is securely stored in the session
 
-    // Use prepared statements for safer queries
-    $update_quantity_query = $conn->prepare("UPDATE `cart` SET quantity = ? WHERE cart_id = ?");
-    $update_quantity_query->bind_param("ii", $update_value, $update_id);
-    $update_quantity_query->execute();
+// Update product quantity
+if (isset($_POST['update_product_quantity'])) {
+    $update_value = intval($_POST['update_quantity']);
+    $update_id = intval($_POST['update_quantity_id']);
+
+    // Check if the cart item belongs to the logged-in user
+    $check_query = $conn->prepare("SELECT * FROM `cart` WHERE cart_id = ? AND tbl_user_id = ?");
+    $check_query->bind_param("ii", $update_id, $tbl_user_id);
+    $check_query->execute();
+    $result = $check_query->get_result();
+
+    if ($result->num_rows > 0) {
+        // Update quantity only if the cart item exists for this user
+        $update_quantity_query = $conn->prepare("UPDATE `cart` SET quantity = ? WHERE cart_id = ? AND tbl_user_id = ?");
+        $update_quantity_query->bind_param("iii", $update_value, $update_id, $tbl_user_id);
+        $update_quantity_query->execute();
+    } else {
+        echo "
+        <script>
+            alert('Unauthorized action.');
+            window.location.href = 'cart.php';
+        </script>
+        ";
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -42,8 +61,13 @@ if (isset($_POST['update_product_quantity'])) {
     <h1 class="heading">My Cart</h1>
     <table>
       <?php
-      $select_cart_products = $conn->query("SELECT * FROM `cart`");
-      if ($select_cart_products->num_rows > 0) {
+      // Fetch cart items for the logged-in user only
+      $select_cart_products = $conn->prepare("SELECT * FROM `cart` WHERE tbl_user_id = ?");
+      $select_cart_products->bind_param("i", $tbl_user_id);
+      $select_cart_products->execute();
+      $result = $select_cart_products->get_result();
+
+      if ($result->num_rows > 0) {
         echo "<thead>
           <th>Sl No</th>
           <th>Product Name</th>
@@ -56,7 +80,7 @@ if (isset($_POST['update_product_quantity'])) {
         <tbody>";
 
         $sl_no = 1;
-        while ($fetch_cart_products = $select_cart_products->fetch_assoc()) {
+        while ($fetch_cart_products = $result->fetch_assoc()) {
           ?>
           <tr>
             <td><?php echo $sl_no++; ?></td>
@@ -76,7 +100,8 @@ if (isset($_POST['update_product_quantity'])) {
             </td>
             <td><?php echo "₱". htmlspecialchars($fetch_cart_products['price'] * $fetch_cart_products['quantity']); ?></td>
             <td>
-              <a href="delete_cart_item.php?id=<?php echo htmlspecialchars($fetch_cart_products['cart_id']); ?>">
+              <a href="delete_cart_item.php?id=<?php echo htmlspecialchars($fetch_cart_products['cart_id']); ?>"
+                 onclick="return confirm('Are you sure you want to remove this item?');">
                 <i class="fas fa-trash"></i> Remove
               </a>
             </td>
@@ -91,8 +116,11 @@ if (isset($_POST['update_product_quantity'])) {
     </table>
 
     <?php
-    // Check if the cart is empty
-    $cart_empty_result = $conn->query("SELECT COUNT(*) AS total_items FROM `cart`");
+    // Check if the cart is empty for the current user
+    $cart_empty_query = $conn->prepare("SELECT COUNT(*) AS total_items FROM `cart` WHERE tbl_user_id = ?");
+    $cart_empty_query->bind_param("i", $tbl_user_id);
+    $cart_empty_query->execute();
+    $cart_empty_result = $cart_empty_query->get_result();
     $cart_empty = $cart_empty_result->fetch_assoc()['total_items'] == 0;
     ?>
     <div class="table_bottom">
@@ -100,7 +128,10 @@ if (isset($_POST['update_product_quantity'])) {
       <h3 class="bottom_btn">
         Total:
         <?php
-          $total_result = $conn->query("SELECT SUM(price * quantity) AS total_price FROM `cart`");
+          $total_query = $conn->prepare("SELECT SUM(price * quantity) AS total_price FROM `cart` WHERE tbl_user_id = ?");
+          $total_query->bind_param("i", $tbl_user_id);
+          $total_query->execute();
+          $total_result = $total_query->get_result();
           $total = $total_result->fetch_assoc()['total_price'] ?? 0;
           echo "₱" . number_format($total, 2);
         ?>

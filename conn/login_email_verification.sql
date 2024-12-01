@@ -43,6 +43,55 @@ INSERT INTO `cart` (`cart_id`, `name`, `price`, `image`, `quantity`) VALUES
 (0, 'Chili Garlic Bagoong', '278.00', 'chili garlic bagoong.jpg', 1),
 (0, 'Plain Alamang', '218.00', 'Plain Alamang.jpg', 4);
 
+---
+
+CREATE TABLE `cart` (
+  `cart_id` int(11) UNSIGNED NOT NULL,
+  `tbl_user_id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `price` varchar(100) NOT NULL,
+  `image` varchar(100) NOT NULL,
+  `quantity` int(100) NOT NULL,
+  `total_price` decimal(10,2) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `cart`
+--
+ALTER TABLE `cart`
+  ADD PRIMARY KEY (`cart_id`),
+  ADD KEY `Test` (`tbl_user_id`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `cart`
+--
+ALTER TABLE `cart`
+  MODIFY `cart_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `cart`
+--
+ALTER TABLE `cart`
+  ADD CONSTRAINT `Test` FOREIGN KEY (`tbl_user_id`) REFERENCES `tbl_user` (`tbl_user_id`);
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+
 -- --------------------------------------------------------
 
 --

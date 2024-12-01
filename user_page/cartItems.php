@@ -143,9 +143,10 @@ if (isset($_POST['update_product_quantity'])) {
       </a>
     </div>
 
-    <a href="delete_all_cart_items.php" class="delete_all_btn">
-      <i class="fas fa-trash"></i> Delete All
+    <a href="delete_all_cart_items.php" class="delete_all_btn" onclick="return confirm('Are you sure you want to remove all items?');">
+    <i class="fas fa-trash"></i> Delete All
     </a>
+
   </section>
 </div>
 </body>

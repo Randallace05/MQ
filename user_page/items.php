@@ -90,6 +90,27 @@ if (isset($_POST['add_to_cart'])) {
     <title><?php echo htmlspecialchars($product['name']); ?> - Product Details</title>
     <link href="css/styles.css" rel="stylesheet">
 </head>
+<style>
+    .related-products {
+    display: flex;
+    justify-content: center; /* Centers the items horizontally */
+    align-items: flex-start; /* Aligns items at the top */
+    gap: 30px; /* Adds spacing between the items */
+    flex-wrap: nowrap; /* Ensures they stay in one row */
+}
+
+.related-products .col-md-4 {
+    flex: 0 0 30%; /* Each product takes up 30% of the row width */
+    max-width: 300px; /* Set a max width for consistency */
+    text-align: center; /* Centers text inside each product card */
+}
+
+.related-products img {
+    max-width: 100%; /* Ensures images are responsive */
+    height: auto; /* Maintains aspect ratio */
+}
+
+</style>
 <body>
 <?php include("../includes/topbar1.php"); ?>
 
@@ -108,9 +129,12 @@ if (isset($_POST['add_to_cart'])) {
                     <input type="hidden" name="product_name" value="<?php echo htmlspecialchars($product['name']); ?>">
                     <input type="hidden" name="product_price" value="<?php echo htmlspecialchars($product['price']); ?>">
                     <input type="hidden" name="product_image" value="<?php echo htmlspecialchars($product['image']); ?>">
-                    <input type="number" name="product_quantity" value="1" min="1" class="form-control mb-2">
+                    <input type="number" name="product_quantity" value="0" min="1" class="form-control mb-2">
                     <button type="submit" name="add_to_cart" class="btn btn-primary">Add to Cart</button>
                 </form>
+                <?php if ($product['stock'] === 0): ?>
+                <p class="text-danger">This product is out of stock.</p>
+                <?php endif; ?>
                 <?php if (isset($success_message)) echo "<p class='text-success'>$success_message</p>"; ?>
                 <?php if (isset($error_message)) echo "<p class='text-danger'>$error_message</p>"; ?>
             </div>
@@ -119,12 +143,12 @@ if (isset($_POST['add_to_cart'])) {
 </section>
 
 <section class="py-5 bg-light">
-    <div class="container">
+    <div class="container text-center">
         <h2>Related Products</h2>
-        <div class="row">
+        <div class="row justify-content-center align-items-start related-products">
             <?php foreach ($related_products as $related): ?>
                 <div class="col-md-4">
-                    <img src="../admin_page/foodMenu/uploads/<?php echo htmlspecialchars($related['image']); ?>" class="img-fluid">
+                    <img src="../admin_page/foodMenu/uploads/<?php echo htmlspecialchars($related['image']); ?>" class="img-fluid mb-2">
                     <p><?php echo htmlspecialchars($related['name']); ?></p>
                     <p>₱<?php echo number_format($related['price'], 2); ?></p>
                     <a href="items.php?id=<?php echo $related['id']; ?>" class="btn btn-secondary">View</a>

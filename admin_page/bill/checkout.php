@@ -1,4 +1,18 @@
 <?php
+session_start(); // Start the session
+
+// Check if the user is logged in
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+    echo "
+    <script>
+        alert('You must log in to proceed.');
+        window.location.href = '../index.php'; // Redirect to login page
+    </script>
+    ";
+    exit;
+}
+
+// Include database connection
 include ('action_page.php');
 
 // Database connection (adjust the credentials as necessary)
@@ -15,34 +29,32 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Query to get all items from cart
-$sql = "SELECT * FROM cart";
-$result = $conn->query($sql);
+// Get the logged-in user's ID from the session
+$tbl_user_id = intval($_SESSION['tbl_user_id']); // Ensure the ID is an integer for safety
+
+// Query to get items from the cart for the logged-in user
+$sql = "SELECT * FROM cart WHERE tbl_user_id = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $tbl_user_id);
+$stmt->execute();
+$result = $stmt->get_result();
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
+    <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="">
-
     <title>Check Out</title>
-
-    <!-- Custom fonts for this template-->
     <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
-    <link
-        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
-        rel="stylesheet">
-
-    <!-- Custom styles for this template-->
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
     <link href="../dashboard/css/sb-admin-2.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-</head>
-<style>
-    .row {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+         .row {
   display: -ms-flexbox; /* IE10 */
   display: flex;
   -ms-flex-wrap: wrap; /* IE10 */
@@ -127,120 +139,116 @@ span.price {
     margin-bottom: 20px;
   }
 }
-</style>
+    </style>
+</head>
 <body id="page-top">
-
-    <!-- Page Wrapper -->
     <div id="wrapper">
-
         <!-- Sidebar -->
         <?php include("sidebar.php"); ?>
         <!-- End of Sidebar -->
 
-        <!-- Content Wrapper -->
         <div id="content-wrapper" class="d-flex flex-column">
-
-           
-
-                <!-- Topbar -->
+            <!-- Topbar -->
             <?php include("../includesAdmin/topbar.php"); ?>
-                <!-- End of Topbar -->
+            <!-- End of Topbar -->
 
-                <!-- Begin Page Content -->
-                <div class="container-fluid">
+            <!-- Begin Page Content -->
+            <div class="container-fluid">
+                <h2 class="mt-4">Check Out</h2>
+                <div class="row">
+                    <div class="col-75">
+                        <div class="container">
+                            <form action="action_page.php" method="POST">
+                                <div class="row">
+                                    <div class="col-50">
+                                        <h3>Billing Address</h3>
+                                        <label for="fname"><i class="fa fa-user"></i> First Name</label>
+                                        <input type="text" id="fname" name="firstname" required>
 
+                                        <label for="email"><i class="fa fa-user"></i> Middle Name</label>
+                                        <input type="text" id="email" name="Mname" required>
 
-                <!-- Content Row -->
-                    <div class="row">
- 
+                                        <label for="email"><i class="fa fa-user"></i> Last Name</label>
+                                        <input type="text" id="email" name="lname" required>
 
-                </div>
-<body>
-    <div class="container-fluid">
-        <h2 class="mt-4">Check Out</h2>
-        <div class="row">
-            <div class="col-75">
-                <div class="container">
-                    <form action="action_page.php" method="POST">
-                        <!-- Your billing address and payment sections here -->
-                        <h2 class="mt-4">Check Out</h2>
-    <div class="row">
-  <div class="col-75">
-    <div class="container">
-      <form action="action_page.php" Method="POST">
-        <div class="row">
-          <div class="col-50">
-            <h3>Billing Address</h3>
-            <label for="fname"><i class="fa fa-user"></i> First Name</label>
-            <input type="text" id="fname" name="firstname" placeholder="">
-            <label for="email"><i class="fa fa-user"></i> Middle Name</label>
-            <input type="text" id="email" name="Mname" placeholder="">
-            <label for="email"><i class="fa fa-user"></i> Last Name</label>
-            <input type="text" id="email" name="lname" placeholder="">
-            <label for="adr"><i class="fa fa-institution"></i> Address</label>
-            <input type="text" id="adr" name="address" placeholder="">
-            <label for="city"><i class="fa fa-institution"></i> City</label>
-            <input type="text" id="city" name="city" placeholder="">
-            <label for="city"><i class="fa fa-institution"></i>Zip Code</label>
-            <input type="text" id="z" name="z" placeholder="">
-            <label for="city"><i class="num"></i>Contact Number</label>
-            <input type="text" id="num" name="num" placeholder="">
+                                        <label for="adr"><i class="fa fa-institution"></i> Address</label>
+                                        <input type="text" id="adr" name="address" required>
 
-          <div class="col-50">
-            <h3>Payment</h3>
-            <label for="fname">Gcash Payment</label>
-            <div class="image-container">
-                <img src="../../uploads/gcash.png" alt="gcash">
-            </div>
-        </div>
-        <label>
-          <input type="checkbox" checked="checked" name="sameadr"> Shipping address same as billing
-        </label>
-            <form action="ref.php" method="post">
-                <input type="submit" value="Continue to checkout" class="btn">
-            </form>
-      </form>
-    </div>
-  </div>
-                    </form>
-                </div>
-            </div>
+                                        <label for="city"><i class="fa fa-institution"></i> City</label>
+                                        <input type="text" id="city" name="city" required>
 
-            <div class="col-25">
-                <div class="container">
-                    <h4>Cart
-                        <span class="price" style="color:black">
-                            <i class="fa fa-shopping-cart"></i>
-                            <b><?php echo $result->num_rows; ?></b>
-                        </span>
-                    </h4>
-                    <?php
-                    // Check if there are any items in the cart
-                    if ($result->num_rows > 0) {
-                      $grandTotal = 0;
-                      // Output each row
-                      while ($row = $result->fetch_assoc()) {
-                          // Calculate total price for each item (price * quantity)
-                          $itemTotal = $row["price"] * $row["quantity"];
-                          echo "<p><a href='#'>" . $row["name"] . " (x" . $row["quantity"] . ")</a> <span class='price'>₱" . $itemTotal . "</span></p>";
-                          $grandTotal += $itemTotal;  // Add to grand total
-                      }
-                      echo "<hr>";
-                      echo "<p>Total <span class='price' style='color:black'><b>₱" . $grandTotal . "</b></span></p>";
-                  } else {
-                      echo "<p>Your cart is empty.</p>";
-                  }
-                    ?>
+                                        <label for="z"><i class="fa fa-institution"></i> Zip Code</label>
+                                        <input type="text" id="z" name="z" required>
+
+                                        <label for="num"><i class="fa fa-phone"></i> Contact Number</label>
+                                        <input type="text" id="num" name="num" required>
+                                    </div>
+                                    <div class="col-50">
+                                    <h3>Payment</h3>
+                                    <label>
+                                        <input type="radio" name="payment_method" value="Cash on Delivery" onclick="togglePaymentImage(false)" required> Cash on Delivery
+                                    </label>
+                                    <br>
+                                    <label>
+                                        <input type="radio" name="payment_method" value="Gcash Payment" onclick="togglePaymentImage(true)" required> GCash Payment
+                                    </label>
+                                    <div id="gcash-image" style="display:none; margin-top: 10px;">
+                                        <img src="../../uploads/gcash.png" alt="Gcash Payment" style="max-width: 100%; height: auto;">
+                                    </div>
+                                </div>
+
+                                </div>
+                                <label>
+                                    <input type="checkbox" checked="checked" name="sameadr"> Shipping address same as billing
+                                </label>
+                                <input type="submit" value="Continue to checkout" class="btn">
+                            </form>
+                        </div>
+                    </div>
+                    <div class="col-25">
+                        <div class="container">
+                            <h4>Cart
+                                <span class="price" style="color:black">
+                                    <i class="fa fa-shopping-cart"></i>
+                                    <b><?php echo $result->num_rows; ?></b>
+                                </span>
+                            </h4>
+                            <?php
+                            $grandTotal = 0;
+                            if ($result->num_rows > 0) {
+                                while ($row = $result->fetch_assoc()) {
+                                    $itemTotal = $row["price"] * $row["quantity"];
+                                    echo "<p><a href='#'>" . htmlspecialchars($row["name"]) . " (x" . htmlspecialchars($row["quantity"]) . ")</a> <span class='price'>₱" . htmlspecialchars($itemTotal) . "</span></p>";
+                                    $grandTotal += $itemTotal;
+                                }
+                                echo "<hr>";
+                                echo "<p>Total <span class='price' style='color:black'><b>₱" . htmlspecialchars($grandTotal) . "</b></span></p>";
+                            } else {
+                                echo "<p>Your cart is empty.</p>";
+                            }
+                            ?>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Your scripts here -->
+    <!-- Scripts -->
+    <script>
+    function togglePaymentImage(show) {
+        const gcashImage = document.getElementById('gcash-image');
+        if (show) {
+            gcashImage.style.display = 'block';
+        } else {
+            gcashImage.style.display = 'none';
+        }
+    }
+    </script>
+
 </body>
 </html>
 
 <?php
-// Close the database connection
 $conn->close();
 ?>

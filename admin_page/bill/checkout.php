@@ -54,7 +54,7 @@ $result = $stmt->get_result();
     <link href="../dashboard/css/sb-admin-2.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
-         .row {
+.row {
   display: -ms-flexbox; /* IE10 */
   display: flex;
   -ms-flex-wrap: wrap; /* IE10 */
@@ -158,7 +158,7 @@ span.price {
                 <div class="row">
                     <div class="col-75">
                         <div class="container">
-                            <form action="action_page.php" method="POST">
+                            <form id="checkoutForm" action="receipt.php" method="POST" onsubmit="return handleCheckout(event)">
                                 <div class="row">
                                     <div class="col-50">
                                         <h3>Billing Address</h3>
@@ -184,19 +184,18 @@ span.price {
                                         <input type="text" id="num" name="num" required>
                                     </div>
                                     <div class="col-50">
-                                    <h3>Payment</h3>
-                                    <label>
-                                        <input type="radio" name="payment_method" value="Cash on Delivery" onclick="togglePaymentImage(false)" required> Cash on Delivery
-                                    </label>
-                                    <br>
-                                    <label>
-                                        <input type="radio" name="payment_method" value="Gcash Payment" onclick="togglePaymentImage(true)" required> GCash Payment
-                                    </label>
-                                    <div id="gcash-image" style="display:none; margin-top: 10px;">
-                                        <img src="../../uploads/gcash.png" alt="Gcash Payment" style="max-width: 100%; height: auto;">
+                                        <h3>Payment</h3>
+                                        <label>
+                                            <input type="radio" name="payment_method" value="Cash on Delivery" onclick="togglePaymentImage(false)" required> Cash on Delivery
+                                        </label>
+                                        <br>
+                                        <label>
+                                            <input type="radio" name="payment_method" value="Gcash Payment" onclick="togglePaymentImage(true)" required> GCash Payment
+                                        </label>
+                                        <div id="gcash-image" style="display:none; margin-top: 10px;">
+                                            <img src="../../uploads/gcash.png" alt="Gcash Payment" style="max-width: 100%; height: auto;">
+                                        </div>
                                     </div>
-                                </div>
-
                                 </div>
                                 <label>
                                     <input type="checkbox" checked="checked" name="sameadr"> Shipping address same as billing
@@ -238,14 +237,20 @@ span.price {
     <script>
     function togglePaymentImage(show) {
         const gcashImage = document.getElementById('gcash-image');
-        if (show) {
-            gcashImage.style.display = 'block';
-        } else {
-            gcashImage.style.display = 'none';
+        gcashImage.style.display = show ? 'block' : 'none';
+    }
+
+    function handleCheckout(event) {
+        const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
+        if (paymentMethod === "Gcash Payment") {
+            event.preventDefault(); // Prevent default form submission
+            window.location.href = "ref.php"; // Redirect to ref.php
+        } else if (paymentMethod === "Cash on Delivery") {
+            return confirm("You have chosen Cash on Delivery. Do you want to proceed to checkout?");
         }
+        return true; // Allow form submission
     }
     </script>
-
 </body>
 </html>
 

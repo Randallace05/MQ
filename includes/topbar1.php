@@ -263,7 +263,7 @@
                 <div class="dropdown-content">
                     <a href="../user_page/profile.php">Profile</a>
                     <a href="../user_page/settings.php">Settings</a>
-                    <a href="logout.php">Logout</a>
+                    <a href="../user_page/logout.php">Logout</a>
                 </div>
             </div>
             <div class="right-space"></div>

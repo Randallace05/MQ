@@ -1,5 +1,10 @@
 <?php
-session_start(); // Start the session
+ini_set('session.use_only_cookies', 1); // Use cookies only
+ini_set('session.cookie_httponly', 1); // Prevent JavaScript access to session
+session_start([
+    'cookie_lifetime' => 3600, // Session expires in 1 hour
+    'cookie_secure' => isset($_SERVER['HTTPS']), // Secure only if HTTPS
+]);
 
 // Include the database connection
 include("C:/xampp/htdocs/MQ/conn/conn.php");
@@ -39,6 +44,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         // Verify the entered password against the stored hashed password
         if (password_verify($password, $stored_password)) {
+            // Clear previous session data
+            session_unset();
+            session_destroy();
+            session_start();
+
             // Set session variables
             $_SESSION['loggedin'] = true;
             $_SESSION['username'] = $stored_username;

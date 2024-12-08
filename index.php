@@ -1,12 +1,12 @@
+<!-- session -->
+ <?php
+ include("endpoint/session_config.php");
+ ?>
+
 <head>
     <title>MQ Kitchen</title>
     <link rel="icon" type="image/x-icon" href="uploads/sili.ico" />
 </head>
-
-
-<!-- session -->
-    <?php session_start(); ?>
-<!-- end of session -->
 
 <!-- start include header -->
     <?php include("includes/header.php"); ?>
@@ -37,7 +37,7 @@
                         <!-- <h2 class="text-center">Welcome to      </h2> -->
                         <img src="uploads/welcome to.png" alt="MO Kitchen" style="width: 250px; margin-top:60px;">
                         <p class="text-center">Fill your login details.</p>
-                        <form action="./endpoint/login.php" method="POST">
+                        <form action="endpoint/login.php" method="POST">
                             <div class="form-group">
                                 <label for="username">Username:</label>
                                 <input type="text" class="form-control" id="username" name="username">

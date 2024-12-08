@@ -209,13 +209,7 @@
     <?php
     include("header.php");
 
-    // Include connection file
-    if (file_exists('../conn/conn.php')) {
-        include_once '../conn/conn.php'; // Ensure only one inclusion
-    } else {
-        die("Connection file not found.");
-    }
-
+    include("../conn/conn.php");
 
     // Retrieve user ID from session
     $tbl_user_id = $_SESSION['tbl_user_id'] ?? null;
@@ -241,7 +235,9 @@
         <div class="header-icons">
             <div class="left-space"></div>
             <div class="logo">
-                <img src="../uploads/bgMQ.png" alt="MO Kitchen Logo">
+                <a href="../user_page/shop.php">
+                    <img src="../uploads/bgMQ.png" alt="MO Kitchen Logo">
+                </a>
             </div>
             <nav class="nav-links">
                 <div class="search-container">

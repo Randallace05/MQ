@@ -7,7 +7,7 @@ session_start([
 ]);
 
 // Include the database connection
-include("C:/xampp/htdocs/MQ/conn/conn.php");
+include('../conn/conn.php');
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Get username and password from the form

@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once '../endpoint/session_config.php';
 include '../conn/conn.php';
 
 if (!$conn) {

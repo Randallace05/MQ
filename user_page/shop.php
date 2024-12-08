@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once '../endpoint/session_config.php';
+
 ?>
 <!DOCTYPE html>
 <html lang="en">

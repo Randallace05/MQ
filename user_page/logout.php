@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once '../endpoint/session_config.php';
+
 session_destroy(); // Destroy all session data
 echo "
 <script>

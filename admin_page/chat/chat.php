@@ -3,16 +3,16 @@
   include_once "../../conn/conn.php";
   
   // Redirect to login if session is not set
-  if(!isset($_SESSION['unique_id'])){
-    header("location: ../../index.php");
-    exit();
-  }
+  // if(!isset($_SESSION['unique_id'])){
+  //   header("location: ../../index.php");
+  //   exit();
+  // }
   
   // Check if user_id is set in the URL
-  if (!isset($_GET['tbl_user_id'])) {
-    header("location: users.php");
-    exit();
-  }
+  // if (!isset($_GET['tbl_user_id'])) {
+  //   header("location: users.php");
+  //   exit();
+  // }
   
   $user_id = $_GET['tbl_user_id'];
 

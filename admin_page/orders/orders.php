@@ -1,44 +1,56 @@
 <?php
+// Include the database connection
 include("../../conn/conn.php");
 
-$sql_user = "SELECT * FROM tbl_user";
-$result_user = $conn->query($sql_user);
 
-if ($result_user->num_rows > 0) {
-    while ($row = $result_user->fetch_assoc()) {
-        echo "User ID: " . $row['unique_id'] . " - Username: " . $row['username'] . "<br>";
+
+
+function fetchOrders($conn) {
+    $sql = "SELECT
+                username, 
+                name, 
+                price, 
+                quantity, 
+                (quantity * price) AS total_price, 
+                quantity, 
+                cart_id
+            FROM 
+                tbl_user
+            INNER JOIN cart 
+            ON tbl_user.tbl_user_id = cart.tbl_user_id";
+
+    $result = $conn->query($sql);
+
+    if (!$result) {
+        die("Query Error: " . $conn->error); // Show the error
     }
-} else {
-    echo "No data found in tbl_user.";
-}
-$sql_cart = "SELECT * FROM cart";
-$result_cart = $conn->query($sql_cart);
 
-if ($result_cart->num_rows > 0) {
-    while ($row = $result_cart->fetch_assoc()) {
-        echo "Cart ID: " . $row['cart_id'] . " - User ID: " . $row['tbl_user_id'] . " - Item: " . $row['name'] . "<br>";
+    $orders = [];
+    if ($result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $orders[] = $row;
+        }
     }
-} else {
-    echo "No data found in cart.";
+    return $orders;
 }
 
 
-// SQL query to join tbl_user and cart based on unique_id (in tbl_user) and user_id (in cart)
-$sql = "SELECT
-            tbl_user.username AS customer,
-            cart.name AS items,
-            cart.quantity,
-            cart.total_price,
-            cart.cart_id
-        FROM
-            tbl_user
-        INNER JOIN
-            cart
-        ON
-            tbl_user.unique_id = cart.tbl_user_id";
+$orders = fetchOrders($conn);
 
-$result = $conn->query($sql);
+
+if (empty($orders)) {
+    echo "No orders found!";
+} else {
+    echo "<pre>";
+    print_r($orders);
+    echo "</pre>";
+}
+
+
+
+$conn->close(); // Close the database connection
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -163,17 +175,17 @@ $result = $conn->query($sql);
                             </thead>
                             <tbody>
                                 <?php
-                                if ($result->num_rows > 0) {
-                                    while ($row = $result->fetch_assoc()) {
+                                if (!empty($orders)) {
+                                    foreach ($orders as $order) {
                                         echo "<tr>";
-                                        echo "<td>" . htmlspecialchars($row["customer"]) . "</td>";
-                                        echo "<td>" . htmlspecialchars($row["items"]) . "</td>";
-                                        echo "<td>" . htmlspecialchars($row["quantity"]) . "</td>";
-                                        echo "<td>₱ " . number_format($row["total_price"], 2) . "</td>";
-                                        echo "<td>" . htmlspecialchars($row["cart_id"]) . "</td>";
+                                        echo "<td>" . htmlspecialchars($order['username']) . "</td>";
+                                        echo "<td>" . htmlspecialchars($order['name']) . "</td>";
+                                        echo "<td>" . htmlspecialchars($order['quantity']) . "</td>";
+                                        echo "<td>₱ " . number_format($order['total_price'], 2) . "</td>";
+                                        echo "<td>" . htmlspecialchars($order['cart_id']) . "</td>";
                                         echo "<td>";
-                                        echo "<a href='arrange_order.php?cart_id=" . urlencode($row["cart_id"]) . "' class='btn btn-arrange'>Arrange Order</a> ";
-                                        echo "<a href='cancel_order.php?cart_id=" . urlencode($row["cart_id"]) . "' class='btn btn-cancel'>Cancel Order</a>";
+                                        echo "<a href='arrange_order.php?cart_id=" . urlencode($order['cart_id']) . "' class='btn btn-arrange'>Arrange Order</a> ";
+                                        echo "<a href='cancel_order.php?cart_id=" . urlencode($order['cart_id']) . "' class='btn btn-cancel'>Cancel Order</a>";
                                         echo "</td>";
                                         echo "</tr>";
                                     }

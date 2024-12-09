@@ -3,46 +3,21 @@
 include("../../conn/conn.php");
 
 
-function fetchUsers($conn) {
-    $sql = "SELECT * FROM tbl_user";
-    $result = $conn->query($sql);
 
-    $users = [];
-    if ($result && $result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
-            $users[] = $row;
-        }
-    }
-    return $users;
-}
-
-
-function fetchCartItems($conn) {
-    $sql = "SELECT * FROM cart";
-    $result = $conn->query($sql);
-
-    $cartItems = [];
-    if ($result && $result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
-            $cartItems[] = $row;
-        }
-    }
-    return $cartItems;
-}
 
 function fetchOrders($conn) {
     $sql = "SELECT
-                tbl_user.username AS customer,
-                cart.name AS items,
-                cart.quantity,
-                cart.total_price,
-                cart.cart_id
-            FROM
+                username, 
+                name, 
+                price, 
+                quantity, 
+                (quantity * price) AS total_price, 
+                quantity, 
+                cart_id
+            FROM 
                 tbl_user
-            INNER JOIN
-                cart
-            ON
-                tbl_user.unique_id = cart.tbl_user_id";
+            INNER JOIN cart 
+            ON tbl_user.tbl_user_id = cart.tbl_user_id";
 
     $result = $conn->query($sql);
 
@@ -60,9 +35,6 @@ function fetchOrders($conn) {
 }
 
 
-// Example: Calling the functions
-$users = fetchUsers($conn);
-$cartItems = fetchCartItems($conn);
 $orders = fetchOrders($conn);
 
 
@@ -104,8 +76,8 @@ $conn->close(); // Close the database connection
             if (!empty($orders)) {
                 foreach ($orders as $order) {
                     echo "<tr>";
-                    echo "<td>" . htmlspecialchars($order['customer']) . "</td>";
-                    echo "<td>" . htmlspecialchars($order['items']) . "</td>";
+                    echo "<td>" . htmlspecialchars($order['username']) . "</td>";
+                    echo "<td>" . htmlspecialchars($order['name']) . "</td>";
                     echo "<td>" . htmlspecialchars($order['quantity']) . "</td>";
                     echo "<td>₱ " . number_format($order['total_price'], 2) . "</td>";
                     echo "<td>" . htmlspecialchars($order['cart_id']) . "</td>";

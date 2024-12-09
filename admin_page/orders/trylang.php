@@ -2,9 +2,6 @@
 // Include the database connection
 include("../../conn/conn.php");
 
-
-
-
 function fetchOrders($conn) {
     $sql = "SELECT
                 username, 
@@ -36,17 +33,6 @@ function fetchOrders($conn) {
 
 
 $orders = fetchOrders($conn);
-
-
-if (empty($orders)) {
-    echo "No orders found!";
-} else {
-    echo "<pre>";
-    print_r($orders);
-    echo "</pre>";
-}
-
-
 
 $conn->close(); // Close the database connection
 ?>

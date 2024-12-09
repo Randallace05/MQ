@@ -34,19 +34,7 @@ function fetchOrders($conn) {
     return $orders;
 }
 
-
 $orders = fetchOrders($conn);
-
-
-if (empty($orders)) {
-    echo "No orders found!";
-} else {
-    echo "<pre>";
-    print_r($orders);
-    echo "</pre>";
-}
-
-
 
 $conn->close(); // Close the database connection
 ?>

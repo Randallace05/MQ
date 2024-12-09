@@ -65,7 +65,6 @@ $users = fetchUsers($conn);
 $cartItems = fetchCartItems($conn);
 $orders = fetchOrders($conn);
 
-$orders = fetchOrders($conn);
 
 if (empty($orders)) {
     echo "No orders found!";

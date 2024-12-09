@@ -1,43 +1,75 @@
 <?php
 include("../../conn/conn.php");
 
-$sql_user = "SELECT * FROM tbl_user";
-$result_user = $conn->query($sql_user);
+// Function to fetch all rows from tbl_user
+function fetchUsers($conn) {
+    $sql_user = "SELECT * FROM tbl_user";
+    $result_user = $conn->query($sql_user);
 
-if ($result_user->num_rows > 0) {
-    while ($row = $result_user->fetch_assoc()) {
-        echo "User ID: " . $row['unique_id'] . " - Username: " . $row['username'] . "<br>";
+    if (!$result_user) {
+        die("Error in tbl_user query: " . $conn->error);
     }
-} else {
-    echo "No data found in tbl_user.";
-}
-$sql_cart = "SELECT * FROM cart";
-$result_cart = $conn->query($sql_cart);
 
-if ($result_cart->num_rows > 0) {
-    while ($row = $result_cart->fetch_assoc()) {
-        echo "Cart ID: " . $row['cart_id'] . " - User ID: " . $row['tbl_user_id'] . " - Item: " . $row['name'] . "<br>";
+    if ($result_user->num_rows > 0) {
+        echo "<h3>Users</h3>";
+        while ($row = $result_user->fetch_assoc()) {
+            echo "User ID: " . $row['unique_id'] . " - Username: " . $row['username'] . "<br>";
+        }
+    } else {
+        echo "No data found in tbl_user.<br>";
     }
-} else {
-    echo "No data found in cart.";
 }
 
+// Function to fetch all rows from cart
+function fetchCart($conn) {
+    $sql_cart = "SELECT * FROM cart";
+    $result_cart = $conn->query($sql_cart);
 
-// SQL query to join tbl_user and cart based on unique_id (in tbl_user) and user_id (in cart)
-$sql = "SELECT
-            tbl_user.username AS customer,
-            cart.name AS items,
-            cart.quantity,
-            cart.total_price,
-            cart.cart_id
-        FROM
-            tbl_user
-        INNER JOIN
-            cart
-        ON
-            tbl_user.unique_id = cart.tbl_user_id";
+    if (!$result_cart) {
+        die("Error in cart query: " . $conn->error);
+    }
 
-$result = $conn->query($sql);
+    if ($result_cart->num_rows > 0) {
+        echo "<h3>Cart</h3>";
+        while ($row = $result_cart->fetch_assoc()) {
+            echo "Cart ID: " . $row['cart_id'] . " - User ID: " . $row['tbl_user_id'] . " - Item: " . $row['name'] . "<br>";
+        }
+    } else {
+        echo "No data found in cart.<br>";
+    }
+}
+
+// Function to fetch orders using JOIN
+function fetchOrders($conn) {
+    $sql = "SELECT
+                tbl_user.username AS customer,
+                cart.name AS items,
+                cart.quantity,
+                cart.total_price,
+                cart.cart_id
+            FROM
+                tbl_user
+            INNER JOIN
+                cart
+            ON
+                tbl_user.unique_id = cart.tbl_user_id";
+
+    $result = $conn->query($sql);
+
+    if (!$result) {
+        die("Error in orders query: " . $conn->error);
+    }
+
+    return $result;
+}
+
+// Fetch data for debugging
+fetchUsers($conn);
+fetchCart($conn);
+
+// Fetch orders
+$result = fetchOrders($conn);
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -51,11 +83,9 @@ $result = $conn->query($sql);
 
     <title>Orders - Dashboard</title>
 
-    <!-- Custom fonts for this template-->
+    <!-- Custom fonts and styles -->
     <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
-
-    <!-- Custom styles for this template-->
     <link href="../dashboard/css/sb-admin-2.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
@@ -66,7 +96,6 @@ $result = $conn->query($sql);
             margin: 0;
             padding: 0;
         }
-
         .container {
             width: 80%;
             margin: 50px auto;
@@ -75,34 +104,27 @@ $result = $conn->query($sql);
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
         }
-
         table, th, td {
             border: 1px solid #ddd;
         }
-
         th, td {
             padding: 10px;
             text-align: left;
         }
-
         th {
             background-color: #f4f4f4;
         }
-
         tr:nth-child(even) {
             background-color: #f9f9f9;
         }
-
         tr:hover {
             background-color: #f1f1f1;
         }
-
         .btn {
             text-decoration: none;
             padding: 5px 10px;
@@ -110,11 +132,9 @@ $result = $conn->query($sql);
             color: white;
             font-size: 14px;
         }
-
         .btn-arrange {
             background-color: #5cb85c;
         }
-
         .btn-cancel {
             background-color: #d9534f;
         }
@@ -122,32 +142,15 @@ $result = $conn->query($sql);
 </head>
 
 <body id="page-top">
-
-    <!-- Page Wrapper -->
     <div id="wrapper">
-
-        <!-- Sidebar -->
         <?php include("../includesAdmin/sidebar.php"); ?>
-        <!-- End of Sidebar -->
-
-        <!-- Content Wrapper -->
         <div id="content-wrapper" class="d-flex flex-column">
-
-            <!-- Main Content -->
             <div id="content">
-
-                <!-- Topbar -->
                 <?php include("../includesAdmin/topbar.php"); ?>
-                <!-- End of Topbar -->
-
-                <!-- Begin Page Content -->
                 <div class="container-fluid">
-
-                    <!-- Page Heading -->
                     <div class="d-sm-flex align-items-center justify-content-between mb-4">
                         <h1 class="h3 mb-0 text-gray-800">Order</h1>
                     </div>
-
                     <div class="container">
                         <h2>Order List</h2>
                         <table>
@@ -187,7 +190,6 @@ $result = $conn->query($sql);
                 </div>
             </div>
         </div>
-
     </div>
 </body>
 </html>

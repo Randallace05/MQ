@@ -1,11 +1,6 @@
 <?php 
   session_start();
   include_once '../../conn/conn.php'; // Include the database connection
-
-  if(!isset($_SESSION['unique_id'])){
-    header("location: ../../index.php");
-    exit();
-  }
 ?>
 <?php include_once "header.php"; ?>
 

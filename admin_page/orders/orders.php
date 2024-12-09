@@ -1,17 +1,27 @@
 <?php
-// Database connection
-$servername = "localhost";
-$username = "root";
-$password = ""; // Adjust if your database password is different
-$dbname = "login_email_verification";
+include("../../conn/conn.php");
 
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
+$sql_user = "SELECT * FROM tbl_user";
+$result_user = $conn->query($sql_user);
 
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+if ($result_user->num_rows > 0) {
+    while ($row = $result_user->fetch_assoc()) {
+        echo "User ID: " . $row['unique_id'] . " - Username: " . $row['username'] . "<br>";
+    }
+} else {
+    echo "No data found in tbl_user.";
 }
+$sql_cart = "SELECT * FROM cart";
+$result_cart = $conn->query($sql_cart);
+
+if ($result_cart->num_rows > 0) {
+    while ($row = $result_cart->fetch_assoc()) {
+        echo "Cart ID: " . $row['cart_id'] . " - User ID: " . $row['tbl_user_id'] . " - Item: " . $row['name'] . "<br>";
+    }
+} else {
+    echo "No data found in cart.";
+}
+
 
 // SQL query to join tbl_user and cart based on unique_id (in tbl_user) and user_id (in cart)
 $sql = "SELECT

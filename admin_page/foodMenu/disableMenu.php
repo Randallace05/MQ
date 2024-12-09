@@ -1,5 +1,5 @@
 <?php
-session_start();
+
 include '../../conn/conn.php'; 
 
 $id = $_GET['id'];

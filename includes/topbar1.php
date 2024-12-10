@@ -246,7 +246,7 @@
                     <div class="search-results" id="searchResults"></div>
                 </div>
             </nav>
-            <a href="#"><i class="fa-regular fa-heart"></i>
+            <a href="../user_page/wishlist.php"><i class="fa-regular fa-heart"></i>
                 <span class="icon-badge">4</span>
             </a>
             <a href="../user_page/cart.php"><i class="fa-solid fa-cart-shopping"></i>

@@ -115,7 +115,7 @@ require_once '../endpoint/session_config.php';
                     <div class="col mb-5">
                         <div class="card h-100">
                             <!-- Product image -->
-                            <img class="card-img-top" src="../admin_page/foodMenu/uploads/<?php echo htmlspecialchars($product['image']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>" />
+                            <img class="card-img-top" src="../admin_page/foodMenu/uploads/<?php echo htmlspecialchars(string: $product['image']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>" />
                             <!-- Product details -->
                             <div class="card-body p-4">
                                 <div class="text-center">

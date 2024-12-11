@@ -1,205 +1,346 @@
 <?php
 require_once '../endpoint/session_config.php';
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <meta name="description" content="" />
-    <meta name="author" content="" />
     <title>MQ Kitchen</title>
-    <!-- Favicon-->
     <link rel="icon" type="image/x-icon" href="../user_page/assets/sili.ico" />
-    <!-- Bootstrap icons-->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" />
-    <!-- Core theme CSS (includes Bootstrap)-->
     <link href="css/styles.css" rel="stylesheet" />
-</head>
-<style>
-    .img-size{
-        width: 50px;
-        height: 50px;
-    }
-    .chili-rating{
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-size: 15px;
-    }
+    <style>
+        .carousel-item img {
+            height: 400px;
+            object-fit: cover;
+            width: 100%;
+        }
 
-    .chili {
+        .promo-container {
+            display: flex;
+            gap: 5px;
+            padding: 20px;
+            justify-content: center;
+        }
+
+        .promo-image {
+            width: calc(50% - 2.5px);
+            height: 250px;
+            object-fit: cover;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .product-card {
+            position: relative;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .product-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+        }
+
+        .wishlist-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: white;
+            border: none;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .wishlist-btn i {
+            color: #000;
+            transition: color 0.3s ease;
+        }
+
+        .wishlist-btn.active i {
+            color: red;
+        }
+
+        .section-title {
+            padding: 20px;
+            margin: 0;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        hr {
+            margin: 0;
+            border-top: 2px solid #ddd;
+        }
+        
+        .dot {
         cursor: pointer;
-        margin: 0 5px;
-        transition: transform 0.3s ease;
-    }
+        height: 15px;
+        width: 15px;
+        margin: 0 2px;
+        background-color: #bbb;
+        border-radius: 50%;
+        display: inline-block;
+        transition: background-color 0.6s ease;
+        }
 
-    .chili.selected, .chili:hover{
-        transform: scale(1.2);
-    }
-
-    #rating-display{
-        margin-top: 20px;
-        text-align: center;
-        font-size: 1.5em;
-    }
-
-    /* picture sizing */
-    .head{
-        background-color: white !important;
-        width: 90%;
-        margin: auto;
-        margin-top: -80px;
-    }
-
-    .right-box, .left-box{
-        width: 89% !important;
-        height: 250px !important;
-        background-color: red;
-        margin-top: -30px;
-    }
-
-    .grid-container {
-        display: grid;
-        grid-template-columns: 1fr 1fr; /* Two equal columns */
-        justify-items: center; /* Center items horizontally */
-        margin-top: 10px;
-    }
-
-    .top-picture{
-        height: 300px ;
-        background-color: red;
-        width: 100%;
-    }
-
-</style>
+    </style>
+</head>
 <body>
-    <!-- Navigation -->
-        <?php include("../includes/topbar1.php"); ?>
-    <!-- end Navigation -->
-
-    <!-- Header -->
-    <header class="py-5 head">
-        <div class="container px-4 px-lg-5 my-5 top-picture">
-            top picture
-        </div>
-        <div class="grid-container">
-            <div class="container left-box">left box pic</div>
-            <div class="container right-box">right box pic</div>
-        </div>
-    </header>
-
-            <!-- <div class="text-center text-white">
-                <h1 class="display-4 fw-bolder">MQ Kitchen</h1>
-                <p class="lead fw-normal text-white-50 mb-0">The Best Spicy Condiments!</p>
-            </div> -->
-
-    <!-- Section -->
-    <section class="py-5">
-    <h2>Most Popular Bagoong</h2>
-    <div class="container px-4 px-lg-5 mt-5">
-        <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
+    <?php include("../includes/topbar1.php"); ?>
+        <!-- Carousel -->
+        <div class="carousel-container">
+        <div class="carousel-inner">
             <?php
             include '../conn/conn.php';
 
-            // Query to fetch products
-            $sql = "SELECT id, name, price, image FROM products WHERE is_disabled = 0";
+            // Fetch carousel images from the database
+            $sql = "SELECT image_path FROM carousel_images LIMIT 6"; // Limit to a max of 6 images
             $result = $conn->query($sql);
+            $dotCount = 0;
 
-            // Check if query executed successfully
             if ($result && $result->num_rows > 0) {
-                // Loop through the products and display them dynamically
-                while ($product = $result->fetch_assoc()) {
-                    ?>
-                    <div class="col mb-5">
-                        <div class="card h-100">
-                            <!-- Product image -->
-                            <img class="card-img-top" src="../admin_page/foodMenu/uploads/<?php echo htmlspecialchars(string: $product['image']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>" />
-                            <!-- Product details -->
-                            <div class="card-body p-4">
-                                <div class="text-center">
-                                    <!-- Product name -->
-                                    <h5 class="fw-bolder"><?php echo htmlspecialchars($product['name']); ?></h5>
-                                    <!-- Product price -->
-                                    <p>&#8369;<?php echo number_format($product['price'], 2); ?></p> <!-- Displaying the price with Peso sign -->
-                                </div>
-                                <div class="chili-rating" id="chili-rating">
-                                    <span class="chili" data-value="1">🌶️</span>
-                                    <span class="chili" data-value="2">🌶️</span>
-                                    <span class="chili" data-value="3">🌶️</span>
-                                    <span class="chili" data-value="4">🌶️</span>
-                                    <span class="chili" data-value="5">🌶️</span>
-                                </div>
-                            </div>
-                            <!-- Product actions -->
-                            <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-                                <div class="text-center">
-                                    <a class="btn btn-outline-dark mt-auto" href="items.php?id=<?php echo $product['id']; ?>">View options</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <?php
+                $first = true; // Flag to track the first iteration
+                while ($row = $result->fetch_assoc()) {
+                    $imagePath = htmlspecialchars($row['image_path']); // Sanitize output
+                    $fullPath = "../admin_page/foodMenu/" . $imagePath; // Adjust path
+
+                    // Display image only if the file exists
+                    if (file_exists($fullPath)) {
+                        echo '<div class="carousel-item ' . ($first ? 'active' : '') . '">
+                            <img src="' . $fullPath . '" class="d-block w-100" alt="Carousel Image">
+                        </div>';
+                        $first = false; // Set the flag to false after the first iteration
+                        $dotCount++; // Increment the dot count for each valid image
+                    }
                 }
             } else {
-                // Display a message if no products are found
-                echo "<p>No products found.</p>";
+                echo '<div class="carousel-item active">
+                    <img src="uploads/default.jpg" class="d-block w-100" alt="Default Image">
+                    <p>No images found in the database.</p>
+                </div>';
+                $dotCount = 1; // Ensure at least one dot for the default image
+            }
+            ?>
+        </div>
+        <div class="carousel-dots" style="text-align:center; margin-top: 10px;">
+            <?php
+            // Render dots based on the number of images
+            for ($i = 0; $i < $dotCount; $i++) {
+                echo '<span class="dot" data-slide="' . $i . '"></span>';
             }
             ?>
         </div>
     </div>
-</section>
 
-            </div>
-        </div>
-    </section>
+    <!-- Promotional Images -->
+    <div class="promo-container">
+        <img src="assets/carousel1.jpg" alt="Promotion 1" class="promo-image">
+        <img src="assets/carousel1.jpg" alt="Promotion 2" class="promo-image">
+    </div>
+
+    <hr>
+
+    <!-- Most Popular Products -->
+    <h2 class="section-title">Most Popular Bagoong</h2>
+    <div class="product-grid">
+        <?php
+        include '../conn/conn.php';
+
+        // Query to fetch top 3 most ordered products
+        // $sql = "SELECT p.id, p.name, p.price, p.image, COUNT(o.product_id) as order_count 
+        //         FROM products p 
+        //         LEFT JOIN orders o ON p.id = o.product_id 
+        //         WHERE p.is_disabled = 0 
+        //         GROUP BY p.id 
+        //         ORDER BY order_count DESC 
+        //         LIMIT 3";
+
+        $sql = "SELECT id, name, price, image FROM products WHERE is_disabled = 0";
+        $result = $conn->query($sql);
+
+        if ($result && $result->num_rows > 0) {
+            while ($product = $result->fetch_assoc()) {
+                ?>
+                <div class="product-card">
+                    <button class="wishlist-btn" onclick="toggleWishlist(this, <?php echo $product['id']; ?>)">
+                        <i class="bi bi-heart"></i>
+                    </button>
+                    <a href="items.php?id=<?php echo $product['id']; ?>">
+                        <img src="../admin_page/foodMenu/uploads/<?php echo htmlspecialchars($product['image']); ?>" 
+                             alt="<?php echo htmlspecialchars($product['name']); ?>"
+                             class="product-image">
+                    </a>
+                    <div class="p-3">
+                        <h5 class="text-center mb-2"><?php echo htmlspecialchars($product['name']); ?></h5>
+                        <p class="text-center mb-2">₱<?php echo number_format($product['price'], 2); ?></p>
+                        <div class="chili-rating" data-product-id="<?php echo $product['id']; ?>">
+                            <?php for($i = 1; $i <= 5; $i++): ?>
+                                <span class="chili" data-value="<?php echo $i; ?>">🌶️</span>
+                            <?php endfor; ?>
+                        </div>
+                    </div>
+                </div>
+                <?php
+            }
+        }
+        ?>
+    </div>
+
+    <h2 class="section-title">Our Products</h2>
+    <div class="product-grid">
+        <?php
+        // Query to fetch all other products
+        // $sql = "SELECT p.* FROM products p 
+        //         WHERE p.is_disabled = 0 
+        //         AND p.id NOT IN (
+        //             SELECT p2.id FROM products p2 
+        //             LEFT JOIN orders o ON p2.id = o.product_id 
+        //             GROUP BY p2.id 
+        //             ORDER BY COUNT(o.product_id) DESC 
+        //             LIMIT 3
+        //         )";
 
 
-    <!-- Footer -->
+        $sql = "SELECT id, name, price, image FROM products WHERE is_disabled = 0";
+        $result = $conn->query($sql);
+
+        if ($result && $result->num_rows > 0) {
+            while ($product = $result->fetch_assoc()) {
+                ?>
+                <div class="product-card">
+                    <button class="wishlist-btn" onclick="toggleWishlist(this, <?php echo $product['id']; ?>)">
+                        <i class="bi bi-heart"></i>
+                    </button>
+                    <a href="items.php?id=<?php echo $product['id']; ?>">
+                        <img src="../admin_page/foodMenu/uploads/<?php echo htmlspecialchars($product['image']); ?>" 
+                             alt="<?php echo htmlspecialchars($product['name']); ?>"
+                             class="product-image">
+                    </a>
+                    <div class="p-3">
+                        <h5 class="text-center mb-2"><?php echo htmlspecialchars($product['name']); ?></h5>
+                        <p class="text-center mb-2">₱<?php echo number_format($product['price'], 2); ?></p>
+                        <div class="chili-rating" data-product-id="<?php echo $product['id']; ?>">
+                            <?php for($i = 1; $i <= 5; $i++): ?>
+                                <span class="chili" data-value="<?php echo $i; ?>">🌶️</span>
+                            <?php endfor; ?>
+                        </div>
+                    </div>
+                </div>
+                <?php
+            }
+        }
+        ?>
+    </div>
+
     <?php include("../includes/footer.php"); ?>
 
-    <!-- Bootstrap core JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Core theme JS -->
-    <script src="js/scripts.js"></script>
     <script>
-    const chilies = document.querySelectorAll('.chili');
-    const ratingDisplay = document.getElementById('rating-display');
-    let selectedRating = 0;
+        function toggleWishlist(button, productId) {
+            button.classList.toggle('active');
+            const icon = button.querySelector('i');
+            icon.classList.toggle('bi-heart');
+            icon.classList.toggle('bi-heart-fill');
+            
+            // Here you can add AJAX call to update wishlist in database
+            fetch('update_wishlist.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    product_id: productId,
+                    action: button.classList.contains('active') ? 'add' : 'remove'
+                })
+            });
+        }
 
-    chilies.forEach(chili => {
-        chili.addEventListener('mouseover', () => {
-            resetChilies();
-            highlightChilies(chili.dataset.value);
+        // Initialize chili ratings
+        document.querySelectorAll('.chili-rating').forEach(container => {
+            const chilies = container.querySelectorAll('.chili');
+            let selectedRating = 0;
+
+            chilies.forEach(chili => {
+                chili.addEventListener('mouseover', () => {
+                    if (selectedRating === 0) {
+                        resetChilies(container);
+                        highlightChilies(container, chili.dataset.value);
+                    }
+                });
+
+                chili.addEventListener('click', () => {
+                    selectedRating = chili.dataset.value;
+                    highlightChilies(container, selectedRating);
+                });
+
+                chili.addEventListener('mouseout', () => {
+                    if (selectedRating === 0) {
+                        resetChilies(container);
+                    }
+                });
+            });
         });
 
-        chili.addEventListener('click', () => {
-            selectedRating = chili.dataset.value;
-            highlightChilies(selectedRating);
-            ratingDisplay.textContent = `You selected ${selectedRating} chili(s)`;
-        });
+        function highlightChilies(container, rating) {
+            const chilies = container.querySelectorAll('.chili');
+            chilies.forEach((chili, index) => {
+                if (index < rating) {
+                    chili.classList.add('selected');
+                } else {
+                    chili.classList.remove('selected');
+                }
+            });
+        }
 
-        chili.addEventListener('mouseout', () => {
-            if (selectedRating == 0) {
-                resetChilies();
-            } else {
-                highlightChilies(selectedRating);
+        function resetChilies(container) {
+            container.querySelectorAll('.chili').forEach(chili => {
+                chili.classList.remove('selected');
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const dots = document.querySelectorAll('.dot');
+            const slides = document.querySelectorAll('.carousel-item');
+
+            let currentIndex = 0;
+
+            function updateCarousel(index) {
+                slides.forEach((slide, i) => {
+                    slide.classList.toggle('active', i === index);
+                });
+                dots.forEach((dot, i) => {
+                    dot.style.backgroundColor = i === index ? '#717171' : '#bbb';
+                });
+                currentIndex = index;
+            }
+
+            dots.forEach((dot, i) => {
+                dot.addEventListener('click', () => {
+                    updateCarousel(i);
+                });
+            });
+
+            // Initialize the carousel
+            if (dots.length > 0) {
+                updateCarousel(0);
             }
         });
-    });
+    </script>
 
-    function highlightChilies(rating) {
-        for (let i = 0; i < rating; i++) {
-            chilies[i].classList.add('selected');
-        }
-    }
-
-    function resetChilies() {
-        chilies.forEach(chili => {
-            chili.classList.remove('selected');
-        });
-    }
-</script>
 </body>
 </html>

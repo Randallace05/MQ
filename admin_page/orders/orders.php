@@ -2,9 +2,6 @@
 // Include the database connection
 include("../../conn/conn.php");
 
-
-
-
 function fetchOrders($conn) {
     $sql = "SELECT
                 username, 

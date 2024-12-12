@@ -84,6 +84,7 @@
                         <h1 class="h3 mb-0 text-gray-800" style="color:#AB1616 !important;">Products Management</h1>
                     </div>
 
+                    para maka  <a href="carousel.php">add</a> ng image sa shop page!  // 'di muna aayusin css 
                     <!-- Alert Message Section -->
                     <?php
                     if (isset($_SESSION['message'])) {

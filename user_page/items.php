@@ -63,6 +63,13 @@ if (isset($_POST['add_to_wishlist'])) {
 }
 ?>
 
+<?php
+require_once '../endpoint/session_config.php';
+include '../conn/conn.php';
+
+// ... (keep existing PHP logic until the HTML part)
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -70,72 +77,187 @@ if (isset($_POST['add_to_wishlist'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title><?php echo htmlspecialchars($product['name']); ?> - Product Details</title>
     <link href="css/styles.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .path {
+            padding: 1rem 0;
+            color: #666;
+        }
+        .path span {
+            color: #000;
+        }
+        .thumbnail-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-right: 15px;
+        }
+        .thumbnail {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            cursor: pointer;
+            border: 1px solid #ddd;
+        }
+        .thumbnail:hover {
+            border-color: #ff0000;
+        }
+        .main-image-container {
+            display: flex;
+            align-items: flex-start;
+        }
+        .main-image {
+            flex-grow: 1;
+            max-width: calc(100% - 100px);
+            height: 500px;
+            object-fit: contain;
+        }
+        .product-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .chili-rating {
+            color: #ff0000;
+            margin-bottom: 15px;
+        }
+        .product-price {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .product-description {
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .quantity-input {
+            width: 100px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .add-to-cart {
+            background-color: #ff0000;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .wishlist-btn {
+            border: 1px solid #000;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            background: transparent;
+        }
+        .wishlist-btn i {
+            color: transparent;
+            -webkit-text-stroke: 1px black;
+        }
+        .row {
+            --bs-gutter-x: 1.5rem;
+            --bs-gutter-y: 0;
+            display: flex;
+            flex-wrap: wrap;
+        }
+    </style>
 </head>
 <body>
-<?php include("../includes/topbar1.php"); ?>
-
-<section class="py-5">
-    <div class="container">
+    <?php include("../includes/topbar1.php"); ?>
+    <div class="path">Products / <span><?php echo htmlspecialchars($product['name']); ?></span></div>  
+    <div class="container py-5">
         <div class="row">
-            <div class="col-md-6">
-                <img src="../admin_page/foodMenu/uploads/<?php echo htmlspecialchars($product['image']); ?>" class="img-fluid" alt="<?php echo htmlspecialchars($product['name']); ?>">
+            <div class="col-md-6 mb-4">
+                <div class="main-image-container">
+                    <div class="thumbnail-container">
+                        <?php 
+                        // Assuming you have multiple images stored as image1, image2, etc.
+                        //papaltan pa to 
+                        for($i = 1; $i <= 4; $i++): 
+                        ?>
+                            <img src="../admin_page/foodMenu/uploads/<?php echo htmlspecialchars($product['image']); ?>" 
+                                 class="thumbnail" 
+                                 onclick="updateMainImage(this.src)"
+                                 alt="Product thumbnail <?php echo $i; ?>">
+                        <?php endfor; ?>
+                    </div>
+                    <img id="mainImage" 
+                         src="../admin_page/foodMenu/uploads/<?php echo htmlspecialchars($product['image']); ?>" 
+                         class="img-fluid main-image" 
+                         alt="<?php echo htmlspecialchars($product['name']); ?>">
+                </div>
             </div>
+            
             <div class="col-md-6">
-                <h1><?php echo htmlspecialchars($product['name']); ?></h1>
-                <p>₱<?php echo number_format($product['price'], 2); ?></p>
-                <p><?php echo htmlspecialchars($product['description']); ?></p>
-                <p>Stock: <?php echo $product['stock']; ?></p>
+                <h1 class="product-title"><?php echo htmlspecialchars($product['name']); ?></h1>
+                
+                <div class="chili-rating">
+                    <?php for($i = 0; $i < 5; $i++): ?>
+                        <i class="fas fa-pepper-hot"></i>
+                    <?php endfor; ?>
+                </div>
+                
+                <div class="product-price">
+                    ₱<?php echo number_format($product['price'], 2); ?>
+                </div>
+                
+                <p class="product-description">
+                    <?php echo htmlspecialchars($product['description']); ?>
+                </p>
+                
+                <hr>
+                
                 <form method="post" class="mb-3">
                     <input type="hidden" name="product_name" value="<?php echo htmlspecialchars($product['name']); ?>">
                     <input type="hidden" name="product_price" value="<?php echo htmlspecialchars($product['price']); ?>">
                     <input type="hidden" name="product_image" value="<?php echo htmlspecialchars($product['image']); ?>">
-                    <input
-                    type="number"
-                    name="product_quantity"
-                    value="1"
-                    min="1"
-                    max="<?php echo $product['stock']; ?>"
-                    class="form-control mb-2"
-                    <?php if ($product['stock'] === 0) echo 'disabled'; ?>>
-
-                    <!-- Add to Cart Button -->
-                    <button type="submit" name="add_to_cart" class="btn btn-primary">Add to Cart</button>
+                    
+                    <div class="action-buttons">
+                        <input type="number" 
+                               name="product_quantity" 
+                               value="1" 
+                               min="1" 
+                               max="<?php echo $product['stock']; ?>" 
+                               class="quantity-input"
+                               <?php if ($product['stock'] === 0) echo 'disabled'; ?>>
+                        
+                        <button type="submit" 
+                                name="add_to_cart" 
+                                class="add-to-cart">
+                            Add to Cart
+                        </button>
+                        
+                        <button type="submit" 
+                                name="add_to_wishlist" 
+                                class="wishlist-btn">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                    </div>
                 </form>
 
-                <!-- Add to Wishlist Button -->
-                <form method="post">
-                    <button type="submit" name="add_to_wishlist" class="btn btn-outline-danger">Add to Wishlist</button>
-                </form>
-
-                <!-- Messages -->
-                <?php if (isset($wishlist_message)) echo "<p class='text-info mt-2'>$wishlist_message</p>"; ?>
-                <?php if (isset($success_message)) echo "<p class='text-success'>$success_message</p>"; ?>
-                <?php if (isset($error_message)) echo "<p class='text-danger'>$error_message</p>"; ?>
-
+                <?php if (isset($wishlist_message)): ?>
+                    <p class="text-info mt-2"><?php echo $wishlist_message; ?></p>
+                <?php endif; ?>
+                
                 <?php if ($product['stock'] === 0): ?>
-                <p class="text-danger">This product is out of stock.</p>
+                    <p class="text-danger">This product is out of stock.</p>
                 <?php endif; ?>
             </div>
         </div>
     </div>
-</section>
 
-<section class="py-5 bg-light">
-    <div class="container text-center">
-        <h2>Related Products</h2>
-        <div class="row justify-content-center align-items-start related-products">
-            <?php foreach ($related_products as $related): ?>
-                <div class="col-md-4">
-                    <img src="../admin_page/foodMenu/uploads/<?php echo htmlspecialchars($related['image']); ?>" class="img-fluid mb-2">
-                    <p><?php echo htmlspecialchars($related['name']); ?></p>
-                    <p>₱<?php echo number_format($related['price'], 2); ?></p>
-                    <a href="items.php?id=<?php echo $related['id']; ?>" class="btn btn-secondary">View</a>
-                </div>
-            <?php endforeach; ?>
-        </div>
-    </div>
-</section>
-
-<script src="js/scripts.js"></script>
+    <script>
+        function updateMainImage(src) {
+            document.getElementById('mainImage').src = src;
+        }
+    </script>
 </body>
 </html>
+

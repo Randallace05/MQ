@@ -11,6 +11,13 @@ require_once '../endpoint/session_config.php';
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" />
     <link href="css/styles.css" rel="stylesheet" />
     <style>
+        /* Container for main content */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 40px;
+        }
+
         .carousel-item img {
             height: 400px;
             object-fit: cover;
@@ -32,7 +39,7 @@ require_once '../endpoint/session_config.php';
 
         .product-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            grid-template-columns: repeat(4, 1fr); /* Changed to 4 columns */
             gap: 20px;
             padding: 20px;
         }
@@ -42,6 +49,8 @@ require_once '../endpoint/session_config.php';
             border: 1px solid #ddd;
             border-radius: 8px;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
         .product-image {
@@ -80,28 +89,80 @@ require_once '../endpoint/session_config.php';
             margin: 0;
             font-size: 24px;
             font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title::before {
+            content: '';
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            background-color: #ff0000;
+        }
+
+        .section-title .highlight {
+            color: #ff0000;
         }
 
         hr {
-            margin: 0;
+            margin: 0 40px;
             border-top: 2px solid #ddd;
         }
         
         .dot {
-        cursor: pointer;
-        height: 15px;
-        width: 15px;
-        margin: 0 2px;
-        background-color: #bbb;
-        border-radius: 50%;
-        display: inline-block;
-        transition: background-color 0.6s ease;
+            cursor: pointer;
+            height: 15px;
+            width: 15px;
+            margin: 0 2px;
+            background-color: #bbb;
+            border-radius: 50%;
+            display: inline-block;
+            transition: background-color 0.6s ease;
         }
 
+        .product-info {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chili-rating {
+            margin-top: auto;
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        @media (max-width: 1200px) {
+            .product-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .product-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .main-container {
+                padding: 0 20px;
+            }
+            hr {
+                margin: 0 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .product-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
     <?php include("../includes/topbar1.php"); ?>
+    
+    <div class="main-container">
         <!-- Carousel -->
         <div class="carousel-container">
             <div class="carousel-inner">
@@ -189,100 +250,90 @@ require_once '../endpoint/session_config.php';
             echo '<img src="' . $rightFullPath . '" alt="Promotion 2" class="promo-image">';
             ?>
         </div>
-
+    </div>
 
     <hr>
 
-    <!-- Most Popular Products -->
-    <h2 class="section-title">Most Popular Bagoong</h2>
-    <div class="product-grid">
-        <?php
-        include '../conn/conn.php';
+    <div class="main-container">
+        <!-- Most Popular Products -->
+        <h2 class="section-title">
+            <span class="highlight">This Month</span>
+            Most Popular Bagoong
+        </h2>
+        <div class="product-grid">
+            <?php
+            include '../conn/conn.php';
 
-        // Query to fetch top 3 most ordered products
-        // $sql = "SELECT p.id, p.name, p.price, p.image, COUNT(o.product_id) as order_count 
-        //         FROM products p 
-        //         LEFT JOIN orders o ON p.id = o.product_id 
-        //         WHERE p.is_disabled = 0 
-        //         GROUP BY p.id 
-        //         ORDER BY order_count DESC 
-        //         LIMIT 3";
+            $sql = "SELECT id, name, price, image FROM products WHERE is_disabled = 0";
+            $result = $conn->query($sql);
 
-        $sql = "SELECT id, name, price, image FROM products WHERE is_disabled = 0";
-        $result = $conn->query($sql);
-
-        if ($result && $result->num_rows > 0) {
-            while ($product = $result->fetch_assoc()) {
-                ?>
-                <div class="product-card">
-                    <button class="wishlist-btn" onclick="toggleWishlist(this, <?php echo $product['id']; ?>)">
-                        <i class="bi bi-heart"></i>
-                    </button>
-                    <a href="items.php?id=<?php echo $product['id']; ?>">
-                        <img src="../admin_page/foodMenu/uploads/<?php echo htmlspecialchars($product['image']); ?>" 
-                             alt="<?php echo htmlspecialchars($product['name']); ?>"
-                             class="product-image">
-                    </a>
-                    <div class="p-3">
-                        <h5 class="text-center mb-2"><?php echo htmlspecialchars($product['name']); ?></h5>
-                        <p class="text-center mb-2">₱<?php echo number_format($product['price'], 2); ?></p>
-                        <div class="chili-rating" data-product-id="<?php echo $product['id']; ?>">
-                            <?php for($i = 1; $i <= 5; $i++): ?>
-                                <span class="chili" data-value="<?php echo $i; ?>">🌶️</span>
-                            <?php endfor; ?>
+            if ($result && $result->num_rows > 0) {
+                while ($product = $result->fetch_assoc()) {
+                    ?>
+                    <div class="product-card">
+                        <button class="wishlist-btn" onclick="toggleWishlist(this, <?php echo $product['id']; ?>)">
+                            <i class="bi bi-heart"></i>
+                        </button>
+                        <a href="items.php?id=<?php echo $product['id']; ?>">
+                            <img src="../admin_page/foodMenu/uploads/<?php echo htmlspecialchars($product['image']); ?>" 
+                                 alt="<?php echo htmlspecialchars($product['name']); ?>"
+                                 class="product-image">
+                        </a>
+                        <div class="product-info">
+                            <div class="p-3">
+                                <h5 class="text-center mb-2"><?php echo htmlspecialchars($product['name']); ?></h5>
+                                <p class="text-center mb-2">₱<?php echo number_format($product['price'], 2); ?></p>
+                            </div>
+                            <div class="chili-rating" data-product-id="<?php echo $product['id']; ?>">
+                                <?php for($i = 1; $i <= 5; $i++): ?>
+                                    <span class="chili" data-value="<?php echo $i; ?>">🌶️</span>
+                                <?php endfor; ?>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <?php
+                    <?php
+                }
             }
-        }
-        ?>
-    </div>
+            ?>
+        </div>
 
-    <h2 class="section-title">Our Products</h2>
-    <div class="product-grid">
-        <?php
-        // Query to fetch all other products
-        // $sql = "SELECT p.* FROM products p 
-        //         WHERE p.is_disabled = 0 
-        //         AND p.id NOT IN (
-        //             SELECT p2.id FROM products p2 
-        //             LEFT JOIN orders o ON p2.id = o.product_id 
-        //             GROUP BY p2.id 
-        //             ORDER BY COUNT(o.product_id) DESC 
-        //             LIMIT 3
-        //         )";
+        <h2 class="section-title">Explore 
+            <span class="highlight">Our Products</span>
+        </h2>
+        <div class="product-grid">
+            <?php
+            $sql = "SELECT id, name, price, image FROM products WHERE is_disabled = 0";
+            $result = $conn->query($sql);
 
-
-        $sql = "SELECT id, name, price, image FROM products WHERE is_disabled = 0";
-        $result = $conn->query($sql);
-
-        if ($result && $result->num_rows > 0) {
-            while ($product = $result->fetch_assoc()) {
-                ?>
-                <div class="product-card">
-                    <button class="wishlist-btn" onclick="toggleWishlist(this, <?php echo $product['id']; ?>)">
-                        <i class="bi bi-heart"></i>
-                    </button>
-                    <a href="items.php?id=<?php echo $product['id']; ?>">
-                        <img src="../admin_page/foodMenu/uploads/<?php echo htmlspecialchars($product['image']); ?>" 
-                             alt="<?php echo htmlspecialchars($product['name']); ?>"
-                             class="product-image">
-                    </a>
-                    <div class="p-3">
-                        <h5 class="text-center mb-2"><?php echo htmlspecialchars($product['name']); ?></h5>
-                        <p class="text-center mb-2">₱<?php echo number_format($product['price'], 2); ?></p>
-                        <div class="chili-rating" data-product-id="<?php echo $product['id']; ?>">
-                            <?php for($i = 1; $i <= 5; $i++): ?>
-                                <span class="chili" data-value="<?php echo $i; ?>">🌶️</span>
-                            <?php endfor; ?>
+            if ($result && $result->num_rows > 0) {
+                while ($product = $result->fetch_assoc()) {
+                    ?>
+                    <div class="product-card">
+                        <button class="wishlist-btn" onclick="toggleWishlist(this, <?php echo $product['id']; ?>)">
+                            <i class="bi bi-heart"></i>
+                        </button>
+                        <a href="items.php?id=<?php echo $product['id']; ?>">
+                            <img src="../admin_page/foodMenu/uploads/<?php echo htmlspecialchars($product['image']); ?>" 
+                                 alt="<?php echo htmlspecialchars($product['name']); ?>"
+                                 class="product-image">
+                        </a>
+                        <div class="product-info">
+                            <div class="p-3">
+                                <h5 class="text-center mb-2"><?php echo htmlspecialchars($product['name']); ?></h5>
+                                <p class="text-center mb-2">₱<?php echo number_format($product['price'], 2); ?></p>
+                            </div>
+                            <div class="chili-rating" data-product-id="<?php echo $product['id']; ?>">
+                                <?php for($i = 1; $i <= 5; $i++): ?>
+                                    <span class="chili" data-value="<?php echo $i; ?>">🌶️</span>
+                                <?php endfor; ?>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <?php
+                    <?php
+                }
             }
-        }
-        ?>
+            ?>
+        </div>
     </div>
 
     <?php include("../includes/footer.php"); ?>
@@ -382,3 +433,4 @@ require_once '../endpoint/session_config.php';
 
 </body>
 </html>
+

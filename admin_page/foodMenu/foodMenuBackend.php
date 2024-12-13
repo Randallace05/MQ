@@ -83,13 +83,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </head>
 <body>
 
-<div class="container mt-5">
-    <div class="card text-center">
-        <div class="card-body">
-            <div class="card-icon" data-bs-toggle="modal" data-bs-target="#formModal">
-                <i class="fas fa-plus-circle fa-color"></i>
+<div class="container mt-5 px-4"> 
+    <div class="row justify-content-center"> 
+        <div class="col-md-4"> 
+            <div class="card h-100">
+                <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                    <div class="card-icon" data-bs-toggle="modal" data-bs-target="#formModal">
+                        <i class="fas fa-plus-circle fa-color"></i>
+                    </div>
+                    <h5 class="card-title mt-3">Add New Product</h5>
+                </div>
             </div>
-            <h5 class="card-title">Add New Product</h5>
         </div>
     </div>
 </div>

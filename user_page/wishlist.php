@@ -1,6 +1,7 @@
 <?php
 session_start(); // Start the session
 
+
 // Ensure the user is logged in
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     echo "
@@ -28,6 +29,20 @@ $stmt->bind_param("i", $tbl_user_id);
 $stmt->execute();
 $wishlistResult = $stmt->get_result();
 ?>
+
+<?php
+// Display success or error messages
+if (isset($_SESSION['success_message'])) {
+    echo "<div style='color: green; text-align: center; margin-bottom: 10px;'>".$_SESSION['success_message']."</div>";
+    unset($_SESSION['success_message']); // Clear the message
+}
+
+if (isset($_SESSION['error_message'])) {
+    echo "<div style='color: red; text-align: center; margin-bottom: 10px;'>".$_SESSION['error_message']."</div>";
+    unset($_SESSION['error_message']); // Clear the message
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -114,7 +129,7 @@ $wishlistResult = $stmt->get_result();
                                 <input type="hidden" name="wishlist_id" value="<?php echo $row['wish_id']; ?>">
                                 <button type="submit" class="button danger">Remove</button>
                             </form>
-                            <form action="cart_action.php" method="POST" style="display: inline;">
+                            <form action="cartItems.php" method="POST" style="display: inline;">
                                 <input type="hidden" name="action" value="add_to_cart">
                                 <input type="hidden" name="product_id" value="<?php echo $row['product_id']; ?>">
                                 <button type="submit" class="button">Add to Cart</button>

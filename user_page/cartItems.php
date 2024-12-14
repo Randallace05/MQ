@@ -1,4 +1,7 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 
 // Include database connection
@@ -16,6 +19,51 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
 
 // Get the logged-in user's ID securely from the session
 $tbl_user_id = intval($_SESSION['tbl_user_id']);
+
+// Handle "Add to Cart" action from the wishlist
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add_to_cart') {
+    $product_id = intval($_POST['product_id']);
+
+    // Fetch product details from the products table
+    $product_query = $conn->prepare("SELECT * FROM `products` WHERE id = ?");
+    $product_query->bind_param("i", $product_id);
+    $product_query->execute();
+    $product_result = $product_query->get_result();
+
+    if ($product_result->num_rows > 0) {
+        $product = $product_result->fetch_assoc();
+        $product_name = $product['name'];
+        $product_image = $product['image'];
+        $product_price = $product['price'];
+
+        // Check if the product is already in the cart
+        $check_cart_query = $conn->prepare("SELECT * FROM `cart` WHERE tbl_user_id = ? AND product_id = ?");
+        $check_cart_query->bind_param("ii", $tbl_user_id, $product_id);
+        $check_cart_query->execute();
+        $check_cart_result = $check_cart_query->get_result();
+
+        if ($check_cart_result->num_rows > 0) {
+            // If already in the cart, display a message
+            $_SESSION['error_message'] = "Product is already in your cart.";
+        } else {
+            // Add the product to the cart
+            $insert_cart_query = $conn->prepare("INSERT INTO `cart` (tbl_user_id, product_id, name, image, price, quantity) VALUES (?, ?, ?, ?, ?, 1)");
+            $insert_cart_query->bind_param("iissi", $tbl_user_id, $product_id, $product_name, $product_image, $product_price);
+
+            if ($insert_cart_query->execute()) {
+                $_SESSION['success_message'] = "Product added to your cart successfully.";
+            } else {
+                $_SESSION['error_message'] = "Failed to add the product to your cart.";
+            }
+        }
+    } else {
+        $_SESSION['error_message'] = "Product not found.";
+    }
+
+    // Redirect back to wishlist page
+    header("Location: wishlist.php");
+    exit;
+}
 
 // Handle product quantity update
 if (isset($_POST['update_product_quantity'])) {

@@ -52,6 +52,26 @@ $products = $result->fetch_all(MYSQLI_ASSOC); // Fetch all rows as an associativ
             color: #EA7C69 !important;
             margin-bottom: 1rem;
         }
+        .table-container {
+            margin-top: 30px;
+        }
+
+        .table th, .table td {
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .table thead {
+            background-color: #f8d7da; /* Light pink header */
+            color: #721c24; /* Darker pink text */
+        }
+
+        .product-img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 50%;
+        }
 </style>
 </head>
 <body>
@@ -134,7 +154,37 @@ $products = $result->fetch_all(MYSQLI_ASSOC); // Fetch all rows as an associativ
         <?php endforeach; ?>
     </div>
 </div>
-
+<div class="container table-container">
+    <h2 class="text-center mb-4" style="color: #EA7C69;">Product Inventory</h2>
+    <div class="table-responsive">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Product ID</th>
+                    <th>Product Name</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>Image</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($products as $product): ?>
+                    <tr>
+                        <td><?= $product['id']; ?></td>
+                        <td><?= htmlspecialchars($product['name']); ?></td>
+                        <td>&#8369; <?= number_format($product['price'], 2); ?></td>
+                        <td><?= $product['stock']; ?></td>
+                        <td>
+                            <img src="uploads/<?= htmlspecialchars($product['image']); ?>" 
+                                 class="product-img" alt="Product Image">
+                        </td>
+                        
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+</div>
 <!-- Bootstrap JS and dependencies -->
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>

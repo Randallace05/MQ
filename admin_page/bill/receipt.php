@@ -1,3 +1,33 @@
+<?php
+// Database connection
+$host = "localhost"; // Replace with your database host
+$user = "root";      // Replace with your database username
+$password = "";      // Replace with your database password
+$database = "login_email_verification"; // Replace with your database name
+
+$conn = new mysqli($host, $user, $password, $database);
+
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// Fetch user data (e.g., the logged-in user)
+$user_id = 25; // Example user_id
+$user_sql = "SELECT * FROM tbl_user WHERE tbl_user_id = $user_id";
+$user_result = $conn->query($user_sql);
+$user = $user_result->fetch_assoc();
+
+// Fetch checkout details
+$checkout_sql = "SELECT * FROM checkout LIMIT 1";
+$checkout_result = $conn->query($checkout_sql);
+$checkout = $checkout_result->fetch_assoc();
+
+// Fetch cart items
+$cart_sql = "SELECT * FROM cart WHERE tbl_user_id = $user_id";
+$cart_result = $conn->query($cart_sql);
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -66,9 +96,10 @@
         </div>
         <div class="receipt-details">
             <p><strong>Order Number:</strong> 123456</p>
-            <p><strong>Order Date:</strong> 2024-11-09</p>
-            <p><strong>Customer Name:</strong> John Doe</p>
-            <p><strong>Shipping Address:</strong> 123 Main St, Springfield, IL 62701</p>
+            <p><strong>Order Date:</strong> <?php echo date('Y-m-d'); ?></p>
+            <p><strong>Customer Name:</strong> <?php echo $user['first_name'] . ' ' . $user['last_name']; ?></p>
+            <p><strong>Shipping Address:</strong> <?php echo $checkout['address']; ?></p>
+            <p><strong>Payment Method:</strong> <?php echo $checkout['payment_method']; ?></p>
         </div>
         <div class="order-summary">
             <table>
@@ -81,22 +112,29 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>Product 1</td>
-                        <td>$25.00</td>
-                        <td>$50.00</td>
-                    </tr>
-
+                    <?php
+                    $total_price = 0;
+                    while ($row = $cart_result->fetch_assoc()) {
+                        $item_total = $row['price'] * $row['quantity'];
+                        $total_price += $item_total;
+                        echo "<tr>
+                                <td>{$row['name']}</td>
+                                <td>{$row['quantity']}</td>
+                                <td>\${$row['price']}</td>
+                                <td>\${$item_total}</td>
+                              </tr>";
+                    }
+                    ?>
                 </tbody>
             </table>
-            <p class="total">Subtotal: $95.00</p>
-            <p class="total">Total: $102.60</p>
+            <p class="total">Subtotal: $<?php echo number_format($total_price, 2); ?></p>
+            <p class="total">Total: $<?php echo number_format($total_price * 1.08, 2); // Including 8% tax ?></p>
         </div>
         <div class="footer">
             <p>If you have any questions about your order, please contact us at support@example.com.</p>
         </div>
     </div>
-<div class="button-container">
+    <div class="button-container">
         <button onclick="printReceipt()">Print Receipt</button>
         <button onclick="downloadPDF()">Download as PDF</button>
     </div>
@@ -121,3 +159,7 @@
     </script>
 </body>
 </html>
+
+<?php
+$conn->close();
+?>

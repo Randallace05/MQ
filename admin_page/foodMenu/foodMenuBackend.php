@@ -98,6 +98,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </div>
 </div>
 
+
 <!-- Modal -->
 <div class="modal fade" id="formModal" tabindex="-1" aria-labelledby="formModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -136,9 +137,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <button type="submit" class="btn btn-primary">Create</button>
                 </form>
             </div>
+            
         </div>
     </div>
+    
 </div>
+
 
 
 <!-- Bootstrap JS and dependencies (Popper.js and jQuery) -->

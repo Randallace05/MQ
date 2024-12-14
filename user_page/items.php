@@ -35,8 +35,60 @@ $related_products = $related_products_result->fetch_all(MYSQLI_ASSOC);
 
 // Add to cart logic
 if (isset($_POST['add_to_cart'])) {
-    // ... (Existing add-to-cart logic)
+    // Check if the user is logged in
+    $tbl_user_id = $_SESSION['tbl_user_id'] ?? null; // Ensure user ID is retrieved from session
+    if (!$tbl_user_id) {
+        $_SESSION['error_message'] = "You need to log in to add items to your cart.";
+        header("Location: " . $_SERVER['REQUEST_URI']); // Redirect to refresh the page
+        exit;
+    }
+
+    // Retrieve product details from the form
+    $product_name = $_POST['product_name'];
+    $product_price = floatval($_POST['product_price']);
+    $product_image = $_POST['product_image'];
+    $product_quantity = intval($_POST['product_quantity']);
+    $total_price = $product_price * $product_quantity;
+
+    // Check if the product is already in the cart for the logged-in user
+    $check_cart_query = "SELECT cart_id, quantity FROM cart WHERE tbl_user_id = ? AND product_id = ?";
+    $check_stmt = $conn->prepare($check_cart_query);
+    $check_stmt->bind_param("ii", $tbl_user_id, $product_id);
+    $check_stmt->execute();
+    $cart_result = $check_stmt->get_result();
+
+    if ($cart_result->num_rows > 0) {
+        // If the product is already in the cart, update its quantity and total price
+        $cart_item = $cart_result->fetch_assoc();
+        $new_quantity = $cart_item['quantity'] + $product_quantity;
+        $new_total_price = $new_quantity * $product_price;
+
+        $update_query = "UPDATE cart SET quantity = ?, total_price = ? WHERE cart_id = ?";
+        $update_stmt = $conn->prepare($update_query);
+        $update_stmt->bind_param("idi", $new_quantity, $new_total_price, $cart_item['cart_id']);
+        if ($update_stmt->execute()) {
+            $_SESSION['success_message'] = "Product quantity updated in cart.";
+        } else {
+            $_SESSION['error_message'] = "Failed to update the cart.";
+        }
+    } else {
+        // If the product is not in the cart, insert it as a new row
+        $insert_query = "INSERT INTO cart (tbl_user_id, product_id, name, price, image, quantity, total_price)
+                         VALUES (?, ?, ?, ?, ?, ?, ?)";
+        $insert_stmt = $conn->prepare($insert_query);
+        $insert_stmt->bind_param("iisdsid", $tbl_user_id, $product_id, $product_name, $product_price, $product_image, $product_quantity, $total_price);
+        if ($insert_stmt->execute()) {
+            $_SESSION['success_message'] = "Product added to your cart.";
+        } else {
+            $_SESSION['error_message'] = "Failed to add product to cart.";
+        }
+    }
+
+    header("Location: " . $_SERVER['REQUEST_URI']); // Redirect to refresh the page
+    exit;
 }
+
+
 
 // Add to wishlist logic
 if (isset($_POST['add_to_wishlist'])) {
@@ -62,7 +114,6 @@ if (isset($_POST['add_to_wishlist'])) {
     }
 }
 ?>
-
 <?php
 require_once '../endpoint/session_config.php';
 include '../conn/conn.php';
@@ -171,71 +222,71 @@ include '../conn/conn.php';
 </head>
 <body>
     <?php include("../includes/topbar1.php"); ?>
-    <div class="path">Products / <span><?php echo htmlspecialchars($product['name']); ?></span></div>  
+    <div class="path">Products / <span><?php echo htmlspecialchars($product['name']); ?></span></div>
     <div class="container py-5">
         <div class="row">
             <div class="col-md-6 mb-4">
                 <div class="main-image-container">
                     <div class="thumbnail-container">
-                        <?php 
+                        <?php
                         // Assuming you have multiple images stored as image1, image2, etc.
-                        //papaltan pa to 
-                        for($i = 1; $i <= 4; $i++): 
+                        //papaltan pa to
+                        for($i = 1; $i <= 4; $i++):
                         ?>
-                            <img src="../admin_page/foodMenu/uploads/<?php echo htmlspecialchars($product['image']); ?>" 
-                                 class="thumbnail" 
+                            <img src="../admin_page/foodMenu/uploads/<?php echo htmlspecialchars($product['image']); ?>"
+                                 class="thumbnail"
                                  onclick="updateMainImage(this.src)"
                                  alt="Product thumbnail <?php echo $i; ?>">
                         <?php endfor; ?>
                     </div>
-                    <img id="mainImage" 
-                         src="../admin_page/foodMenu/uploads/<?php echo htmlspecialchars($product['image']); ?>" 
-                         class="img-fluid main-image" 
+                    <img id="mainImage"
+                         src="../admin_page/foodMenu/uploads/<?php echo htmlspecialchars($product['image']); ?>"
+                         class="img-fluid main-image"
                          alt="<?php echo htmlspecialchars($product['name']); ?>">
                 </div>
             </div>
-            
+
             <div class="col-md-6">
                 <h1 class="product-title"><?php echo htmlspecialchars($product['name']); ?></h1>
-                
+
                 <div class="chili-rating">
                     <?php for($i = 0; $i < 5; $i++): ?>
                         <i class="fas fa-pepper-hot"></i>
                     <?php endfor; ?>
                 </div>
-                
+
                 <div class="product-price">
                     ₱<?php echo number_format($product['price'], 2); ?>
                 </div>
-                
+
                 <p class="product-description">
                     <?php echo htmlspecialchars($product['description']); ?>
                 </p>
-                
+
                 <hr>
-                
+
                 <form method="post" class="mb-3">
                     <input type="hidden" name="product_name" value="<?php echo htmlspecialchars($product['name']); ?>">
                     <input type="hidden" name="product_price" value="<?php echo htmlspecialchars($product['price']); ?>">
                     <input type="hidden" name="product_image" value="<?php echo htmlspecialchars($product['image']); ?>">
-                    
+
                     <div class="action-buttons">
-                        <input type="number" 
-                               name="product_quantity" 
-                               value="1" 
-                               min="1" 
-                               max="<?php echo $product['stock']; ?>" 
+                        <input type="number"
+                               name="product_quantity"
+                               value="1"
+                               min="1"
+                               max="<?php echo $product['stock']; ?>"
                                class="quantity-input"
                                <?php if ($product['stock'] === 0) echo 'disabled'; ?>>
-                        
-                        <button type="submit" 
-                                name="add_to_cart" 
+
+                        <button type="submit"
+                                name="add_to_cart"
                                 class="add-to-cart">
                             Add to Cart
                         </button>
-                        
-                        <button type="submit" 
-                                name="add_to_wishlist" 
+
+                        <button type="submit"
+                                name="add_to_wishlist"
                                 class="wishlist-btn">
                             <i class="fas fa-heart"></i>
                         </button>
@@ -245,7 +296,7 @@ include '../conn/conn.php';
                 <?php if (isset($wishlist_message)): ?>
                     <p class="text-info mt-2"><?php echo $wishlist_message; ?></p>
                 <?php endif; ?>
-                
+
                 <?php if ($product['stock'] === 0): ?>
                     <p class="text-danger">This product is out of stock.</p>
                 <?php endif; ?>

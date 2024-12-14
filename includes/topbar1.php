@@ -228,6 +228,21 @@
         }
         $stmt->close();
     }
+    // Initialize wishlist count
+    $wishlist_count = 0;
+    if ($conn && $tbl_user_id) {
+        // Secure query to fetch wishlist count for the specific user
+        $wishlist_stmt = $conn->prepare("SELECT COUNT(*) as count FROM wishlist WHERE tbl_user_id = ?");
+        $wishlist_stmt->bind_param("i", $tbl_user_id);
+        $wishlist_stmt->execute();
+        $wishlist_result = $wishlist_stmt->get_result();
+        if ($wishlist_result) {
+            $wishlist_data = $wishlist_result->fetch_assoc();
+            $wishlist_count = $wishlist_data['count'] ?? 0;
+        }
+        $wishlist_stmt->close();
+    }
+
     ?>
 
     <div class="z-index">
@@ -246,9 +261,11 @@
                     <div class="search-results" id="searchResults"></div>
                 </div>
             </nav>
-            <a href="../user_page/wishlist.php"><i class="fa-regular fa-heart"></i>
-                <span class="icon-badge">4</span>
+            <a href="../user_page/wishlist.php">
+                <i class="fa-regular fa-heart"></i>
+                <span class="icon-badge"><?php echo $wishlist_count; ?></span>
             </a>
+
             <a href="../user_page/cart.php"><i class="fa-solid fa-cart-shopping"></i>
                 <span class="icon-badge"><?php echo $row_count; ?></span>
             </a>

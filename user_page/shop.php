@@ -110,7 +110,7 @@ require_once '../endpoint/session_config.php';
             margin: 0 40px;
             border-top: 2px solid #ddd;
         }
-        
+
         .dot {
             cursor: pointer;
             height: 15px;
@@ -161,7 +161,7 @@ require_once '../endpoint/session_config.php';
 </head>
 <body>
     <?php include("../includes/topbar1.php"); ?>
-    
+
     <div class="main-container">
         <!-- Carousel -->
         <div class="carousel-container">
@@ -218,7 +218,7 @@ require_once '../endpoint/session_config.php';
             $imageDir = "../admin_page/foodMenu/";
 
             // Fetch left and right promotional image paths from the database
-            $promoSql = "SELECT left_image_path, right_image_path FROM carousel_images WHERE id = 1"; 
+            $promoSql = "SELECT left_image_path, right_image_path FROM carousel_images WHERE id = 1";
             $promoResult = $conn->query($promoSql);
 
             // Initialize variables for left and right promotional images
@@ -275,7 +275,7 @@ require_once '../endpoint/session_config.php';
                             <i class="bi bi-heart"></i>
                         </button>
                         <a href="items.php?id=<?php echo $product['id']; ?>">
-                            <img src="../admin_page/foodMenu/uploads/<?php echo htmlspecialchars($product['image']); ?>" 
+                            <img src="../admin_page/foodMenu/uploads/<?php echo htmlspecialchars($product['image']); ?>"
                                  alt="<?php echo htmlspecialchars($product['name']); ?>"
                                  class="product-image">
                         </a>
@@ -297,7 +297,7 @@ require_once '../endpoint/session_config.php';
             ?>
         </div>
 
-        <h2 class="section-title">Explore 
+        <h2 class="section-title">Explore
             <span class="highlight">Our Products</span>
         </h2>
         <div class="product-grid">
@@ -313,7 +313,7 @@ require_once '../endpoint/session_config.php';
                             <i class="bi bi-heart"></i>
                         </button>
                         <a href="items.php?id=<?php echo $product['id']; ?>">
-                            <img src="../admin_page/foodMenu/uploads/<?php echo htmlspecialchars($product['image']); ?>" 
+                            <img src="../admin_page/foodMenu/uploads/<?php echo htmlspecialchars($product['image']); ?>"
                                  alt="<?php echo htmlspecialchars($product['name']); ?>"
                                  class="product-image">
                         </a>
@@ -341,23 +341,37 @@ require_once '../endpoint/session_config.php';
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function toggleWishlist(button, productId) {
-            button.classList.toggle('active');
-            const icon = button.querySelector('i');
-            icon.classList.toggle('bi-heart');
-            icon.classList.toggle('bi-heart-fill');
-            
-            // Here you can add AJAX call to update wishlist in database
+            const isActive = button.classList.contains('active');
+            const action = isActive ? 'remove' : 'add';
+
             fetch('update_wishlist.php', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     product_id: productId,
-                    action: button.classList.contains('active') ? 'add' : 'remove'
+                    action: action
                 })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    button.classList.toggle('active');
+                    const icon = button.querySelector('i');
+                    icon.classList.toggle('bi-heart');
+                    icon.classList.toggle('bi-heart-fill');
+
+                    // Update the wishlist badge count in real time
+                    document.querySelector('.icon-badge').textContent = data.wishlist_count;
+                } else {
+                    alert(data.message || 'Something went wrong.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while updating your wishlist.');
             });
         }
+
 
         // Initialize chili ratings
         document.querySelectorAll('.chili-rating').forEach(container => {

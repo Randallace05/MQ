@@ -113,6 +113,40 @@ if (isset($_POST['add_to_wishlist'])) {
         }
     }
 }
+// Handle review submission
+if (isset($_POST['submit_review'])) {
+    $tbl_user_id = $_SESSION['tbl_user_id'] ?? null;
+    if (!$tbl_user_id) {
+        $_SESSION['error_message'] = "You need to log in to submit a review.";
+        header("Location: " . $_SERVER['REQUEST_URI']);
+        exit;
+    }
+
+    $review_text = trim($_POST['review_text']);
+    $username = $_SESSION['username'] ?? 'Anonymous';
+
+    if (!empty($review_text)) {
+        $insert_review = $conn->prepare("INSERT INTO reviews (product_id, tbl_user_id, username, review_text) VALUES (?, ?, ?, ?)");
+        $insert_review->bind_param("iiss", $product_id, $tbl_user_id, $username, $review_text);
+        if ($insert_review->execute()) {
+            $_SESSION['success_message'] = "Review submitted successfully.";
+        } else {
+            $_SESSION['error_message'] = "Failed to submit review.";
+        }
+    } else {
+        $_SESSION['error_message'] = "Review cannot be empty.";
+    }
+    header("Location: " . $_SERVER['REQUEST_URI']);
+    exit;
+}
+
+// Fetch existing reviews for the product
+$review_query = "SELECT username, review_text, created_at FROM reviews WHERE product_id = ? ORDER BY created_at DESC";
+$review_stmt = $conn->prepare($review_query);
+$review_stmt->bind_param("i", $product_id);
+$review_stmt->execute();
+$reviews_result = $review_stmt->get_result();
+$reviews = $reviews_result->fetch_all(MYSQLI_ASSOC);
 ?>
 <?php
 require_once '../endpoint/session_config.php';
@@ -218,6 +252,20 @@ include '../conn/conn.php';
             display: flex;
             flex-wrap: wrap;
         }
+        .review {
+            background-color: #f9f9f9;
+        }
+
+        .review h5 {
+            margin: 0;
+            font-weight: bold;
+        }
+
+        .review small {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+        }
     </style>
 </head>
 <body>
@@ -301,6 +349,37 @@ include '../conn/conn.php';
                     <p class="text-danger">This product is out of stock.</p>
                 <?php endif; ?>
             </div>
+            <div class="container mt-5">
+                <h3>Customer Reviews</h3>
+                <hr>
+
+                <!-- Review Submission Form -->
+                <?php if (isset($_SESSION['tbl_user_id'])): ?>
+                    <form method="post" class="mb-4">
+                        <div class="mb-3">
+                            <label for="review_text" class="form-label">Write a review:</label>
+                            <textarea name="review_text" id="review_text" rows="3" class="form-control" required></textarea>
+                        </div>
+                        <button type="submit" name="submit_review" class="btn btn-primary">Submit Review</button>
+                    </form>
+                <?php else: ?>
+                    <p><a href="../user_page/login.php">Log in</a> to write a review.</p>
+                <?php endif; ?>
+
+                <!-- Display Reviews -->
+                <?php if (!empty($reviews)): ?>
+                    <?php foreach ($reviews as $review): ?>
+                        <div class="review mb-3 p-3 border rounded">
+                            <h5 class="mb-1"><?php echo htmlspecialchars($review['username']); ?></h5>
+                            <small class="text-muted"><?php echo date("F j, Y, g:i a", strtotime($review['created_at'])); ?></small>
+                            <p class="mt-2"><?php echo nl2br(htmlspecialchars($review['review_text'])); ?></p>
+                        </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <p>No reviews yet. Be the first to review this product!</p>
+                <?php endif; ?>
+            </div>
+
         </div>
     </div>
 

@@ -1,7 +1,6 @@
 <?php
 session_start(); // Start the session
 
-
 // Ensure the user is logged in
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     echo "
@@ -20,7 +19,7 @@ include '../conn/conn.php'; // Replace with your actual database connection file
 $tbl_user_id = intval($_SESSION['tbl_user_id']);
 
 // Fetch wishlist items for the user
-$sql = "SELECT wish_id, w.product_id, p.name AS product_name, p.price
+$sql = "SELECT wish_id, w.product_id, p.name AS product_name, p.price, p.image AS product_image
         FROM wishlist w
         JOIN products p ON w.product_id = p.id
         WHERE w.tbl_user_id = ?";
@@ -95,6 +94,11 @@ if (isset($_SESSION['error_message'])) {
         .button.danger:hover {
             background-color: #e53935;
         }
+        .product-image {
+            max-width: 100px;
+            max-height: 100px;
+            object-fit: cover;
+        }
     </style>
 </head>
 <body>
@@ -113,6 +117,7 @@ if (isset($_SESSION['error_message'])) {
             <table class="wishlist-table">
                 <thead>
                     <tr>
+                        <th>Image</th>
                         <th>Product</th>
                         <th>Price</th>
                         <th>Actions</th>
@@ -121,6 +126,15 @@ if (isset($_SESSION['error_message'])) {
                 <tbody>
                 <?php while ($row = $wishlistResult->fetch_assoc()): ?>
                     <tr>
+                        <td>
+                        <img src="<?php
+                                    echo file_exists("../admin_page/foodMenu/uploads/".$row['product_image'])
+                                    ? "../admin_page/foodMenu/uploads/".htmlspecialchars($row['product_image'])
+                                    : 'default_image.jpg';
+                                ?>"
+                                alt="Product Image"
+                                style="width: 200px; height: 200px; object-fit: cover;">
+                        </td>
                         <td><?php echo htmlspecialchars($row['product_name']); ?></td>
                         <td>₱<?php echo number_format($row['price'], 2); ?></td>
                         <td class="actions">
@@ -144,5 +158,4 @@ if (isset($_SESSION['error_message'])) {
         <?php endif; ?>
     </div>
 </body>
-
 </html>

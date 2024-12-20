@@ -49,56 +49,122 @@ if (isset($_SESSION['error_message'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Wishlist</title>
     <style>
+        /* General Styles */
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
+            font-family: 'Arial', sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+            color: #333;
         }
+
         .wishlist-container {
-            max-width: 800px;
-            margin: 0 auto;
+            max-width: 900px;
+            margin: 40px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
+
         .wishlist-header {
             text-align: center;
             margin-bottom: 20px;
         }
+
+        .wishlist-header h1 {
+            font-size: 2rem;
+            color: #4CAF50;
+            margin-bottom: 10px;
+        }
+
+        .wishlist-header p {
+            color: #666;
+        }
+
         .wishlist-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
+            margin-top: 20px;
         }
+
         .wishlist-table th, .wishlist-table td {
-            padding: 10px;
-            border: 1px solid #ddd;
-            text-align: left;
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
         }
+
         .wishlist-table th {
             background-color: #f4f4f4;
+            font-weight: bold;
+            color: #333;
         }
-        .wishlist-table .actions {
-            text-align: center;
+
+        .wishlist-table tr:hover {
+            background-color: #f7f7f7;
         }
-        .button {
-            padding: 8px 12px;
+
+        .product-image {
+            width: 200px;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+
+        .actions button {
+            margin: 5px;
+            padding: 10px 15px;
+            font-size: 0.9rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .actions .button {
             background-color: #4CAF50;
             color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
         }
-        .button:hover {
+
+        .actions .button:hover {
             background-color: #45a049;
         }
-        .button.danger {
+
+        .actions .danger {
             background-color: #f44336;
+            color: white;
         }
-        .button.danger:hover {
+
+        .actions .danger:hover {
             background-color: #e53935;
         }
-        .product-image {
-            max-width: 100px;
-            max-height: 100px;
-            object-fit: cover;
+
+        .back-to-shop {
+            display: inline-block;
+            margin-bottom: 20px;
+            text-align: center;
         }
+
+        .back-to-shop a {
+            text-decoration: none;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .back-to-shop a:hover {
+            background-color: #45a049;
+        }
+
+        .empty-message {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #777;
+        }
+
     </style>
 </head>
 <body>
@@ -109,8 +175,8 @@ if (isset($_SESSION['error_message'])) {
         </div>
 
         <!-- Back to Shop Button -->
-        <div style="text-align: center; margin-bottom: 20px;">
-            <a href="shop.php" class="button">Back to Shop</a>
+        <div class="back-to-shop">
+            <a href="shop.php">&larr; Back to Shop</a>
         </div>
 
         <?php if ($wishlistResult->num_rows > 0): ?>
@@ -127,13 +193,13 @@ if (isset($_SESSION['error_message'])) {
                 <?php while ($row = $wishlistResult->fetch_assoc()): ?>
                     <tr>
                         <td>
-                        <img src="<?php
+                            <img src="<?php
                                     echo file_exists("../admin_page/foodMenu/uploads/".$row['product_image'])
                                     ? "../admin_page/foodMenu/uploads/".htmlspecialchars($row['product_image'])
                                     : 'default_image.jpg';
                                 ?>"
                                 alt="Product Image"
-                                style="width: 200px; height: 200px; object-fit: cover;">
+                                class="product-image">
                         </td>
                         <td><?php echo htmlspecialchars($row['product_name']); ?></td>
                         <td>₱<?php echo number_format($row['price'], 2); ?></td>
@@ -154,7 +220,7 @@ if (isset($_SESSION['error_message'])) {
                 </tbody>
             </table>
         <?php else: ?>
-            <p>Your wishlist is currently empty. Start adding items to your wishlist now!</p>
+            <p class="empty-message">Your wishlist is currently empty. Start adding items to your wishlist now!</p>
         <?php endif; ?>
     </div>
 </body>

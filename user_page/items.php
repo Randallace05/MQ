@@ -164,109 +164,221 @@ include '../conn/conn.php';
     <link href="css/styles.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        .path {
-            padding: 1rem 0;
-            color: #666;
-        }
-        .path span {
-            color: #000;
-        }
-        .thumbnail-container {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-right: 15px;
-        }
-        .thumbnail {
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
-            cursor: pointer;
-            border: 1px solid #ddd;
-        }
-        .thumbnail:hover {
-            border-color: #ff0000;
-        }
+    body {
+        font-family: 'Arial', sans-serif;
+        line-height: 1.6;
+        background-color: #f4f4f4;
+        color: #333;
+        margin: 0;
+        padding: 0;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: auto;
+        padding: 15px;
+    }
+
+    .path {
+        margin-bottom: 20px;
+        font-size: 14px;
+        color: #666;
+    }
+
+    .path span {
+        font-weight: bold;
+        color: #000;
+    }
+
+    .main-image-container {
+        display: flex;
+        gap: 20px;
+    }
+
+    .thumbnail-container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .thumbnail {
+        width: 70px;
+        height: 70px;
+        object-fit: cover;
+        border: 2px solid #ddd;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: transform 0.3s ease, border-color 0.3s ease;
+    }
+
+    .thumbnail:hover {
+        transform: scale(1.1);
+        border-color: #ff0000;
+    }
+
+    .main-image {
+        width: 100%;
+        height: auto;
+        max-height: 500px;
+        border-radius: 8px;
+        border: 2px solid #ddd;
+        object-fit: contain;
+    }
+
+    .product-title {
+        font-size: 26px;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .chili-rating i {
+        color: #ff0000;
+        font-size: 18px;
+        margin-right: 2px;
+    }
+
+    .product-price {
+        font-size: 22px;
+        font-weight: bold;
+        color: #27ae60;
+        margin-bottom: 15px;
+    }
+
+    .product-description {
+        font-size: 16px;
+        color: #555;
+        margin-bottom: 20px;
+    }
+
+    .quantity-input {
+        width: 80px;
+        height: 40px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 5px;
+        font-size: 16px;
+        text-align: center;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+    }
+
+    .add-to-cart {
+        background-color: #ff0000;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .add-to-cart:hover {
+        background-color: #cc0000;
+    }
+
+    .wishlist-btn {
+        background: none;
+        border: 2px solid #ff0000;
+        padding: 10px;
+        border-radius: 4px;
+        color: #ff0000;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .wishlist-btn:hover {
+        background-color: #ff0000;
+        color: white;
+    }
+
+    /* Customer Review Section */
+    .review {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background-color: #fff;
+        padding: 15px;
+        margin-bottom: 15px;
+        box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .review h5 {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 5px;
+        color: #333;
+    }
+
+    .review small {
+        font-size: 12px;
+        color: #999;
+    }
+
+    .review p {
+        margin-top: 10px;
+        color: #555;
+        font-size: 14px;
+    }
+
+    /* Review Submission Form */
+    form.bg-light {
+        padding: 20px;
+        background-color: #f9f9f9;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+    }
+
+    textarea.form-control {
+        resize: none;
+        padding: 10px;
+        font-size: 14px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        width: 100%;
+    }
+
+    .btn-primary {
+        background-color: #ff0000;
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
+        color: white;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background-color: #cc0000;
+    }
+
+    @media (max-width: 768px) {
         .main-image-container {
-            display: flex;
-            align-items: flex-start;
+            flex-direction: column;
         }
+
         .main-image {
-            flex-grow: 1;
-            max-width: calc(100% - 100px);
-            height: 500px;
-            object-fit: contain;
-        }
-        .product-title {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
-        .chili-rating {
-            color: #ff0000;
-            margin-bottom: 15px;
-        }
-        .product-price {
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
-        .product-description {
-            font-size: 14px;
-            line-height: 1.6;
-            margin-bottom: 20px;
-        }
-        .quantity-input {
-            width: 100px;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        .add-to-cart {
-            background-color: #ff0000;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .wishlist-btn {
-            border: 1px solid #000;
-            padding: 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            background: transparent;
-        }
-        .wishlist-btn i {
-            color: transparent;
-            -webkit-text-stroke: 1px black;
-        }
-        .row {
-            --bs-gutter-x: 1.5rem;
-            --bs-gutter-y: 0;
-            display: flex;
-            flex-wrap: wrap;
-        }
-        .review {
-            background-color: #f9f9f9;
+            max-height: 300px;
         }
 
-        .review h5 {
-            margin: 0;
-            font-weight: bold;
+        .thumbnail-container {
+            flex-direction: row;
+            gap: 5px;
+            overflow-x: auto;
         }
 
-        .review small {
-            display: block;
-            margin-bottom: 5px;
-            color: #666;
+        .thumbnail {
+            flex-shrink: 0;
+            width: 60px;
+            height: 60px;
         }
-    </style>
+    }
+</style>
+
 </head>
 <body>
     <?php include("../includes/topbar1.php"); ?>
@@ -350,36 +462,36 @@ include '../conn/conn.php';
                 <?php endif; ?>
             </div>
             <div class="container mt-5">
-                <h3>Customer Reviews</h3>
-                <hr>
+            <h3 class="mb-4">Customer Reviews</h3>
 
-                <!-- Review Submission Form -->
-                <?php if (isset($_SESSION['tbl_user_id'])): ?>
-                    <form method="post" class="mb-4">
-                        <div class="mb-3">
-                            <label for="review_text" class="form-label">Write a review:</label>
-                            <textarea name="review_text" id="review_text" rows="3" class="form-control" required></textarea>
-                        </div>
-                        <button type="submit" name="submit_review" class="btn btn-primary">Submit Review</button>
-                    </form>
-                <?php else: ?>
-                    <p><a href="../user_page/login.php">Log in</a> to write a review.</p>
-                <?php endif; ?>
+            <!-- Review Submission Form -->
+            <?php if (isset($_SESSION['tbl_user_id'])): ?>
+                <form method="post" class="mb-4 p-4 border rounded bg-light">
+                    <div class="mb-3">
+                        <label for="review_text" class="form-label" style="font-weight: bold;">Write a Review:</label>
+                        <textarea name="review_text" id="review_text" rows="3" class="form-control" placeholder="Share your thoughts about this product..." required></textarea>
+                    </div>
+                    <button type="submit" name="submit_review" class="btn btn-primary w-100">Submit Review</button>
+                </form>
+            <?php else: ?>
+                <p><a href="../user_page/login.php">Log in</a> to write a review.</p>
+            <?php endif; ?>
 
-                <!-- Display Reviews -->
-                <?php if (!empty($reviews)): ?>
-                    <?php foreach ($reviews as $review): ?>
-                        <div class="review mb-3 p-3 border rounded">
-                            <h5 class="mb-1"><?php echo htmlspecialchars($review['username']); ?></h5>
+            <!-- Display Reviews -->
+            <?php if (!empty($reviews)): ?>
+                <?php foreach ($reviews as $review): ?>
+                    <div class="review mb-4 p-4 border rounded bg-white shadow-sm">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h5 class="mb-0 text-primary"><?php echo htmlspecialchars($review['username']); ?></h5>
                             <small class="text-muted"><?php echo date("F j, Y, g:i a", strtotime($review['created_at'])); ?></small>
-                            <p class="mt-2"><?php echo nl2br(htmlspecialchars($review['review_text'])); ?></p>
                         </div>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <p>No reviews yet. Be the first to review this product!</p>
-                <?php endif; ?>
-            </div>
-
+                        <p class="mt-2 mb-0" style="line-height: 1.6;"><?php echo nl2br(htmlspecialchars($review['review_text'])); ?></p>
+                    </div>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <p class="text-muted">No reviews yet. Be the first to review this product!</p>
+            <?php endif; ?>
+        </div>
         </div>
     </div>
 

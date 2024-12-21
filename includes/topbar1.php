@@ -274,7 +274,7 @@
                     <i class="fa-regular fa-user"></i>
                 </a>
                 <div class="dropdown-content">
-                    <a href="../user_page/profile.php">Profile</a>
+                    <a href="../user_page/profile_page.php">Profile</a>
                     <a href="../user_page/settings.php">Settings</a>
                     <a href="../user_page/logout.php">Logout</a>
                 </div>

@@ -7,38 +7,99 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     <script>
         alert('You must log in to proceed.');
         window.location.href = '../index.php'; // Redirect to login page
-    </script>
-    ";
+    </script>";
     exit;
 }
 
 // Include database connection
-include ('action_page.php');
+include '../../conn/conn.php';
 
-// Database connection (adjust the credentials as necessary)
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "login_email_verification";  // replace with your actual database name
+try {
+    // Create database connection
+    $conn = new mysqli($servername, $username, $password, $db);
 
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
+    // Check for connection errors
+    if ($conn->connect_error) {
+        die("Connection failed: " . $conn->connect_error);
+    }
 
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+    // Get logged-in user's ID
+    $tbl_user_id = intval($_SESSION['tbl_user_id']); // Ensure ID is an integer for safety
+
+    // Fetch cart items for the user
+    $stmt = $conn->prepare("SELECT * FROM cart WHERE tbl_user_id = ?");
+    $stmt->bind_param("i", $tbl_user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $cartItems = $result->fetch_all(MYSQLI_ASSOC);
+
+    // Calculate the total amount
+    $grandTotal = 0;
+    foreach ($cartItems as $item) {
+        $grandTotal += $item['price'] * $item['quantity'];
+    }
+
+    // Handle form submission
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        // Debug: Check if POST data is received
+        echo "<pre>";
+        print_r($_POST);
+        echo "</pre>";
+
+        $firstName = htmlspecialchars($_POST['firstname']);
+        $middleName = htmlspecialchars($_POST['Mname']);
+        $lastName = htmlspecialchars($_POST['lname']);
+        $address = htmlspecialchars($_POST['address']);
+        $city = htmlspecialchars($_POST['city']);
+        $zipCode = htmlspecialchars($_POST['z']);
+        $contactNumber = htmlspecialchars($_POST['num']);
+        $paymentMethod = htmlspecialchars($_POST['payment_method']);
+
+        // Prepare the INSERT statement
+        $stmt = $conn->prepare("
+            INSERT INTO checkout (user_id, first_name, middle_name, last_name, address, city, zip_code, contact_number, payment_method, grand_total)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ");
+
+        if ($stmt === false) {
+            die("Prepare failed: " . $conn->error);
+        }
+
+        // Bind parameters
+        $stmt->bind_param(
+            "issssssssd",
+            $tbl_user_id,
+            $firstName,
+            $middleName,
+            $lastName,
+            $address,
+            $city,
+            $zipCode,
+            $contactNumber,
+            $paymentMethod,
+            $grandTotal
+        );
+
+        // Execute statement
+        if ($stmt->execute()) {
+            echo "
+            <script>
+                alert('Checkout successful! Your order has been placed.');
+                window.location.href = 'receipt.php';
+            </script>";
+        } else {
+            // Debugging error
+            echo "Error: " . $stmt->error;
+        }
+    }
+
+} catch (Exception $e) {
+    die("Error: " . $e->getMessage());
+} finally {
+    $conn->close(); // Close the database connection
 }
-
-// Get the logged-in user's ID from the session
-$tbl_user_id = intval($_SESSION['tbl_user_id']); // Ensure the ID is an integer for safety
-
-// Query to get items from the cart for the logged-in user
-$sql = "SELECT * FROM cart WHERE tbl_user_id = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $tbl_user_id);
-$stmt->execute();
-$result = $stmt->get_result();
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -209,16 +270,14 @@ span.price {
                             <h4>Cart
                                 <span class="price" style="color:black">
                                     <i class="fa fa-shopping-cart"></i>
-                                    <b><?php echo $result->num_rows; ?></b>
+                                    <b><?php echo count($cartItems); ?></b>
                                 </span>
                             </h4>
                             <?php
-                            $grandTotal = 0;
-                            if ($result->num_rows > 0) {
-                                while ($row = $result->fetch_assoc()) {
-                                    $itemTotal = $row["price"] * $row["quantity"];
-                                    echo "<p><a href='#'>" . htmlspecialchars($row["name"]) . " (x" . htmlspecialchars($row["quantity"]) . ")</a> <span class='price'>₱" . htmlspecialchars($itemTotal) . "</span></p>";
-                                    $grandTotal += $itemTotal;
+                            if (!empty($cartItems)) {
+                                foreach ($cartItems as $item) {
+                                    $itemTotal = $item["price"] * $item["quantity"];
+                                    echo "<p><a href='#'>" . htmlspecialchars($item["name"]) . " (x" . htmlspecialchars($item["quantity"]) . ")</a> <span class='price'>₱" . htmlspecialchars($itemTotal) . "</span></p>";
                                 }
                                 echo "<hr>";
                                 echo "<p>Total <span class='price' style='color:black'><b>₱" . htmlspecialchars($grandTotal) . "</b></span></p>";
@@ -228,6 +287,7 @@ span.price {
                             ?>
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>
@@ -254,6 +314,4 @@ span.price {
 </body>
 </html>
 
-<?php
-$conn->close();
-?>
+

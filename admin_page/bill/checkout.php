@@ -210,7 +210,7 @@ span.price {
                 <div class="row">
                     <div class="col-75">
                         <div class="container">
-                            <form id="checkoutForm" action="receipt.php" method="POST" onsubmit="return handleCheckout(event)">
+                            <form id="checkoutForm" action="action_page.php" method="POST" onsubmit="return handleCheckout(event)">
                                 <div class="row">
                                     <div class="col-50">
                                         <h3>Billing Address</h3>

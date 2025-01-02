@@ -52,7 +52,7 @@ try {
 
         // Insert data into the checkout table
         $stmt = $conn->prepare("
-            INSERT INTO checkout (user_id, first_name, middle_name, last_name, address, city, zip_code, contact_number, payment_method, grand_total)
+            INSERT INTO checkout (id, firstname, middlename, lastname, address, city, zip_code, contact_number, payment_method, grand_total)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
         $stmt->bind_param(
@@ -66,7 +66,7 @@ try {
             $zipCode,
             $contactNumber,
             $paymentMethod,
-            $grandTotal
+            $grand_Total
         );
 
         if ($stmt->execute()) {

@@ -41,11 +41,6 @@ try {
 
     // Handle form submission
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        // Debug: Check if POST data is received
-        echo "<pre>";
-        print_r($_POST);
-        echo "</pre>";
-
         $firstName = htmlspecialchars($_POST['firstname']);
         $middleName = htmlspecialchars($_POST['Mname']);
         $lastName = htmlspecialchars($_POST['lname']);
@@ -55,17 +50,11 @@ try {
         $contactNumber = htmlspecialchars($_POST['num']);
         $paymentMethod = htmlspecialchars($_POST['payment_method']);
 
-        // Prepare the INSERT statement
+        // Insert data into the checkout table
         $stmt = $conn->prepare("
             INSERT INTO checkout (user_id, first_name, middle_name, last_name, address, city, zip_code, contact_number, payment_method, grand_total)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
-
-        if ($stmt === false) {
-            die("Prepare failed: " . $conn->error);
-        }
-
-        // Bind parameters
         $stmt->bind_param(
             "issssssssd",
             $tbl_user_id,
@@ -80,15 +69,18 @@ try {
             $grandTotal
         );
 
-        // Execute statement
         if ($stmt->execute()) {
+            // Get the last inserted order ID
+            $order_id = $conn->insert_id;
+
+            // Redirect to receipt.php with the order ID
             echo "
             <script>
                 alert('Checkout successful! Your order has been placed.');
-                window.location.href = 'receipt.php';
+                window.location.href = 'receipt.php?order_id=$order_id';
             </script>";
+            exit;
         } else {
-            // Debugging error
             echo "Error: " . $stmt->error;
         }
     }
@@ -99,7 +91,6 @@ try {
     $conn->close(); // Close the database connection
 }
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">

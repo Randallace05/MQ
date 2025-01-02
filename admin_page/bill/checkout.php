@@ -41,6 +41,7 @@ try {
 
     // Handle form submission
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        // Fetch form data
         $firstName = htmlspecialchars($_POST['firstname']);
         $middleName = htmlspecialchars($_POST['Mname']);
         $lastName = htmlspecialchars($_POST['lname']);
@@ -66,24 +67,27 @@ try {
             $zipCode,
             $contactNumber,
             $paymentMethod,
-            $grand_Total
+            $grandTotal
         );
 
         if ($stmt->execute()) {
             // Get the last inserted order ID
             $order_id = $conn->insert_id;
 
-            // Redirect to receipt.php with the order ID
-            echo "
-            <script>
-                alert('Checkout successful! Your order has been placed.');
-                window.location.href = 'receipt.php?order_id=$order_id';
-            </script>";
-            exit;
+            if ($paymentMethod === "Cash on Delivery") {
+                // Redirect to receipt.php for Cash on Delivery
+                header("Location: receipt.php?order_id=$order_id");
+                exit;
+            } else if ($paymentMethod === "Gcash Payment") {
+                // Redirect to ref.php for GCash Payment
+                header("Location: ref.php");
+                exit;
+            }
         } else {
             echo "Error: " . $stmt->error;
         }
     }
+
 
 } catch (Exception $e) {
     die("Error: " . $e->getMessage());
@@ -292,15 +296,19 @@ span.price {
     }
 
     function handleCheckout(event) {
-        const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
-        if (paymentMethod === "Gcash Payment") {
-            event.preventDefault(); // Prevent default form submission
-            window.location.href = "ref.php"; // Redirect to ref.php
-        } else if (paymentMethod === "Cash on Delivery") {
-            return confirm("You have chosen Cash on Delivery. Do you want to proceed to checkout?");
-        }
-        return true; // Allow form submission
+    const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
+
+    if (paymentMethod === "Gcash Payment") {
+        event.preventDefault(); // Prevent default form submission
+        window.location.href = "ref.php"; // Redirect to GCash payment page
+    } else if (paymentMethod === "Cash on Delivery") {
+        // Allow form submission, and backend will handle redirection
+        return true;
     }
+
+    return false; // Prevent form submission for unhandled cases
+}
+
     </script>
 </body>
 </html>

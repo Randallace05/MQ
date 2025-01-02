@@ -1,8 +1,10 @@
 <?php
-$servername = "localhost";  // Your server host
-$username = "root";         // Replace with your MySQL username
-$password = "";             // Replace with your MySQL password
-$dbname = "login_email_verification";  // Database name
+session_start();
+
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "login_email_verification";
 
 // Create a connection to the MySQL server
 $conn = new mysqli($servername, $username, $password, $dbname);
@@ -11,6 +13,38 @@ $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
+
+// Ensure the user is logged in
+if (!isset($_SESSION['tbl_user_id'])) {
+    die("User ID is not set in the session. Please log in.");
+}
+
+$tbl_user_id = intval($_SESSION['tbl_user_id']); // Ensure ID is an integer for safety
+
+// Check if the user exists in the tbl_user table
+$user_check_stmt = $conn->prepare("SELECT * FROM tbl_user WHERE tbl_user_id = ?");
+$user_check_stmt->bind_param("i", $tbl_user_id);
+$user_check_stmt->execute();
+$user_result = $user_check_stmt->get_result();
+
+if ($user_result->num_rows === 0) {
+    die("Invalid user ID. Please log in again.");
+}
+
+// Fetch cart items for the user
+$stmt = $conn->prepare("SELECT * FROM cart WHERE tbl_user_id = ?");
+$stmt->bind_param("i", $tbl_user_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$cartItems = $result->fetch_all(MYSQLI_ASSOC);
+
+// Check if there are cart items
+if (empty($cartItems)) {
+    die("No cart items found for this user.");
+}
+
+// Get the first cart_id (or modify logic as needed)
+$cart_id = $cartItems[0]['cart_id'];
 
 // Check if the form was submitted
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
@@ -37,15 +71,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 
     // Prepare SQL statement to prevent SQL injection
-    $stmt = $conn->prepare("INSERT INTO checkout (firstname, middlename, lastname, address, city, zip_code, contact_number, payment_method)
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt = $conn->prepare("
+        INSERT INTO checkout (cart, tbl_user_id, firstname, middlename, lastname, address, city, zip_code, contact_number, payment_method)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ");
     if ($stmt === false) {
         die("Error preparing SQL statement: " . $conn->error);
     }
 
     // Bind parameters
     $stmt->bind_param(
-        "ssssssss",
+        "iissssssss",
+        $cart_id,
+        $tbl_user_id,
         $first_name,
         $middle_name,
         $last_name,
@@ -59,7 +97,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Execute the query
     if ($stmt->execute()) {
         // Redirect to a confirmation page
-        header("Location: ref.php");
+        header("Location: receipt.php");
         exit;
     } else {
         echo "Error: " . $stmt->error;
@@ -69,6 +107,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $stmt->close();
 }
 
+
 // Close the database connection
 $conn->close();
 ?>
+

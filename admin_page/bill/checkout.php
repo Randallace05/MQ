@@ -214,7 +214,7 @@ span.price {
                 <div class="row">
                     <div class="col-75">
                         <div class="container">
-                            <form id="checkoutForm" action="action_page.php" method="POST" onsubmit="return handleCheckout(event)">
+                        <form id="checkoutForm" action="action_page.php" method="POST" enctype="multipart/form-data" onsubmit="return handleCheckout(event)">
                                 <div class="row">
                                     <div class="col-50">
                                         <h3>Billing Address</h3>
@@ -242,16 +242,21 @@ span.price {
                                     <div class="col-50">
                                         <h3>Payment</h3>
                                         <label>
-                                            <input type="radio" name="payment_method" value="Cash on Delivery" onclick="togglePaymentImage(false)" required> Cash on Delivery
+                                            <input type="radio" name="payment_method" value="Cash on Delivery" onclick="togglePaymentFields(false)" required> Cash on Delivery
                                         </label>
                                         <br>
                                         <label>
-                                            <input type="radio" name="payment_method" value="Gcash Payment" onclick="togglePaymentImage(true)" required> GCash Payment
+                                            <input type="radio" name="payment_method" value="Gcash Payment" onclick="togglePaymentFields(true)" required> GCash Payment
                                         </label>
                                         <div id="gcash-image" style="display:none; margin-top: 10px;">
                                             <img src="../../uploads/gcash.png" alt="Gcash Payment" style="max-width: 100%; height: auto;">
                                         </div>
+                                        <div id="gcash-upload" style="display:none; margin-top: 10px;">
+                                            <label for="gcash-proof">Upload GCash Payment Proof</label>
+                                            <input type="file" id="gcash-proof" name="gcash_proof" accept="image/*">
+                                        </div>
                                     </div>
+
                                 </div>
                                 <label>
                                     <input type="checkbox" checked="checked" name="sameadr"> Shipping address same as billing
@@ -290,26 +295,37 @@ span.price {
 
     <!-- Scripts -->
     <script>
-    function togglePaymentImage(show) {
+    function togglePaymentFields(show) {
         const gcashImage = document.getElementById('gcash-image');
+        const gcashUpload = document.getElementById('gcash-upload');
+
         gcashImage.style.display = show ? 'block' : 'none';
+        gcashUpload.style.display = show ? 'block' : 'none';
     }
+
 
     function handleCheckout(event) {
-    const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
+        const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
 
-    if (paymentMethod === "Gcash Payment") {
-        event.preventDefault(); // Prevent default form submission
-        window.location.href = "ref.php"; // Redirect to GCash payment page
-    } else if (paymentMethod === "Cash on Delivery") {
-        // Allow form submission, and backend will handle redirection
-        return true;
+        // Show a confirmation dialog
+        const confirmation = confirm("Are you sure you want to proceed with the checkout?");
+        if (!confirmation) {
+            event.preventDefault(); // Stop form submission if the user cancels
+            return false;
+        }
+
+        if (paymentMethod === "Gcash Payment") {
+            event.preventDefault(); // Prevent default form submission
+            window.location.href = "receipt.php"; // Redirect to GCash payment page
+        } else if (paymentMethod === "Cash on Delivery") {
+            // Allow form submission, and backend will handle redirection
+            return true;
+        }
+
+        return false; // Prevent form submission for unhandled cases
     }
+</script>
 
-    return false; // Prevent form submission for unhandled cases
-}
-
-    </script>
 </body>
 </html>
 

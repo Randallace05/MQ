@@ -70,18 +70,33 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         die("Invalid payment method selected. Please go back and try again.");
     }
 
+    // Handle GCash payment proof upload
+    $gcash_proof_path = null;
+    if ($payment_method === "Gcash Payment" && isset($_FILES['gcash_proof']) && $_FILES['gcash_proof']['error'] === UPLOAD_ERR_OK) {
+        $upload_dir = '../../uploads/payment_proofs/';
+        if (!is_dir($upload_dir)) {
+            mkdir($upload_dir, 0777, true); // Create directory if it doesn't exist
+        }
+
+        $file_name = uniqid() . '_' . basename($_FILES['gcash_proof']['name']);
+        $upload_file = $upload_dir . $file_name;
+
+        if (move_uploaded_file($_FILES['gcash_proof']['tmp_name'], $upload_file)) {
+            $gcash_proof_path = $file_name;
+        } else {
+            die("Error uploading GCash payment proof. Please try again.");
+        }
+    }
+
     // Prepare SQL statement to prevent SQL injection
-    $stmt = $conn->prepare("
-        INSERT INTO checkout (cart, tbl_user_id, firstname, middlename, lastname, address, city, zip_code, contact_number, payment_method)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ");
+    $stmt = $conn->prepare("INSERT INTO checkout (cart, tbl_user_id, firstname, middlename, lastname, address, city, zip_code, contact_number, payment_method, gcash_proof) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
     if ($stmt === false) {
         die("Error preparing SQL statement: " . $conn->error);
     }
 
     // Bind parameters
     $stmt->bind_param(
-        "iissssssss",
+        "iisssssssss",
         $cart_id,
         $tbl_user_id,
         $first_name,
@@ -91,13 +106,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $city,
         $zip_code,
         $contact_number,
-        $payment_method
+        $payment_method,
+        $gcash_proof_path
     );
 
     // Execute the query
     if ($stmt->execute()) {
-        // Redirect to a confirmation page
-        header("Location: receipt.php");
+        // Redirect based on payment method
+        $order_id = $conn->insert_id;
+        if ($payment_method === "Cash on Delivery") {
+            header("Location: receipt.php?order_id=$order_id");
+        } elseif ($payment_method === "Gcash Payment") {
+            header("Location: receipt.php?order_id=$order_id");
+        }
         exit;
     } else {
         echo "Error: " . $stmt->error;
@@ -107,8 +128,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $stmt->close();
 }
 
-
 // Close the database connection
 $conn->close();
 ?>
-

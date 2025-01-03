@@ -172,7 +172,7 @@ span.price {
                 <!-- Begin Page Content -->
                 <div class="container-fluid">
                 <div class="upload-form-container">
-                      <form action="uploadcon.php" method="POST" enctype="multipart/form-data">
+                      <form action="receipt.php" method="POST" enctype="multipart/form-data">
                           <h2>Upload File</h2>
                           <div class="form-group">
                               <label for="file">Choose File</label>

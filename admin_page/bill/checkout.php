@@ -40,6 +40,7 @@ try {
     }
 
     // Handle form submission
+   // Check if the form was submitted
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Fetch form data
         $firstName = htmlspecialchars($_POST['firstname']);
@@ -51,13 +52,30 @@ try {
         $contactNumber = htmlspecialchars($_POST['num']);
         $paymentMethod = htmlspecialchars($_POST['payment_method']);
 
+        // Optional: Handle Gcash payment proof upload
+        $gcashProofPath = null;
+        if ($paymentMethod === 'Gcash Payment' && isset($_FILES['gcash_proof']) && $_FILES['gcash_proof']['error'] === UPLOAD_ERR_OK) {
+            $uploadDir = '../../uploads/payment_proofs/';
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0777, true); // Create directory if it doesn't exist
+            }
+            $fileName = uniqid() . '_' . basename($_FILES['gcash_proof']['name']);
+            $uploadFile = $uploadDir . $fileName;
+
+            if (move_uploaded_file($_FILES['gcash_proof']['tmp_name'], $uploadFile)) {
+                $gcashProofPath = $fileName;
+            } else {
+                die("Error uploading GCash payment proof. Please try again.");
+            }
+        }
+
         // Insert data into the checkout table
         $stmt = $conn->prepare("
-            INSERT INTO checkout (id, firstname, middlename, lastname, address, city, zip_code, contact_number, payment_method, grand_total)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO checkout (id, firstname, middlename, lastname, address, city, zip_code, contact_number, payment_method, gcash_proof, grand_total)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
         $stmt->bind_param(
-            "issssssssd",
+            "isssssssssd",
             $tbl_user_id,
             $firstName,
             $middleName,
@@ -67,6 +85,7 @@ try {
             $zipCode,
             $contactNumber,
             $paymentMethod,
+            $gcashProofPath,
             $grandTotal
         );
 
@@ -74,15 +93,13 @@ try {
             // Get the last inserted order ID
             $order_id = $conn->insert_id;
 
+            // Redirect based on payment method
             if ($paymentMethod === "Cash on Delivery") {
-                // Redirect to receipt.php for Cash on Delivery
                 header("Location: receipt.php?order_id=$order_id");
-                exit;
-            } else if ($paymentMethod === "Gcash Payment") {
-                // Redirect to ref.php for GCash Payment
-                header("Location: ref.php");
-                exit;
+            } elseif ($paymentMethod === "Gcash Payment") {
+                header("Location: ref.php?order_id=$order_id");
             }
+            exit;
         } else {
             echo "Error: " . $stmt->error;
         }
@@ -303,27 +320,17 @@ span.price {
         gcashUpload.style.display = show ? 'block' : 'none';
     }
 
-
     function handleCheckout(event) {
-        const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
-
         // Show a confirmation dialog
         const confirmation = confirm("Are you sure you want to proceed with the checkout?");
         if (!confirmation) {
             event.preventDefault(); // Stop form submission if the user cancels
             return false;
         }
-
-        if (paymentMethod === "Gcash Payment") {
-            event.preventDefault(); // Prevent default form submission
-            window.location.href = "receipt.php"; // Redirect to GCash payment page
-        } else if (paymentMethod === "Cash on Delivery") {
-            // Allow form submission, and backend will handle redirection
-            return true;
-        }
-
-        return false; // Prevent form submission for unhandled cases
+        // Allow the form to submit and backend to handle the rest
+        return true;
     }
+
 </script>
 
 </body>

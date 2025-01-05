@@ -17,7 +17,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
 }
 
 // Get the logged-in user's ID securely from the session
-$tbl_user_id = intval($_SESSION['tbl_user_id']);
+$tbl_user_id = intval($_SESSION['unique_id']);
 
 // Fetch user information
 $user_query = $conn->prepare("SELECT first_name, last_name, contact_number, email, username, password FROM tbl_user WHERE tbl_user_id = ?");

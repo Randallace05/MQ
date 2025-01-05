@@ -15,11 +15,11 @@ if ($conn->connect_error) {
 }
 
 // Ensure the user is logged in
-if (!isset($_SESSION['tbl_user_id'])) {
+if (!isset($_SESSION['unique_id'])) {
     die("User ID is not set in the session. Please log in.");
 }
 
-$tbl_user_id = intval($_SESSION['tbl_user_id']); // Ensure ID is an integer for safety
+$tbl_user_id = intval($_SESSION['unique_id']); // Ensure ID is an integer for safety
 
 // Check if the user exists in the tbl_user table
 $user_check_stmt = $conn->prepare("SELECT * FROM tbl_user WHERE tbl_user_id = ?");

@@ -92,7 +92,7 @@ if (isset($_POST['add_to_cart'])) {
 
 // Add to wishlist logic
 if (isset($_POST['add_to_wishlist'])) {
-    $tbl_user_id = $_SESSION['tbl_user_id']; // Assuming you store the user ID in the session
+    $tbl_user_id = $_SESSION['unique_id']; // Assuming you store the user ID in the session
 
     // Check if the product is already in the wishlist
     $check_wishlist = $conn->prepare("SELECT * FROM wishlist WHERE product_id = ? AND tbl_user_id = ?");

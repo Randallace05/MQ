@@ -64,7 +64,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     echo "
                     <script>
                         alert('Welcome Admin, Login Successful!');
-                        window.location.href = '../admin_page/dashboard/index.php'; // Admin dashboard
+                        window.location.href = '../admin_page/chat/users .php'; // Admin dashboard
                     </script>";
                     break;
                 case 'customer':

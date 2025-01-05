@@ -36,7 +36,7 @@ $related_products = $related_products_result->fetch_all(MYSQLI_ASSOC);
 // Add to cart logic
 if (isset($_POST['add_to_cart'])) {
     // Check if the user is logged in
-    $tbl_user_id = $_SESSION['tbl_user_id'] ?? null; // Ensure user ID is retrieved from session
+    $tbl_user_id = $_SESSION['unique_id'] ?? null; // Ensure user ID is retrieved from session
     if (!$tbl_user_id) {
         $_SESSION['error_message'] = "You need to log in to add items to your cart.";
         header("Location: " . $_SERVER['REQUEST_URI']); // Redirect to refresh the page

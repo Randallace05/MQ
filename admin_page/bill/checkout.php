@@ -24,7 +24,7 @@ try {
     }
 
     // Get logged-in user's ID
-    $tbl_user_id = intval($_SESSION['tbl_user_id']); // Ensure ID is an integer for safety
+    $tbl_user_id = intval($_SESSION['unique_id']); // Ensure ID is an integer for safety
 
     // Fetch cart items for the user
     $stmt = $conn->prepare("SELECT * FROM cart WHERE tbl_user_id = ?");

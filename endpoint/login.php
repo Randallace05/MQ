@@ -1,10 +1,13 @@
 <?php
-ini_set('session.use_only_cookies', 1); // Use cookies only
-ini_set('session.cookie_httponly', 1); // Prevent JavaScript access to session
-session_start([
-    'cookie_lifetime' => 3600, // Session expires in 1 hour
-    'cookie_secure' => isset($_SERVER['HTTPS']), // Secure only if HTTPS
-]);
+// ini_set('session.use_only_cookies', 1); // Use cookies only
+// ini_set('session.cookie_httponly', 1); // Prevent JavaScript access to session
+// session_start([
+//     'cookie_lifetime' => 3600, // Session expires in 1 hour
+//     'cookie_secure' => isset($_SERVER['HTTPS']), // Secure only if HTTPS
+// ]);
+
+// Initialize session
+session_start();
 
 // Include the database connection
 include('../conn/conn.php');
@@ -25,7 +28,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // Prepare the SQL query to fetch user data
-    $query = "SELECT tbl_user_id, `password`, `username`, `user_role` FROM `tbl_user` WHERE `username` = ?";
+    $query = "SELECT tbl_user_id AS unique_id, `password`, `username`, `user_role` FROM `tbl_user` WHERE `username` = ?";
     $stmt = $conn->prepare($query);
     if ($stmt === false) {
         die("Error preparing statement: " . $conn->error);
@@ -40,7 +43,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stored_password = $user['password'];
         $stored_username = $user['username'];
         $user_role = $user['user_role'];
-        $tbl_user_id = $user['tbl_user_id'];
+        $unique_id = $user['unique_id']; // Renamed tbl_user_id to unique_id
 
         // Verify the entered password against the stored hashed password
         if (password_verify($password, $stored_password)) {
@@ -53,7 +56,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION['loggedin'] = true;
             $_SESSION['username'] = $stored_username;
             $_SESSION['user_role'] = $user_role;
-            $_SESSION['tbl_user_id'] = $tbl_user_id; // Store user ID in the session
+            $_SESSION['unique_id'] = $unique_id; // Use unique_id for consistency
 
             // Redirect based on user role
             switch ($user_role) {

@@ -16,7 +16,7 @@ include("../includes/topbar1.php");
 include '../conn/conn.php'; // Replace with your actual database connection file
 
 // Get logged-in user's ID
-$tbl_user_id = intval($_SESSION['tbl_user_id']);
+$tbl_user_id = intval($_SESSION['unique_id']);
 
 // Fetch wishlist items for the user
 $sql = "SELECT wish_id, w.product_id, p.name AS product_name, p.price, p.image AS product_image

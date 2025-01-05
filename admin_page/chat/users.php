@@ -1,50 +1,42 @@
 <?php 
   session_start();
-  include_once '../../conn/conn.php'; // Include the database connection
+  include_once "php/config.php";
+  if(!isset($_SESSION['tbl_user_id'])){
+    header("location: ../../index.php");
+  }
 ?>
 <?php include_once "header.php"; ?>
-
 <body>
   <div class="wrapper">
-    <section class="chat-area">
+    <section class="users">
       <header>
-        <?php 
-          // Get and validate user_id from the URL
-          $user_id = filter_input(INPUT_GET, 'user_id', FILTER_SANITIZE_NUMBER_INT);
-
-          // Prepare and execute the query using MySQLi
-          $stmt = $conn->prepare("SELECT * FROM tbl_user WHERE unique_id = ?");
-          $stmt->bind_param("i", $user_id);  // 'i' indicates integer parameter
-          $stmt->execute();
-          $result = $stmt->get_result();
-
-          // Check if user exists
-          if ($result->num_rows > 0) {
-            $row = $result->fetch_assoc();
-          } else {
-            header("location: users.php");
-            exit(); // Ensure no further code runs
-          }
-        ?>
-        <a href="users.php" class="back-icon"><i class="fas fa-arrow-left"></i></a>
-        <img src="php/images/<?php echo htmlspecialchars($row['img']); ?>" alt="User Image">
-        <div class="details">
-          <span><?php echo htmlspecialchars($row['fname']) . " " . htmlspecialchars($row['lname']); ?></span>
-          <p><?php echo htmlspecialchars($row['status']); ?></p>
+        <div class="content">
+          <?php 
+            $sql = mysqli_query($conn, "SELECT * FROM tbl_user WHERE tbl_user_id = {$_SESSION['tbl_user_id']}");
+            if(mysqli_num_rows($sql) > 0){
+              $row = mysqli_fetch_assoc($sql);
+            }
+          ?>
+          <!-- <img src="php/images/<?php echo $row['img']; ?>" alt=""> -->
+          <div class="details">
+            <span><?php echo $row['first_name']. " " . $row['last_name'] ?></span>
+            <p><?php echo $row['status']; ?></p>
+          </div>
         </div>
+        <a href="php/logout.php?logout_id=<?php echo $row['unique_id']; ?>" class="logout">Logout</a>
       </header>
-      <div class="chat-box">
-        <!-- Chat messages will go here -->
+      <div class="search">
+        <span class="text">Select an user to start chat</span>
+        <input type="text" placeholder="Enter name to search..."> 
+        <button><i class="fas fa-search"></i></button>
       </div>
-      <form action="#" class="typing-area">
-        <input type="text" class="incoming_id" name="incoming_id" value="<?php echo htmlspecialchars($user_id); ?>" hidden>
-        <input type="text" name="message" class="input-field" placeholder="Type a message here..." autocomplete="off">
-        <button><i class="fab fa-telegram-plane"></i></button>
-      </form>
+      <div class="users-list">
+  
+      </div>
     </section>
   </div>
 
-  <script src="javascript/chat.js"></script>
+  <script src="javascript/users.js"></script>
 
 </body>
 </html>

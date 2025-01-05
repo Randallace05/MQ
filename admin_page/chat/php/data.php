@@ -38,8 +38,8 @@ if (isset($users) && is_array($users)) {
 
             // Escape output to prevent XSS attacks
             $unique_id = htmlspecialchars($row['unique_id']);
-            $fname = htmlspecialchars($row['fname']);
-            $lname = htmlspecialchars($row['lname']);
+            $fname = htmlspecialchars($row['first_name']);
+            $lname = htmlspecialchars($row['last_name']);
             $img = htmlspecialchars($row['img']);
             $you = htmlspecialchars($you);
             $msg = htmlspecialchars($msg);

@@ -15,7 +15,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
 }
 
 // Get the logged-in user's ID
-$tbl_user_id = intval($_SESSION['tbl_user_id']); // Assuming `tbl_user_id` is securely stored in the session
+$tbl_user_id = intval($_SESSION['unique_id']); // Assuming `tbl_user_id` is securely stored in the session
 
 // Delete related records from the checkout table first
 $delete_checkout_query = $conn->prepare("

@@ -212,7 +212,7 @@
     include("../conn/conn.php");
 
     // Retrieve user ID from session
-    $tbl_user_id = $_SESSION['tbl_user_id'] ?? null;
+    $tbl_user_id = $_SESSION['unique_id'] ?? null;
 
     // Initialize cart count
     $row_count = 0;

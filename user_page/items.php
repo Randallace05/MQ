@@ -115,7 +115,7 @@ if (isset($_POST['add_to_wishlist'])) {
 }
 // Handle review submission
 if (isset($_POST['submit_review'])) {
-    $tbl_user_id = $_SESSION['tbl_user_id'] ?? null;
+    $tbl_user_id = $_SESSION['unique_id'] ?? null;
     if (!$tbl_user_id) {
         $_SESSION['error_message'] = "You need to log in to submit a review.";
         header("Location: " . $_SERVER['REQUEST_URI']);

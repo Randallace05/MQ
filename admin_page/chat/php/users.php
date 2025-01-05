@@ -2,7 +2,7 @@
 session_start();
 include_once "../../../conn/conn.php"; // Adjust the path as necessary
 
-$outgoing_id = $_SESSION['unique_id'];
+$outgoing_id = $_SESSION['tbl_user_id'];
 
 // Prepare the SQL query using MySQLi
 $sql = "SELECT * FROM tbl_user WHERE unique_id != ? ORDER BY tbl_user_id DESC";

@@ -17,7 +17,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
 }
 
 // Get the logged-in user's ID securely from the session
-$tbl_user_id = intval($_SESSION['unique_id']);
+$tbl_user_id = intval($_SESSION['tbl_user_id']);
 
 // Check if the cart is empty
 $cart_empty_query = $conn->prepare("SELECT COUNT(*) AS total_items FROM `cart` WHERE tbl_user_id = ?");

@@ -465,7 +465,7 @@ include '../conn/conn.php';
             <h3 class="mb-4">Customer Reviews</h3>
 
             <!-- Review Submission Form -->
-            <?php if (isset($_SESSION['tbl_user_id'])): ?>
+            <?php if (isset($_SESSION['unique_id'])): ?>
                 <form method="post" class="mb-4 p-4 border rounded bg-light">
                     <div class="mb-3">
                         <label for="review_text" class="form-label" style="font-weight: bold;">Write a Review:</label>

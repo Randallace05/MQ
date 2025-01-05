@@ -1,6 +1,9 @@
 <!-- session -->
  <?php
  include("endpoint/session_config.php");
+//  if(!isset($_SESSION['unique_id'])){
+//     header("location: user_page/shop.php");
+//   } eedit pa to pag admin sa admin page
  ?>
 
 <head>

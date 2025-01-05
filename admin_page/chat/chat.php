@@ -1,43 +1,39 @@
 <?php 
   session_start();
-  include_once "../../conn/conn.php";
-  
-  // Redirect to login if session is not set
-  // if(!isset($_SESSION['unique_id'])){
-  //   header("location: ../../index.php");
-  //   exit();
-  // }
-  
-  // Check if user_id is set in the URL
-  // if (!isset($_GET['tbl_user_id'])) {
-  //   header("location: users.php");
-  //   exit();
-  // }
-  
-  $user_id = $_GET['tbl_user_id'];
+  include_once "php/config.php";
 
-  // Prepare the query to fetch user details
-  $stmt = $conn->prepare("SELECT * FROM tbl_user WHERE unique_id = ?");
-  $stmt->bind_param('i', $user_id); // Bind the user_id as an integer parameter
-  $stmt->execute();
-  $result = $stmt->get_result();
+  // Check if session variable is set
+  if (!isset($_SESSION['unique_id'])) {
+      header("location: ../../index.php");
+      exit;
+  }
 
-  if ($result->num_rows > 0) {
-    $row = $result->fetch_assoc();
+  // Ensure the `tbl_user_id` is passed in the URL
+  if (!isset($_GET['tbl_user_id']) || empty($_GET['tbl_user_id'])) {
+      header("location: users.php");
+      exit;
+  }
+
+  $user_id = mysqli_real_escape_string($conn, $_GET['tbl_user_id']); // Sanitize input
+
+  // Fetch user data
+  $sql = mysqli_query($conn, "SELECT * FROM tbl_user WHERE unique_id = '{$user_id}'");
+  if ($sql && mysqli_num_rows($sql) > 0) {
+      $row = mysqli_fetch_assoc($sql);
   } else {
-    header("location: users.php");
-    exit();
+      header("location: users.php");
+      exit;
   }
 ?>
 <?php include_once "header.php"; ?>
-<body>
+<body>  
   <div class="wrapper">
     <section class="chat-area">
       <header>
         <a href="users.php" class="back-icon"><i class="fas fa-arrow-left"></i></a>
         <img src="php/images/<?php echo htmlspecialchars($row['img']); ?>" alt="">
         <div class="details">
-          <span><?php echo htmlspecialchars($row['fname'] . " " . $row['lname']); ?></span>
+          <span><?php echo htmlspecialchars($row['first_name']) . " " . htmlspecialchars($row['last_name']); ?></span>
           <p><?php echo htmlspecialchars($row['status']); ?></p>
         </div>
       </header>
@@ -53,6 +49,5 @@
   </div>
 
   <script src="javascript/chat.js"></script>
-
 </body>
 </html>

@@ -282,14 +282,46 @@ span.price {
                             </form>
                         </div>
                     </div>
-                    <div class="col-25">
-                        <div class="container">
-                            <h4>Cart
-                                <span class="price" style="color:black">
-                                    <i class="fa fa-shopping-cart"></i>
-                                    <b><?php echo count($cartItems); ?></b>
-                                </span>
-                            </h4>
+                    <div class="col-25"> 
+    <div class="container">
+        <h4>Cart
+            <span class="price" style="color:black">
+                <i class="fa fa-shopping-cart"></i>
+                <b><?php echo count($cartItems); ?></b>
+            </span>
+        </h4>
+        <?php
+        $shippingFee = 60; // Fixed shipping fee
+        $totalPrice = 0;
+
+        foreach ($cartItems as $item) {
+            // Assuming each item has 'name', 'price', and 'quantity' properties
+            $itemTotal = $item['price'] * $item['quantity'];
+            $totalPrice += $itemTotal;
+        ?>
+            <p>
+                <a href="#"><?php echo $item['name']; ?></a>
+                <span class="price"><?php echo '₱' . number_format($itemTotal, 2); ?></span>
+            </p>
+        <?php } ?>
+
+        <!-- Display shipping fee -->
+        <p>
+            <a href="#">Shipping Fee</a>
+            <span class="price"><?php echo '₱' . number_format($shippingFee, 2); ?></span>
+        </p>
+
+        <!-- Calculate and display total price including shipping -->
+        <?php $totalPrice += $shippingFee; ?>
+        <hr>
+        <p>
+            <b>Total</b>
+            <span class="price" style="color:black">
+                <b><?php echo '₱' . number_format($totalPrice, 2); ?></b>
+            </span>
+        </p>
+    </div>
+</div>
                             <?php
                             if (!empty($cartItems)) {
                                 foreach ($cartItems as $item) {

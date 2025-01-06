@@ -17,7 +17,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
 }
 
 // Get the logged-in user's ID securely from the session
-$tbl_user_id = intval($_SESSION['unique_id']);
+$tbl_user_id = intval($_SESSION['tbl_user_id']);
 
 // Check if the cart is empty
 $cart_empty_query = $conn->prepare("SELECT COUNT(*) AS total_items FROM `cart` WHERE tbl_user_id = ?");
@@ -127,6 +127,48 @@ if (isset($_POST['update_product_quantity'])) {
             background-color: #f4f4f4;
         }
 
+        .select-all-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .select-all-label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .select-all-label input[type="checkbox"] {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #ccc;
+            border-radius: 50%;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .select-all-label input[type="checkbox"]:checked {
+            background-color:rgb(255, 0, 0);
+            border-color:rgb(255, 0, 0);
+        }
+
+        .select-all-label input[type="checkbox"]:checked::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 10px;
+            height: 10px;
+            background-color: white;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+
         .bottom-btn {
             display: inline-block;
             background-color:rgb(255, 0, 0);
@@ -154,6 +196,12 @@ if (isset($_POST['update_product_quantity'])) {
 <div class="container cart-container">
     <section class="shopping_cart">
         <h1 class="heading">My Cart</h1>
+        <div class="select-all-container">
+            <label class="select-all-label">
+                <input type="checkbox" id="select-all">
+                <span>Select all (<span id="item-count"></span>)</span>
+            </label>
+        </div>
         <form id="cart-form" method="POST">
             <table>
                 <?php
@@ -165,6 +213,7 @@ if (isset($_POST['update_product_quantity'])) {
                 if ($result->num_rows > 0) {
                     echo "<thead>
                         <tr>
+                            <th>Select</th>
                             <th>Sl No</th>
                             <th>Product Name</th>
                             <th>Product Image</th>
@@ -180,6 +229,9 @@ if (isset($_POST['update_product_quantity'])) {
                     while ($fetch_cart_products = $result->fetch_assoc()) {
                         ?>
                         <tr>
+                            <td>
+                                <input type="checkbox" name="select_product[]" value="<?php echo $fetch_cart_products['cart_id']; ?>">
+                            </td>
                             <td><?php echo $sl_no++; ?></td>
                             <td><?php echo htmlspecialchars($fetch_cart_products['name']); ?></td>
                             <td>
@@ -214,7 +266,7 @@ if (isset($_POST['update_product_quantity'])) {
                     }
                     echo "</tbody>";
                 } else {
-                    echo "<tr><td colspan='7'>No products in the cart</td></tr>";
+                    echo "<tr><td colspan='8'>No products in the cart</td></tr>";
                 }
                 ?>
             </table>
@@ -244,5 +296,54 @@ if (isset($_POST['update_product_quantity'])) {
         </a>
     </section>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const selectAllCheckbox = document.getElementById('select-all');
+    const checkboxes = document.querySelectorAll('input[name="select_product[]"]');
+    const itemCount = document.getElementById('item-count');
+    const totalPriceElement = document.querySelector('.table_bottom h3.bottom-btn');
+    const checkoutButton = document.querySelector('.table_bottom a[href="../admin_page/bill/checkout.php"]');
+
+    // Update total items count
+    itemCount.textContent = checkboxes.length;
+
+    // Function to calculate the total price of selected items
+    function calculateTotal() {
+        let total = 0;
+        checkboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                const row = checkbox.closest('tr');
+                const priceCell = row.querySelector('td:nth-child(7)');
+                total += parseFloat(priceCell.textContent.replace('₱', ''));
+            }
+        });
+        totalPriceElement.textContent = 'Total: ₱' + total.toFixed(2);
+
+        // Enable or disable the checkout button
+        checkoutButton.classList.toggle('disabled', total === 0);
+        checkoutButton.style.pointerEvents = total === 0 ? 'none' : 'auto';
+        checkoutButton.style.opacity = total === 0 ? '0.5' : '1';
+    }
+
+    // Select/Deselect all checkboxes
+    selectAllCheckbox.addEventListener('change', function () {
+        checkboxes.forEach(checkbox => checkbox.checked = this.checked);
+        calculateTotal();
+    });
+
+    // Update "Select All" state and recalculate total when individual checkboxes are toggled
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function () {
+            selectAllCheckbox.checked = [...checkboxes].every(cb => cb.checked);
+            calculateTotal();
+        });
+    });
+
+    // Initial total calculation
+    calculateTotal();
+});
+</script>
+
 </body>
 </html>

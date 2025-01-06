@@ -11,21 +11,61 @@ $conn = new mysqli($host, $user, $password, $database);
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-// Fetch user data (e.g., the logged-in user)
-$user_id = 25; // Example user_id
-$user_sql = "SELECT * FROM tbl_user WHERE tbl_user_id = $user_id";
+// Check if the user is logged in
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+    echo "
+    <script>
+        alert('You must log in to access the cart.');
+        window.location.href = '../index.php'; // Redirect to the login page
+    </script>";
+    exit;
+}
+
+// Get the logged-in user's ID securely from the session
+$tbl_user_id = intval($_SESSION['unique_id']); // Example user ID
+$user_sql = "SELECT first_name, last_name FROM tbl_user WHERE tbl_user_id = $tbl_user_id";
 $user_result = $conn->query($user_sql);
-$user = $user_result->fetch_assoc();
+if ($user_result && $user_result->num_rows > 0) {
+    $user = $user_result->fetch_assoc();
+} else {
+    $user = ['first_name' => 'Guest', 'last_name' => 'User']; // Default values
+}
 
 // Fetch checkout details
-$checkout_sql = "SELECT * FROM checkout LIMIT 1";
+$checkout_sql = "SELECT address, payment_method FROM checkout WHERE tbl_user_id = $tbl_user_id";
 $checkout_result = $conn->query($checkout_sql);
-$checkout = $checkout_result->fetch_assoc();
+if ($checkout_result && $checkout_result->num_rows > 0) {
+    $checkout = $checkout_result->fetch_assoc();
+} else {
+    $checkout = ['address' => 'No Address Provided', 'payment_method' => 'Not Specified']; // Default values
+}
 
-// Fetch cart items
-$cart_sql = "SELECT * FROM cart WHERE tbl_user_id = $user_id";
+// Fetch cart items and calculate total
+$cart_sql = "SELECT name, price, quantity FROM cart WHERE tbl_user_id = $tbl_user_id";
 $cart_result = $conn->query($cart_sql);
+if (!$cart_result || $cart_result->num_rows == 0) {
+    die("No items in the cart for this user.");
+}
+
+$subtotal = 0;
+$shipping_fee = 60; // Fixed shipping fee
+while ($row = $cart_result->fetch_assoc()) {
+    $subtotal += $row['price'] * $row['quantity'];
+}
+$grand_total = $subtotal + $shipping_fee;
+
+// Insert order into the database
+$order_sql = "INSERT INTO orders (tbl_user_id, total_amount, shipping_address, payment_method)
+              VALUES ($tbl_user_id, $grand_total, '{$checkout['address']}', '{$checkout['payment_method']}')";
+if ($conn->query($order_sql) === TRUE) {
+    $order_id = $conn->insert_id; // Get the auto-incremented order ID
+} else {
+    die("Error: " . $conn->error);
+}
 ?>
 
 <!DOCTYPE html>
@@ -35,6 +75,7 @@ $cart_result = $conn->query($cart_sql);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order Receipt</title>
     <style>
+        /* Styles for the receipt */
         body {
             font-family: Arial, sans-serif;
             background-color: #f5f5f5;
@@ -95,8 +136,8 @@ $cart_result = $conn->query($cart_sql);
             <p>Thank you for your purchase!</p>
         </div>
         <div class="receipt-details">
-            <p><strong>Order Number:</strong> 123456</p>
-            <p><strong>Order Date:</strong> <?php echo date('Y-m-d'); ?></p>
+            <p><strong>Order Number:</strong> <?php echo $order_id; ?></p>
+            <p><strong>Order Date:</strong> <?php echo date('Y-m-d H:i:s'); ?></p>
             <p><strong>Customer Name:</strong> <?php echo $user['first_name'] . ' ' . $user['last_name']; ?></p>
             <p><strong>Shipping Address:</strong> <?php echo $checkout['address']; ?></p>
             <p><strong>Payment Method:</strong> <?php echo $checkout['payment_method']; ?></p>
@@ -113,22 +154,22 @@ $cart_result = $conn->query($cart_sql);
                 </thead>
                 <tbody>
                     <?php
-                    $total_price = 0;
+                    $cart_result = $conn->query($cart_sql); // Reset the cart query
                     while ($row = $cart_result->fetch_assoc()) {
                         $item_total = $row['price'] * $row['quantity'];
-                        $total_price += $item_total;
                         echo "<tr>
                                 <td>{$row['name']}</td>
                                 <td>{$row['quantity']}</td>
-                                <td>\${$row['price']}</td>
-                                <td>\${$item_total}</td>
+                                <td>₱" . number_format($row['price'], 2) . "</td>
+                                <td>₱" . number_format($item_total, 2) . "</td>
                               </tr>";
                     }
                     ?>
                 </tbody>
             </table>
-            <p class="total">Subtotal: $<?php echo number_format($total_price, 2); ?></p>
-            <p class="total">Total: $<?php echo number_format($total_price * 1.08, 2); // Including 8% tax ?></p>
+            <p class="total">Subtotal: ₱<?php echo number_format($subtotal, 2); ?></p>
+            <p class="total">Shipping Fee: ₱<?php echo number_format($shipping_fee, 2); ?></p>
+            <p class="total">Grand Total: ₱<?php echo number_format($grand_total, 2); ?></p>
         </div>
         <div class="footer">
             <p>If you have any questions about your order, please contact us at support@example.com.</p>

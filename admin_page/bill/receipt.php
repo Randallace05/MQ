@@ -172,7 +172,7 @@ if ($conn->query($order_sql) === TRUE) {
             <p class="total">Grand Total: ₱<?php echo number_format($grand_total, 2); ?></p>
         </div>
         <div class="footer">
-            <p>If you have any questions about your order, please contact us at support@example.com.</p>
+            <p>If you have any questions about your order, please contact us at mqsupport@gmail.com.</p>
         </div>
     </div>
     <div class="button-container">

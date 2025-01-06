@@ -7,7 +7,7 @@ if (!isset($_SESSION['unique_id'])) {
     exit;
 }
 
-$sql = mysqli_query($conn, "SELECT * FROM tbl_user WHERE unique_id = {$_SESSION['unique_id']}");
+$sql = mysqli_query($conn, "SELECT * FROM tbl_user WHERE tbl_user_id = {$_SESSION['unique_id']}");
 if (mysqli_num_rows($sql) > 0) {
     $row = mysqli_fetch_assoc($sql);
 } else {
@@ -15,6 +15,7 @@ if (mysqli_num_rows($sql) > 0) {
 }
 ?>
 <?php include_once "header.php"; ?>
+
 <body>
   <div class="wrapper">
     <section class="users">

@@ -1,11 +1,11 @@
 <?php
 session_start();
-include_once "../../../conn/conn.php"; // Adjust the path as necessary
+include_once "config.php";
 
-$outgoing_id = $_SESSION['tbl_user_id'];
+$outgoing_id = $_SESSION['unique_id'];
 
 // Prepare the SQL query using MySQLi
-$sql = "SELECT * FROM tbl_user WHERE unique_id != ? ORDER BY tbl_user_id DESC";
+$sql = "SELECT * FROM tbl_user WHERE tbl_user_id != ? ORDER BY tbl_user_id DESC";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $outgoing_id); // Bind the parameter (integer)
 
@@ -23,7 +23,7 @@ if ($result->num_rows == 0) {
 } else {
     // Fetch all users and include the data.php file
     $users = $result->fetch_all(MYSQLI_ASSOC); // Fetch all users as an associative array
-    include_once "data.php"; // Now $users is defined and passed to data.php
+    include_once "data.php"; // Pass $users to data.php
 }
 
 echo $output;

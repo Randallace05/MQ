@@ -26,7 +26,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </script>";
         exit;
     }
-
+    
     // Prepare the SQL query to fetch user data
     $query = "SELECT tbl_user_id AS unique_id, `password`, `username`, `user_role` FROM `tbl_user` WHERE `username` = ?";
     $stmt = $conn->prepare($query);

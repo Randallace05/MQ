@@ -27,7 +27,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
 
 // Get the logged-in user's ID securely from the session
 $tbl_user_id = intval($_SESSION['unique_id']); // Example user ID
-$user_sql = "SELECT first_name, last_name FROM tbl_user WHERE tbl_user_id = $tbl_user_id";
+$user_sql = "SELECT firstname, lastname FROM checkout WHERE tbl_user_id = $tbl_user_id";
 $user_result = $conn->query($user_sql);
 if ($user_result && $user_result->num_rows > 0) {
     $user = $user_result->fetch_assoc();
@@ -138,7 +138,7 @@ if ($conn->query($order_sql) === TRUE) {
         <div class="receipt-details">
             <p><strong>Order Number:</strong> <?php echo $order_id; ?></p>
             <p><strong>Order Date:</strong> <?php echo date('Y-m-d H:i:s'); ?></p>
-            <p><strong>Customer Name:</strong> <?php echo $user['first_name'] . ' ' . $user['last_name']; ?></p>
+            <p><strong>Customer Name:</strong> <?php echo $user['firstname'] . ' ' . $user['lastname']; ?></p>
             <p><strong>Shipping Address:</strong> <?php echo $checkout['address']; ?></p>
             <p><strong>Payment Method:</strong> <?php echo $checkout['payment_method']; ?></p>
         </div>

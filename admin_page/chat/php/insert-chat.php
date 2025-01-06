@@ -1,25 +1,38 @@
 <?php 
 session_start();
-
 if (isset($_SESSION['unique_id'])) {
-    include_once "../../../conn/conn.php"; // Include your connection file
+    include_once "config.php";
 
+    // Validate and sanitize inputs
     $outgoing_id = $_SESSION['unique_id'];
-    $incoming_id = $_POST['incoming_id']; // Assuming you trust this input or sanitize it properly
-    $message = $_POST['message']; // Assuming you trust this input or sanitize it properly
+    $incoming_id = isset($_POST['incoming_id']) ? mysqli_real_escape_string($conn, $_POST['incoming_id']) : null;
+    $message = isset($_POST['message']) ? mysqli_real_escape_string($conn, $_POST['message']) : null;
 
-    if (!empty($message)) {
-        try {
-            // Prepare SQL statement using MySQLi
-            $sql = "INSERT INTO messages (incoming_msg_id, outgoing_msg_id, msg) VALUES (?, ?, ?)";
-            $stmt = $conn->prepare($sql);  // MySQLi prepared statement
-            $stmt->bind_param("iis", $incoming_id, $outgoing_id, $message); // 'i' for integer, 's' for string
-            $stmt->execute();
-        } catch (Exception $e) {
-            die("Error: " . $e->getMessage()); // Handle any errors
+    // Ensure all required data is provided
+    if (!empty($incoming_id) && !empty($message)) {
+        // Use prepared statements for better security
+        $stmt = $conn->prepare("INSERT INTO messages (incoming_msg_id, outgoing_msg_id, msg) VALUES (?, ?, ?)");
+        if ($stmt) {
+            // Bind parameters
+            $stmt->bind_param("iis", $incoming_id, $outgoing_id, $message);
+
+            // Execute the query and check for success
+            if ($stmt->execute()) {
+                echo "Message sent successfully.";
+            } else {
+                echo "Failed to send message. Please try again.";
+            }
+
+            // Close the statement
+            $stmt->close();
+        } else {
+            echo "Error preparing the query.";
         }
+    } else {
+        echo "Message or recipient is missing.";
     }
 } else {
-    header("location: ../login.php"); // Redirect if session is not set
+    header("location: ../login.php");
+    exit();
 }
 ?>

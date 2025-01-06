@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 12, 2024 at 03:27 PM
+-- Generation Time: Jan 06, 2025 at 08:34 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -49,6 +49,7 @@ INSERT INTO `carousel_images` (`id`, `image_path`, `left_image_path`, `right_ima
 
 CREATE TABLE `cart` (
   `cart_id` int(11) UNSIGNED NOT NULL,
+  `product_id` int(11) NOT NULL,
   `tbl_user_id` int(11) NOT NULL,
   `name` varchar(100) NOT NULL,
   `price` varchar(100) NOT NULL,
@@ -57,6 +58,13 @@ CREATE TABLE `cart` (
   `total_price` decimal(10,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `cart`
+--
+
+INSERT INTO `cart` (`cart_id`, `product_id`, `tbl_user_id`, `name`, `price`, `image`, `quantity`, `total_price`) VALUES
+(103, 15, 68, 'Plain Alamang', '218', 'Plain Alamang.jpg', 2, 436.00);
+
 -- --------------------------------------------------------
 
 --
@@ -64,7 +72,9 @@ CREATE TABLE `cart` (
 --
 
 CREATE TABLE `checkout` (
-  `id` int(11) NOT NULL,
+  `id` int(11) UNSIGNED NOT NULL,
+  `tbl_user_id` int(11) NOT NULL,
+  `cart` int(11) UNSIGNED NOT NULL,
   `firstname` varchar(50) NOT NULL,
   `middlename` varchar(50) DEFAULT NULL,
   `lastname` varchar(50) NOT NULL,
@@ -72,16 +82,10 @@ CREATE TABLE `checkout` (
   `city` varchar(50) NOT NULL,
   `zip_code` varchar(10) NOT NULL,
   `contact_number` varchar(15) NOT NULL,
-  `payment_method` varchar(50) DEFAULT 'Gcash'
+  `payment_method` varchar(50) DEFAULT NULL,
+  `grand_total` decimal(10,2) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `checkout`
---
-
-INSERT INTO `checkout` (`id`, `firstname`, `middlename`, `lastname`, `address`, `city`, `zip_code`, `contact_number`, `payment_method`) VALUES
-(1, '', '', '', '', '', '', '', 'Gcash'),
-(2, '', '', '', '', '', '', '', 'Gcash');
 
 -- --------------------------------------------------------
 
@@ -95,6 +99,17 @@ CREATE TABLE `messages` (
   `outgoing_msg_id` int(255) NOT NULL,
   `msg` varchar(1000) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `messages`
+--
+
+INSERT INTO `messages` (`msg_id`, `incoming_msg_id`, `outgoing_msg_id`, `msg`) VALUES
+(0, 677, 25, 'admin 1'),
+(0, 677, 25, 'admin 2'),
+(0, 677, 25, 'admin 3'),
+(0, 167290355, 68, 'zaed1'),
+(0, 578381648, 68, 'zaed1');
 
 -- --------------------------------------------------------
 
@@ -128,6 +143,30 @@ INSERT INTO `products` (`id`, `name`, `price`, `image`, `description`, `other_im
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `reviews`
+--
+
+CREATE TABLE `reviews` (
+  `review_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `tbl_user_id` int(11) NOT NULL,
+  `username` varchar(255) NOT NULL,
+  `review_text` text NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `reviews`
+--
+
+INSERT INTO `reviews` (`review_id`, `product_id`, `tbl_user_id`, `username`, `review_text`, `created_at`) VALUES
+(2, 15, 68, 'zaed', 'asdasd', '2025-01-05 14:01:55'),
+(3, 15, 68, 'zaed', 'qweqw2e12', '2025-01-05 14:02:00'),
+(4, 15, 68, 'zaed', 'qweasdaxc', '2025-01-05 14:02:04');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `tbl_user`
 --
 
@@ -141,18 +180,18 @@ CREATE TABLE `tbl_user` (
   `username` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
   `verification_code` int(6) NOT NULL,
-  `user_role` enum('admin','customer','distributor') NOT NULL
+  `user_role` enum('admin','customer','distributor') NOT NULL,
+  `status` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `tbl_user`
 --
 
-INSERT INTO `tbl_user` (`tbl_user_id`, `unique_id`, `first_name`, `last_name`, `contact_number`, `email`, `username`, `password`, `verification_code`, `user_role`) VALUES
-(25, 578381648, 'admin', 'admin', '1', 'zaedrickalvarico@gmail.com', 'admin', '$2y$10$6M9R7ZqbWrwvPOnbnUr.pey/y./.wxDxHSb2eZfAGVMktNnfnI9gS', 128065, 'admin'),
-(28, 634632955, 'rick', 'rick', '123123', 'zaedrick.alvarico@cvsu.edu.ph', 'rick', '$2y$10$xFM3tftPVNHWRJq4brcRn.sEb3ELyDEBvGrK703QE/CHYfxsTykuG', 880859, 'customer'),
-(30, 167290355, 'randall', 'randall', '123123', 'randallace05@gmail.com', 'randall', '$2y$10$hRYUvfqMpxZi0KuFtMm1t.8Ci0/.6qAWzqQzLdApHm8cTdDDdilTC', 516985, 'customer'),
-(67, 6744327, 'zaed', 'zaed', '1213', 'zaedalvarico@gmail.com', 'zaed', '$2y$10$ZSQSVKeJyXuHy9oZNeixC.7O4tUsGtGdWErp0cKQlmxtQDqh9JzCa', 478273, 'customer');
+INSERT INTO `tbl_user` (`tbl_user_id`, `unique_id`, `first_name`, `last_name`, `contact_number`, `email`, `username`, `password`, `verification_code`, `user_role`, `status`) VALUES
+(25, 578381648, 'admin', 'admin', '1', 'zaedrickalvarico@gmail.com', 'admin', '$2y$10$6M9R7ZqbWrwvPOnbnUr.pey/y./.wxDxHSb2eZfAGVMktNnfnI9gS', 128065, 'admin', 'Offline now'),
+(30, 167290355, 'randall', 'randall', '123123', 'randallace05@gmail.com', 'randall', '$2y$10$hRYUvfqMpxZi0KuFtMm1t.8Ci0/.6qAWzqQzLdApHm8cTdDDdilTC', 516985, 'admin', 'Offline now'),
+(68, 677, 'zaed', 'zaed', '123', 'zaedalvarico@gmail.com', 'zaed', '$2y$10$I9jSAJexGeCypJkJiDQjpujTadbtL6dNsz2O5O.DAZiep0djfIR.G', 379910, 'admin', 'Offline now');
 
 -- --------------------------------------------------------
 
@@ -186,8 +225,9 @@ CREATE TABLE `wishlist` (
 --
 
 INSERT INTO `wishlist` (`wish_id`, `tbl_user_id`, `product_id`, `name`, `price`) VALUES
-(0, 67, 15, '', 0.00),
-(0, 67, 1, '', 0.00);
+(0, 68, 15, '', 0.00),
+(0, 68, 14, '', 0.00),
+(0, 68, 1, '', 0.00);
 
 --
 -- Indexes for dumped tables
@@ -200,16 +240,34 @@ ALTER TABLE `carousel_images`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `cart`
+--
+ALTER TABLE `cart`
+  ADD PRIMARY KEY (`cart_id`),
+  ADD KEY `Test` (`tbl_user_id`),
+  ADD KEY `product_id` (`product_id`);
+
+--
 -- Indexes for table `checkout`
 --
 ALTER TABLE `checkout`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `cart` (`cart`),
+  ADD KEY `tbl_user_id` (`tbl_user_id`);
 
 --
 -- Indexes for table `products`
 --
 ALTER TABLE `products`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `reviews`
+--
+ALTER TABLE `reviews`
+  ADD PRIMARY KEY (`review_id`),
+  ADD KEY `wa` (`product_id`),
+  ADD KEY `tbl_user_id` (`tbl_user_id`);
 
 --
 -- Indexes for table `tbl_user`
@@ -234,10 +292,10 @@ ALTER TABLE `carousel_images`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
--- AUTO_INCREMENT for table `checkout`
+-- AUTO_INCREMENT for table `cart`
 --
-ALTER TABLE `checkout`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+ALTER TABLE `cart`
+  MODIFY `cart_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=104;
 
 --
 -- AUTO_INCREMENT for table `products`
@@ -246,16 +304,40 @@ ALTER TABLE `products`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
+-- AUTO_INCREMENT for table `reviews`
+--
+ALTER TABLE `reviews`
+  MODIFY `review_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
 -- AUTO_INCREMENT for table `tbl_user`
 --
 ALTER TABLE `tbl_user`
-  MODIFY `tbl_user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=68;
+  MODIFY `tbl_user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=69;
 
 --
 -- AUTO_INCREMENT for table `uploads`
 --
 ALTER TABLE `uploads`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `cart`
+--
+ALTER TABLE `cart`
+  ADD CONSTRAINT `Test` FOREIGN KEY (`tbl_user_id`) REFERENCES `tbl_user` (`tbl_user_id`),
+  ADD CONSTRAINT `cart_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`);
+
+--
+-- Constraints for table `reviews`
+--
+ALTER TABLE `reviews`
+  ADD CONSTRAINT `reviews_ibfk_1` FOREIGN KEY (`tbl_user_id`) REFERENCES `tbl_user` (`tbl_user_id`),
+  ADD CONSTRAINT `wa` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -6,13 +6,13 @@ if (isset($_SESSION['unique_id'])) {
     $incoming_id = $_POST['incoming_id'];
     $output = "";
 
-    // Prepare SQL statement using MySQLi
+    // Corrected SQL query
     $sql = "SELECT * FROM messages 
-            LEFT JOIN tbl_users ON users.unique_id = messages.outgoing_msg_id
+            LEFT JOIN tbl_user ON tbl_user.unique_id = messages.outgoing_msg_id
             WHERE (outgoing_msg_id = ? AND incoming_msg_id = ?)
             OR (outgoing_msg_id = ? AND incoming_msg_id = ?) 
             ORDER BY msg_id";
-    
+
     // Prepare the statement
     if ($stmt = $conn->prepare($sql)) {
         // Bind parameters

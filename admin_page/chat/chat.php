@@ -1,32 +1,27 @@
-<?php 
-  session_start();
-  include_once "php/config.php";
+<?php
+session_start();
+include_once "php/config.php";
 
-  // Check if session variable is set
-  if (!isset($_SESSION['unique_id'])) {
-      header("location: ../../index.php");
-      exit;
-  }
+// Check if user_id exists in the query string
+if (!isset($_GET['user_id']) || empty($_GET['user_id'])) {
+    // die("Invalid user ID. <a href='users.php'>Go back</a>.");
+    header("location: users.php");
+}
 
-  // Ensure the `tbl_user_id` is passed in the URL
-  if (!isset($_GET['tbl_user_id']) || empty($_GET['tbl_user_id'])) {
-      header("location: users.php");
-      exit;
-  }
+$user_id = mysqli_real_escape_string($conn, $_GET['user_id']);
+$sql = mysqli_query($conn, "SELECT * FROM tbl_user WHERE unique_id = {$user_id}");
 
-  $user_id = mysqli_real_escape_string($conn, $_GET['tbl_user_id']); // Sanitize input
-
-  // Fetch user data
-  $sql = mysqli_query($conn, "SELECT * FROM tbl_user WHERE unique_id = '{$user_id}'");
-  if ($sql && mysqli_num_rows($sql) > 0) {
-      $row = mysqli_fetch_assoc($sql);
-  } else {
-      header("location: users.php");
-      exit;
-  }
+if (mysqli_num_rows($sql) > 0) {
+    $row = mysqli_fetch_assoc($sql);
+} else {
+    header("location: users.php");
+    exit;
+}
 ?>
+
+
 <?php include_once "header.php"; ?>
-<body>  
+<body>
   <div class="wrapper">
     <section class="chat-area">
       <header>
@@ -49,5 +44,6 @@
   </div>
 
   <script src="javascript/chat.js"></script>
+
 </body>
 </html>

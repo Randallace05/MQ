@@ -30,6 +30,7 @@ $output = "";
 if ($result->num_rows == 0) {
     $output .= "No users are available to chat";
 } else {
+
     while ($row = $result->fetch_assoc()) {
         $sql2 = "SELECT * FROM messages WHERE (incoming_msg_id = ? OR outgoing_msg_id = ?) 
                 AND (outgoing_msg_id = ? OR incoming_msg_id = ?) ORDER BY msg_id DESC LIMIT 1";
@@ -61,6 +62,20 @@ if ($result->num_rows == 0) {
                     <div class="status-dot '. $offline .'"><i class="fas fa-circle"></i></div>
                 </a>';
     }
+
+    // Fetch all users as an associative array
+    $users = $result->fetch_all(MYSQLI_ASSOC);
+
+    // Add a default value for missing 'status' keys
+    foreach ($users as &$user) {
+        if (!array_key_exists('status', $user)) {
+            $user['status'] = "offline"; // Assign a default value
+        }
+    }
+    unset($user); // Unset reference to avoid side effects
+
+    // Include data.php to handle the users
+    include_once "data.php";
 }
 
 echo $output;

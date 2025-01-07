@@ -21,9 +21,19 @@ $output = "";
 if ($result->num_rows == 0) {
     $output .= "No users are available to chat";
 } else {
-    // Fetch all users and include the data.php file
-    $users = $result->fetch_all(MYSQLI_ASSOC); // Fetch all users as an associative array
-    include_once "data.php"; // Pass $users to data.php
+    // Fetch all users as an associative array
+    $users = $result->fetch_all(MYSQLI_ASSOC);
+
+    // Add a default value for missing 'status' keys
+    foreach ($users as &$user) {
+        if (!array_key_exists('status', $user)) {
+            $user['status'] = "offline"; // Assign a default value
+        }
+    }
+    unset($user); // Unset reference to avoid side effects
+
+    // Include data.php to handle the users
+    include_once "data.php";
 }
 
 echo $output;

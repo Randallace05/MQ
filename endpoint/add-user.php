@@ -2,7 +2,7 @@
 include('../conn/conn.php');
 
 use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception; 
+use PHPMailer\PHPMailer\Exception;
 
 require 'PHPMailer/src/Exception.php';
 require 'PHPMailer/src/PHPMailer.php';
@@ -26,6 +26,9 @@ if (isset($_POST['register'])) {
         // Hash the password
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
+        // Set a default image
+        $defaultImage = '../uploads/default.png';
+
         // Begin a transaction
         $conn->begin_transaction();
 
@@ -48,12 +51,13 @@ if (isset($_POST['register'])) {
                     `password`, 
                     `verification_code`, 
                     `unique_id`,
-                    `user_role`
+                    `user_role`,
+                    `img`
                 ) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
             $insertStmt->bind_param(
-                "ssisssiss",
+                "ssisssisss",
                 $firstName,
                 $lastName,
                 $contactNumber,
@@ -62,7 +66,8 @@ if (isset($_POST['register'])) {
                 $hashedPassword,
                 $verificationCode,
                 $uniqueID,
-                $user_role
+                $user_role,
+                $defaultImage
             );
             $insertStmt->execute();
 
@@ -130,50 +135,4 @@ if (isset($_POST['register'])) {
         echo "Error: " . $e->getMessage();
     }
 }
-
-if (isset($_POST['verify'])) {
-    try {
-        session_start();
-        $userVerificationID = $_SESSION['user_verification_id'] ?? null; // Retrieve ID from session
-        $verificationCode = $_POST['verification_code'];
-    
-        // Check for a valid user ID and verification code
-        if ($userVerificationID) {
-            $stmt = $conn->prepare("SELECT `verification_code` FROM `tbl_user` WHERE `tbl_user_id` = ?");
-            $stmt->bind_param("i", $userVerificationID);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            $codeExist = $result->fetch_assoc();
-
-            if ($codeExist && $codeExist['verification_code'] == $verificationCode) {
-                session_destroy();
-                echo "
-                <script>
-                    alert('Registered Successfully.');
-                    window.location.href = '../index.php';
-                </script>
-                ";
-            } else {
-                // If verification code is incorrect, delete user entry
-                $deleteStmt = $conn->prepare("DELETE FROM `tbl_user` WHERE `tbl_user_id` = ?");
-                $deleteStmt->bind_param("i", $userVerificationID);
-                if ($deleteStmt->execute()) {
-                    echo "
-                    <script>
-                        alert('Incorrect Verification Code. Register Again.');
-                        window.location.href = '../index.php';
-                    </script>
-                    ";
-                } else {
-                    echo "Error: Unable to delete unverified user.";
-                }
-            }
-        } else {
-            echo "Error: User verification session not found.";
-        }
-    } catch (mysqli_sql_exception $e) {
-        echo "Error: " . $e->getMessage();
-    }
-}
-
 ?>

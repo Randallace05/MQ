@@ -1,4 +1,5 @@
 <?php
+session_start();
 // Loop through the $users array instead of $result
 foreach ($users as $row) {
     $sql2 = "SELECT * FROM messages WHERE (incoming_msg_id = {$row['unique_id']}

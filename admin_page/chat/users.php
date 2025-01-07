@@ -3,11 +3,11 @@ session_start();
 include_once "php/config.php";
 
 if (!isset($_SESSION['unique_id'])) {
-    header("location: ../../index.php");
+    header("location: ../index.php");
     exit;
 }
 
-$sql = mysqli_query($conn, "SELECT * FROM tbl_user WHERE tbl_user_id = {$_SESSION['unique_id']}");
+$sql = mysqli_query($conn, "SELECT * FROM tbl_user WHERE unique_id = {$_SESSION['unique_id']}");
 if (mysqli_num_rows($sql) > 0) {
     $row = mysqli_fetch_assoc($sql);
 } else {
@@ -21,7 +21,7 @@ if (mysqli_num_rows($sql) > 0) {
     <section class="users">
       <header>
         <div class="content">
-          <!-- Display User Info -->
+          <img src="../uploads/<?php echo htmlspecialchars($row['img']); ?>" alt="">
           <div class="details">
             <span><?php echo htmlspecialchars($row['first_name']) . " " . htmlspecialchars($row['last_name']); ?></span>
             <p><?php echo htmlspecialchars($row['status']); ?></p>
@@ -44,3 +44,4 @@ if (mysqli_num_rows($sql) > 0) {
 
 </body>
 </html>
+

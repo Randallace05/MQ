@@ -11,6 +11,7 @@ $conn = new mysqli($host, $user, $password, $database);
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -26,31 +27,28 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
 }
 
 // Get the logged-in user's ID securely from the session
-$tbl_user_id = intval($_SESSION['unique_id']); // Example user ID
-$user_sql = "SELECT firstname, lastname FROM checkout WHERE tbl_user_id = $tbl_user_id";
+$tbl_user_id = intval($_SESSION['unique_id']);
+
+// Fetch user and checkout details
+$user_sql = "SELECT firstname, middlename, lastname, address, city, zip_code, contact_number, payment_method 
+             FROM checkout WHERE tbl_user_id = $tbl_user_id";
 $user_result = $conn->query($user_sql);
+
 if ($user_result && $user_result->num_rows > 0) {
     $user = $user_result->fetch_assoc();
 } else {
-    $user = ['first_name' => 'Guest', 'last_name' => 'User']; // Default values
+    die("No checkout details found for this user.");
 }
 
-// Fetch checkout details
-$checkout_sql = "SELECT address, payment_method FROM checkout WHERE tbl_user_id = $tbl_user_id";
-$checkout_result = $conn->query($checkout_sql);
-if ($checkout_result && $checkout_result->num_rows > 0) {
-    $checkout = $checkout_result->fetch_assoc();
-} else {
-    $checkout = ['address' => 'No Address Provided', 'payment_method' => 'Not Specified']; // Default values
-}
-
-// Fetch cart items and calculate total
+// Fetch cart items
 $cart_sql = "SELECT name, price, quantity FROM cart WHERE tbl_user_id = $tbl_user_id";
 $cart_result = $conn->query($cart_sql);
+
 if (!$cart_result || $cart_result->num_rows == 0) {
     die("No items in the cart for this user.");
 }
 
+// Calculate totals
 $subtotal = 0;
 $shipping_fee = 60; // Fixed shipping fee
 while ($row = $cart_result->fetch_assoc()) {
@@ -58,13 +56,31 @@ while ($row = $cart_result->fetch_assoc()) {
 }
 $grand_total = $subtotal + $shipping_fee;
 
-// Insert order into the database
-$order_sql = "INSERT INTO orders (tbl_user_id, total_amount, shipping_address, payment_method)
-              VALUES ($tbl_user_id, $grand_total, '{$checkout['address']}', '{$checkout['payment_method']}')";
-if ($conn->query($order_sql) === TRUE) {
-    $order_id = $conn->insert_id; // Get the auto-incremented order ID
+// Initialize shipping address
+$shipping_address = "{$user['address']}, {$user['city']}, {$user['zip_code']}";
+
+// Check if an order already exists to prevent duplicate entries
+$order_check_sql = "SELECT order_id 
+                    FROM orders 
+                    WHERE tbl_user_id = $tbl_user_id 
+                    AND total_amount = $grand_total 
+                    AND shipping_address = '$shipping_address' 
+                    AND payment_method = '{$user['payment_method']}'";
+$order_check_result = $conn->query($order_check_sql);
+
+if ($order_check_result && $order_check_result->num_rows > 0) {
+    // Fetch existing order ID
+    $order_row = $order_check_result->fetch_assoc();
+    $order_id = $order_row['order_id'];
 } else {
-    die("Error: " . $conn->error);
+    // Insert new order into the `orders` table
+    $order_sql = "INSERT INTO orders (tbl_user_id, total_amount, shipping_address, payment_method)
+                  VALUES ($tbl_user_id, $grand_total, '$shipping_address', '{$user['payment_method']}')";
+    if ($conn->query($order_sql) === TRUE) {
+        $order_id = $conn->insert_id; // Get the auto-incremented order ID
+    } else {
+        die("Error inserting order: " . $conn->error);
+    }
 }
 ?>
 
@@ -138,9 +154,10 @@ if ($conn->query($order_sql) === TRUE) {
         <div class="receipt-details">
             <p><strong>Order Number:</strong> <?php echo $order_id; ?></p>
             <p><strong>Order Date:</strong> <?php echo date('Y-m-d H:i:s'); ?></p>
-            <p><strong>Customer Name:</strong> <?php echo $user['firstname'] . ' ' . $user['lastname']; ?></p>
-            <p><strong>Shipping Address:</strong> <?php echo $checkout['address']; ?></p>
-            <p><strong>Payment Method:</strong> <?php echo $checkout['payment_method']; ?></p>
+            <p><strong>Customer Name:</strong> <?php echo "{$user['firstname']} {$user['middlename']} {$user['lastname']}"; ?></p>
+            <p><strong>Shipping Address:</strong> <?php echo $shipping_address; ?></p>
+            <p><strong>Phone Number:</strong> <?php echo $user['contact_number']; ?></p>
+            <p><strong>Payment Method:</strong> <?php echo $user['payment_method']; ?></p>
         </div>
         <div class="order-summary">
             <table>
@@ -154,7 +171,8 @@ if ($conn->query($order_sql) === TRUE) {
                 </thead>
                 <tbody>
                     <?php
-                    $cart_result = $conn->query($cart_sql); // Reset the cart query
+                    // Reset cart result pointer
+                    $cart_result = $conn->query($cart_sql);
                     while ($row = $cart_result->fetch_assoc()) {
                         $item_total = $row['price'] * $row['quantity'];
                         echo "<tr>

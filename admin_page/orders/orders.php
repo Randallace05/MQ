@@ -3,18 +3,22 @@
 include("../../conn/conn.php");
 
 function fetchOrders($conn) {
+    // Adjust the SQL query to fetch data correctly
     $sql = "SELECT
-                username, 
-                name, 
-                price, 
-                quantity, 
-                (quantity * price) AS total_price, 
-                quantity, 
-                cart_id
-            FROM 
+                tbl_user.username,
+                orders.id AS order_id, -- Ensure 'id' exists in the orders table
+                orders.order_date,
+                orders.total_amount,
+                orders.shipping_address,
+                orders.payment_method,
+                checkout.cart_items
+            FROM
                 tbl_user
-            INNER JOIN cart 
-            ON tbl_user.tbl_user_id = cart.tbl_user_id";
+            INNER JOIN orders
+                ON tbl_user.tbl_user_id = orders.tbl_user_id
+            LEFT JOIN checkout
+                ON orders.id = checkout.orders_id -- Ensure 'orders_id' exists in the checkout table
+            ORDER BY orders.order_date DESC";
 
     $result = $conn->query($sql);
 
@@ -35,6 +39,8 @@ $orders = fetchOrders($conn);
 
 $conn->close(); // Close the database connection
 ?>
+
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -57,6 +63,7 @@ $conn->close(); // Close the database connection
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <style>
+        /* Custom styles */
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
@@ -108,12 +115,12 @@ $conn->close(); // Close the database connection
             font-size: 14px;
         }
 
-        .btn-arrange {
-            background-color: #5cb85c;
+        .btn-primary {
+            background-color: #007bff;
         }
 
-        .btn-cancel {
-            background-color: #d9534f;
+        .btn-danger {
+            background-color: #dc3545;
         }
     </style>
 </head>
@@ -142,7 +149,7 @@ $conn->close(); // Close the database connection
 
                     <!-- Page Heading -->
                     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                        <h1 class="h3 mb-0 text-gray-800">Order</h1>
+                        <h1 class="h3 mb-0 text-gray-800">Orders</h1>
                     </div>
 
                     <div class="container">
@@ -151,10 +158,12 @@ $conn->close(); // Close the database connection
                             <thead>
                                 <tr>
                                     <th>Customer</th>
-                                    <th>Items</th>
-                                    <th>Quantity</th>
-                                    <th>Total Price</th>
-                                    <th>Reference Number</th>
+                                    <th>Order ID</th>
+                                    <th>Cart Items</th>
+                                    <th>Order Date</th>
+                                    <th>Shipping Address</th>
+                                    <th>Total Amount</th>
+                                    <th>Payment Method</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -164,18 +173,20 @@ $conn->close(); // Close the database connection
                                     foreach ($orders as $order) {
                                         echo "<tr>";
                                         echo "<td>" . htmlspecialchars($order['username']) . "</td>";
-                                        echo "<td>" . htmlspecialchars($order['name']) . "</td>";
-                                        echo "<td>" . htmlspecialchars($order['quantity']) . "</td>";
-                                        echo "<td>₱ " . number_format($order['total_price'], 2) . "</td>";
-                                        echo "<td>" . htmlspecialchars($order['cart_id']) . "</td>";
+                                        echo "<td>" . htmlspecialchars($order['order_id']) . "</td>";
+                                        echo "<td>" . htmlspecialchars($order['cart_items']) . "</td>";
+                                        echo "<td>" . htmlspecialchars($order['order_date']) . "</td>";
+                                        echo "<td>" . htmlspecialchars($order['shipping_address']) . "</td>";
+                                        echo "<td>₱ " . number_format($order['total_amount'], 2) . "</td>";
+                                        echo "<td>" . htmlspecialchars($order['payment_method']) . "</td>";
                                         echo "<td>";
-                                        echo "<a href='arrange_order.php?cart_id=" . urlencode($order['cart_id']) . "' class='btn btn-arrange'>Arrange Order</a> ";
-                                        echo "<a href='cancel_order.php?cart_id=" . urlencode($order['cart_id']) . "' class='btn btn-cancel'>Cancel Order</a>";
+                                        echo "<a href='view_order.php?order_id=" . urlencode($order['order_id']) . "' class='btn btn-primary'>View</a> ";
+                                        echo "<a href='delete_order.php?order_id=" . urlencode($order['order_id']) . "' class='btn btn-danger'>Delete</a>";
                                         echo "</td>";
                                         echo "</tr>";
                                     }
                                 } else {
-                                    echo "<tr><td colspan='6'>No orders found</td></tr>";
+                                    echo "<tr><td colspan='8'>No orders found</td></tr>";
                                 }
                                 ?>
                             </tbody>
@@ -188,7 +199,3 @@ $conn->close(); // Close the database connection
     </div>
 </body>
 </html>
-
-<?php
-$conn->close();
-?>

@@ -44,7 +44,6 @@ if (empty($cartItems)) {
 }
 
 // Check if the form was submitted
-// Check if the form was submitted
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Retrieve and sanitize input data
     $first_name = trim($_POST['firstname']);
@@ -86,63 +85,77 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
     }
 
-    // Combine all cart items into a single field
+    // Combine all cart items into a single field without including the price
     $cart_items_combined = [];
     foreach ($cartItems as $cartItem) {
-        if (!isset($cartItem['cart_id'], $cartItem['name'], $cartItem['price'], $cartItem['quantity'])) {
-            die("Cart item details are missing (cart_id, name, price, or quantity). Please check the cart table.");
-        }
-
-        // Add each item to the combined array
-        $cart_items_combined[] = [
-            'name' => $cartItem['name'],
-            'price' => $cartItem['price'],
-            'quantity' => $cartItem['quantity']
-        ];
+        $cart_items_combined[] = "{$cartItem['name']} ({$cartItem['quantity']}x)";
     }
+    $cart_items_string = implode(", ", $cart_items_combined);
 
-    // Convert combined cart items into JSON format
+    // Convert combined cart items into JSON format (if needed elsewhere)
     $cart_items_json = json_encode($cart_items_combined);
 
-    // Insert data into the checkout table
-    $stmt = $conn->prepare(
-        "INSERT INTO checkout (tbl_user_id, cart_items, firstname, middlename, lastname, address, city, zip_code, contact_number, payment_method, gcash_proof)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+
+        // Define the shipping fee (set a fixed amount or calculate dynamically if needed)
+    $shipping_fee = 60.00; // Example: 50 currency units for the shipping fee
+
+    // Calculate the total amount including the shipping fee
+    $total_amount = array_reduce($cartItems, function ($carry, $item) {
+        return $carry + ($item['price'] * $item['quantity']);
+    }, 0);
+
+    $total_amount += $shipping_fee; // Add the shipping fee to the total amount
+
+    // Insert into the orders table and retrieve the generated order ID
+    $order_stmt = $conn->prepare(
+        "INSERT INTO orders (tbl_user_id, order_date, total_amount, shipping_address, payment_method)
+        VALUES (?, NOW(), ?, ?, ?)"
     );
 
-    if ($stmt === false) {
-        die("Error preparing SQL statement: " . $conn->error);
+    $order_stmt->bind_param("idss", $tbl_user_id, $total_amount, $address, $payment_method);
+
+    if (!$order_stmt->execute()) {
+        die("Error inserting into orders table: " . $order_stmt->error);
     }
 
-    // Bind parameters
-    $stmt->bind_param(
-        "issssssssss",
-        $tbl_user_id,
-        $cart_items_json,
-        $first_name,
-        $middle_name,
-        $last_name,
-        $address,
-        $city,
-        $zip_code,
-        $contact_number,
-        $payment_method,
-        $gcash_proof_path
-    );
+$orders_id = $order_stmt->insert_id; // Get the generated orders_id
+$order_stmt->close();
 
-    // Execute the query
-    if (!$stmt->execute()) {
-        die("Error: " . $stmt->error);
-    }
 
-    // Close the statement
-    $stmt->close();
+ // Insert data into the checkout table
+$checkout_stmt = $conn->prepare(
+    "INSERT INTO checkout (orders_id, tbl_user_id, cart_items, firstname, middlename, lastname, address, city, zip_code, contact_number, payment_method, gcash_proof)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+);
+
+$checkout_stmt->bind_param(
+    "iissssssssss", // Updated type string
+    $orders_id,
+    $tbl_user_id,
+    $cart_items_string, // Use the formatted string without prices
+    $first_name,
+    $middle_name,
+    $last_name,
+    $address,
+    $city,
+    $zip_code,
+    $contact_number,
+    $payment_method,
+    $gcash_proof_path
+);
+
+if (!$checkout_stmt->execute()) {
+    die("Error inserting into checkout table: " . $checkout_stmt->error);
+}
+
+// Close the statement
+$checkout_stmt->close();
+
 
     // Redirect to receipt after processing
     header("Location: receipt.php");
     exit;
 }
-
 
 // Close the database connection
 $conn->close();

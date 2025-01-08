@@ -6,10 +6,10 @@ $user = "root";
 $password = "";
 $database = "login_email_verification";
 =======
-$host = "localhost"; 
-$user = "root";      
-$password = "";      
-$database = "login_email_verification"; 
+$host = "localhost";
+$user = "root";
+$password = "";
+$database = "login_email_verification";
 >>>>>>> f075d0b26e18c86717f5490fabb37b5098a7ba6c
 
 $conn = new mysqli($host, $user, $password, $database);
@@ -43,9 +43,9 @@ $checkout_sql = "SELECT checkout_id, firstname, middlename, lastname, address, c
                  WHERE tbl_user_id = $unique_id
                  ORDER BY checkout_id DESC
 =======
-                 FROM checkout 
+                 FROM checkout
                  WHERE tbl_user_id = $unique_id
-                 ORDER BY checkout_id DESC 
+                 ORDER BY checkout_id DESC
 >>>>>>> f075d0b26e18c86717f5490fabb37b5098a7ba6c
                  LIMIT 1";
 $checkout_result = $conn->query($checkout_sql);
@@ -93,7 +93,7 @@ if ($order_check_result && $order_check_result->num_rows > 0) {
 <<<<<<< HEAD
         $order_id = $conn->insert_id;
 =======
-        $order_id = $conn->insert_id; 
+        $order_id = $conn->insert_id;
 >>>>>>> f075d0b26e18c86717f5490fabb37b5098a7ba6c
     } else {
         die("Error inserting order: " . $conn->error);

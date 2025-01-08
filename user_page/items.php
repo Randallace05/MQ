@@ -34,6 +34,7 @@ $related_products_result = $related_stmt->get_result();
 $related_products = $related_products_result->fetch_all(MYSQLI_ASSOC);
 
 // Add to cart logic
+// Add to cart logic
 if (isset($_POST['add_to_cart'])) {
     // Check if the user is logged in
     $tbl_user_id = $_SESSION['unique_id'] ?? null; // Ensure user ID is retrieved from session
@@ -49,6 +50,13 @@ if (isset($_POST['add_to_cart'])) {
     $product_image = $_POST['product_image'];
     $product_quantity = intval($_POST['product_quantity']);
     $total_price = $product_price * $product_quantity;
+
+    // Check if the requested quantity is available in stock
+    if ($product['stock'] < $product_quantity) {
+        $_SESSION['error_message'] = "Insufficient stock available.";
+        header("Location: " . $_SERVER['REQUEST_URI']);
+        exit;
+    }
 
     // Check if the product is already in the cart for the logged-in user
     $check_cart_query = "SELECT cart_id, quantity FROM cart WHERE tbl_user_id = ? AND product_id = ?";
@@ -84,9 +92,22 @@ if (isset($_POST['add_to_cart'])) {
         }
     }
 
+    // Reduce stock in the database
+    $new_stock = $product['stock'] - $product_quantity;
+    $stock_update_query = "UPDATE products SET stock = ? WHERE id = ?";
+    $stock_update_stmt = $conn->prepare($stock_update_query);
+    $stock_update_stmt->bind_param("ii", $new_stock, $product_id);
+
+    if ($stock_update_stmt->execute()) {
+        $_SESSION['success_message'] = "Stock updated successfully.";
+    } else {
+        $_SESSION['error_message'] = "Failed to update stock.";
+    }
+
     header("Location: " . $_SERVER['REQUEST_URI']); // Redirect to refresh the page
     exit;
 }
+
 
 
 
@@ -429,7 +450,6 @@ include '../conn/conn.php';
                     <input type="hidden" name="product_name" value="<?php echo htmlspecialchars($product['name']); ?>">
                     <input type="hidden" name="product_price" value="<?php echo htmlspecialchars($product['price']); ?>">
                     <input type="hidden" name="product_image" value="<?php echo htmlspecialchars($product['image']); ?>">
-
                     <div class="action-buttons">
                         <input type="number"
                                name="product_quantity"

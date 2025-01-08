@@ -1,3 +1,24 @@
+<?php
+include ("../chat/php/config.php");
+
+$query = "SELECT unique_id, first_name, last_name FROM tbl_user"; // Replace with your actual query
+$result = mysqli_query($conn, $query); // Use $conn here
+
+if (!$result) {
+    die("Query failed: " . mysqli_error($conn)); // Error handling for query
+}
+
+if (mysqli_num_rows($result) > 0) {
+    $row = mysqli_fetch_assoc($result); // Fetch the first row
+    echo "Unique ID: " . htmlspecialchars($row['unique_id']) . "<br>";
+    echo "Name: " . htmlspecialchars($row['first_name']) . " " . htmlspecialchars($row['last_name']) . "<br>";
+} else {
+    echo "No records found.";
+}
+
+mysqli_close($conn); // Close the connection
+?>
+
 <style>
     .btn-css{
         color:#fff;
@@ -21,8 +42,6 @@
         border-color:#D24444
         }
 </style>
-
-
 <!-- Topbar -->
 <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
 
@@ -153,7 +172,7 @@
     <li class="nav-item dropdown no-arrow">
         <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
             data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <span class="mr-2 d-none d-lg-inline text-gray-600 small">Douglas McGee</span>
+            <span class="mr-2 d-none d-lg-inline text-gray-600 small"><?php echo htmlspecialchars($row['first_name']) . " " . htmlspecialchars($row['last_name']); ?></span>
             <img class="img-profile rounded-circle"
                 src="img/undraw_profile.svg">
         </a>
@@ -197,7 +216,7 @@
                 <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                    <a class="btn btn-primary" href="../../index.php">Logout</a>
+                    <a class="btn btn-primary" href="../chat/php/logout.php?logout_id=<?php echo $row['unique_id']; ?>">Logout</a>
                 </div>
             </div>
         </div>

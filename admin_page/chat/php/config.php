@@ -1,14 +1,12 @@
 <?php
-$servername = "localhost";
-$username = "root";  // Replace with your database username
-$password = "";      // Replace with your database password
-$dbname = "login_email_verification";  // Replace with your database name
+  $hostname = "localhost";
+  $username = "root";
+  $password = "";
+  $dbname = "login_email_verification";
 
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+  $conn = mysqli_connect($hostname, $username, $password, $dbname);
+  if(!$conn){
+    echo "Database connection error".mysqli_connect_error();
+  }
 ?>
+

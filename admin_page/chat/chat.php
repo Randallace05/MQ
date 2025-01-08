@@ -26,7 +26,7 @@ if (mysqli_num_rows($sql) > 0) {
     <section class="chat-area">
       <header>
         <a href="users.php" class="back-icon"><i class="fas fa-arrow-left"></i></a>
-        <img src="php/images/<?php echo htmlspecialchars($row['img']); ?>" alt="">
+        <img src="php/images/<?php echo htmlspecialchars($row['img']); ?>" alt="profile">
         <div class="details">
           <span><?php echo htmlspecialchars($row['first_name']) . " " . htmlspecialchars($row['last_name']); ?></span>
           <p><?php echo htmlspecialchars($row['status']); ?></p>

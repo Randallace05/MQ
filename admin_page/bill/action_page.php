@@ -43,7 +43,7 @@ if (empty($cartItems)) {
     die("No cart items found for this user.");
 }
 
-// Check if the form was submitted
+// Process the form submission
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Retrieve and sanitize input data
     $first_name = trim($_POST['firstname']);
@@ -92,12 +92,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
     $cart_items_string = implode(", ", $cart_items_combined);
 
-    // Convert combined cart items into JSON format (if needed elsewhere)
-    $cart_items_json = json_encode($cart_items_combined);
-
-
-        // Define the shipping fee (set a fixed amount or calculate dynamically if needed)
-    $shipping_fee = 60.00; // Example: 50 currency units for the shipping fee
+    // Define the shipping fee (set a fixed amount or calculate dynamically if needed)
+    $shipping_fee = 60.00; // Example: 60 currency units for the shipping fee
 
     // Calculate the total amount including the shipping fee
     $total_amount = array_reduce($cartItems, function ($carry, $item) {
@@ -118,42 +114,39 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         die("Error inserting into orders table: " . $order_stmt->error);
     }
 
-$orders_id = $order_stmt->insert_id; // Get the generated orders_id
-$order_stmt->close();
+    $orders_id = $order_stmt->insert_id; // Get the generated orders_id
+    $order_stmt->close();
 
+    // Insert data into the checkout table
+    $checkout_stmt = $conn->prepare(
+        "INSERT INTO checkout (orders_id, tbl_user_id, cart_items, firstname, middlename, lastname, address, city, zip_code, contact_number, payment_method, gcash_proof)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+    );
 
- // Insert data into the checkout table
-$checkout_stmt = $conn->prepare(
-    "INSERT INTO checkout (orders_id, tbl_user_id, cart_items, firstname, middlename, lastname, address, city, zip_code, contact_number, payment_method, gcash_proof)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-);
+    $checkout_stmt->bind_param(
+        "iissssssssss", // Updated type string
+        $orders_id,
+        $tbl_user_id,
+        $cart_items_string, // Use the formatted string without prices
+        $first_name,
+        $middle_name,
+        $last_name,
+        $address,
+        $city,
+        $zip_code,
+        $contact_number,
+        $payment_method,
+        $gcash_proof_path
+    );
 
-$checkout_stmt->bind_param(
-    "iissssssssss", // Updated type string
-    $orders_id,
-    $tbl_user_id,
-    $cart_items_string, // Use the formatted string without prices
-    $first_name,
-    $middle_name,
-    $last_name,
-    $address,
-    $city,
-    $zip_code,
-    $contact_number,
-    $payment_method,
-    $gcash_proof_path
-);
+    if (!$checkout_stmt->execute()) {
+        die("Error inserting into checkout table: " . $checkout_stmt->error);
+    }
 
-if (!$checkout_stmt->execute()) {
-    die("Error inserting into checkout table: " . $checkout_stmt->error);
-}
+    $checkout_stmt->close();
 
-// Close the statement
-$checkout_stmt->close();
-
-
-    // Redirect to receipt after processing
-    header("Location: receipt.php");
+    // Redirect to receipt.php with order ID
+    header("Location: receipt.php?order_id=" . $orders_id);
     exit;
 }
 

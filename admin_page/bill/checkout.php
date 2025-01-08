@@ -74,72 +74,35 @@ try {
             INSERT INTO checkout (id, firstname, middlename, lastname, address, city, zip_code, contact_number, payment_method, gcash_proof, grand_total)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
-      // Insert data into the checkout table
-$stmt = $conn->prepare("
-INSERT INTO checkout (id, firstname, middlename, lastname, address, city, zip_code, contact_number, payment_method, gcash_proof, grand_total)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-");
-$stmt->bind_param(
-"isssssssssd",
-$tbl_user_id,
-$firstName,
-$middleName,
-$lastName,
-$address,
-$city,
-$zipCode,
-$contactNumber,
-$paymentMethod,
-$gcashProofPath,
-$grandTotal
-);
+        $stmt->bind_param(
+            "isssssssssd",
+            $tbl_user_id,
+            $firstName,
+            $middleName,
+            $lastName,
+            $address,
+            $city,
+            $zipCode,
+            $contactNumber,
+            $paymentMethod,
+            $gcashProofPath,
+            $grandTotal
+        );
 
-if ($stmt->execute()) {
-// Get the last inserted order ID
-$order_id = $conn->insert_id;
+        if ($stmt->execute()) {
+            // Get the last inserted order ID
+            $order_id = $conn->insert_id;
 
-// Insert items into the order_items table
-$insertItemsStmt = $conn->prepare("
-    INSERT INTO order_items (order_id, product_id, product_name, quantity, price, total_price)
-    VALUES (?, ?, ?, ?, ?, ?)
-");
-
-foreach ($cartItems as $item) {
-    $product_id = $item['product_id']; // Assuming you have a product_id in your cart table
-    $product_name = $item['name'];
-    $quantity = $item['quantity'];
-    $price = $item['price'];
-    $total_price = $price * $quantity;
-
-    $insertItemsStmt->bind_param(
-        "iisidd",
-        $order_id,
-        $product_id,
-        $product_name,
-        $quantity,
-        $price,
-        $total_price
-    );
-
-    $insertItemsStmt->execute();
-}
-
-// Clear the user's cart
-$clearCartStmt = $conn->prepare("DELETE FROM cart WHERE tbl_user_id = ?");
-$clearCartStmt->bind_param("i", $tbl_user_id);
-$clearCartStmt->execute();
-
-// Redirect based on payment method
-if ($paymentMethod === "Cash on Delivery") {
-    header("Location: receipt.php?order_id=$order_id");
-} elseif ($paymentMethod === "Gcash Payment") {
-    header("Location: ref.php?order_id=$order_id");
-}
-exit;
-} else {
-echo "Error: " . $stmt->error;
-}
-
+            // Redirect based on payment method
+            if ($paymentMethod === "Cash on Delivery") {
+                header("Location: receipt.php?order_id=$order_id");
+            } elseif ($paymentMethod === "Gcash Payment") {
+                header("Location: ref.php?order_id=$order_id");
+            }
+            exit;
+        } else {
+            echo "Error: " . $stmt->error;
+        }
     }
 
 
@@ -319,7 +282,7 @@ span.price {
                             </form>
                         </div>
                     </div>
-                    <div class="col-25"> 
+                    <div class="col-25">
     <div class="container">
         <h4>Cart
             <span class="price" style="color:black">

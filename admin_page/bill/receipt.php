@@ -1,16 +1,9 @@
 <?php
 // Database connection
-<<<<<<< HEAD
 $host = "localhost";
 $user = "root";
 $password = "";
 $database = "login_email_verification";
-=======
-$host = "localhost";
-$user = "root";
-$password = "";
-$database = "login_email_verification";
->>>>>>> f075d0b26e18c86717f5490fabb37b5098a7ba6c
 
 $conn = new mysqli($host, $user, $password, $database);
 
@@ -38,15 +31,9 @@ $unique_id = intval($_SESSION['unique_id']);
 
 // Fetch the latest checkout record for the user
 $checkout_sql = "SELECT checkout_id, firstname, middlename, lastname, address, city, zip_code, contact_number, payment_method
-<<<<<<< HEAD
                  FROM checkout
                  WHERE tbl_user_id = $unique_id
                  ORDER BY checkout_id DESC
-=======
-                 FROM checkout
-                 WHERE tbl_user_id = $unique_id
-                 ORDER BY checkout_id DESC
->>>>>>> f075d0b26e18c86717f5490fabb37b5098a7ba6c
                  LIMIT 1";
 $checkout_result = $conn->query($checkout_sql);
 
@@ -90,11 +77,7 @@ if ($order_check_result && $order_check_result->num_rows > 0) {
     $order_sql = "INSERT INTO orders (tbl_user_id, checkout_id, total_amount, shipping_address, payment_method)
                   VALUES ($unique_id, $checkout_id, $grand_total, '$shipping_address', '{$user['payment_method']}')";
     if ($conn->query($order_sql) === TRUE) {
-<<<<<<< HEAD
         $order_id = $conn->insert_id;
-=======
-        $order_id = $conn->insert_id;
->>>>>>> f075d0b26e18c86717f5490fabb37b5098a7ba6c
     } else {
         die("Error inserting order: " . $conn->error);
     }

@@ -2,10 +2,11 @@
 // Include the database connection
 include("../../conn/conn.php");
 
+// Check if the order_id is set
 if (isset($_GET['order_id'])) {
     $order_id = intval($_GET['order_id']);
 
-    // Fetch order details
+    // Fetch order details from the database
     $sql = "SELECT tbl_user.username, orders.*, checkout.cart_items 
             FROM tbl_user 
             INNER JOIN orders ON tbl_user.tbl_user_id = orders.tbl_user_id 
@@ -16,203 +17,76 @@ if (isset($_GET['order_id'])) {
     $stmt->execute();
     $result = $stmt->get_result();
 
+    // Check if the order exists
     if ($result->num_rows > 0) {
         $order = $result->fetch_assoc();
-        // Generate receipt with admin styling
-        echo "
-        <html>
-        <head>
-            <style>
-                body {
-                    font-family: Arial, sans-serif;
-                    background-color: #2c3e50;
-                    color: #ecf0f1;
-                    margin: 0;
-                    padding: 0;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    height: 100vh;
-                }
-                .receipt-container {
-                    max-width: 700px;
-                    width: 100%;
-                    background-color: #34495e;
-                    padding: 20px;
-                    border-radius: 10px;
-                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-                }
-                .header {
-                    text-align: center;
-                    margin-bottom: 20px;
-                }
-                .header h1 {
-                    margin: 0;
-                    font-size: 28px;
-                    color: #1abc9c;
-                }
-                .header p {
-                    margin: 5px 0;
-                    color: #bdc3c7;
-                }
-                .details {
-                    margin-bottom: 20px;
-                }
-                .details p {
-                    margin: 5px 0;
-                    line-height: 1.6;
-                }
-                .order-summary {
-                    width: 100%;
-                    border-collapse: collapse;
-                    margin-top: 20px;
-                }
-                .order-summary th, 
-                .order-summary td {
-                    text-align: left;
-                    padding: 10px;
-                    border-bottom: 1px solid #7f8c8d;
-                }
-                .order-summary th {
-                    background-color: #1abc9c;
-                    color: #fff;
-                    font-weight: bold;
-                }
-                .totals {
-                    text-align: right;
-                    margin-top: 20px;
-                }
-                .totals p {
-                    margin: 5px 0;
-                    font-size: 16px;
-                }
-                .totals .grand-total {
-                    font-size: 20px;
-                    font-weight: bold;
-                    color: #1abc9c;
-                }
-                .highlight {
-                    color: #1abc9c;
-                    font-weight: bold;
-                }
-                .buttons {
-                    margin-top: 20px;
-                    text-align: center;
-                }
-                .buttons button {
-                    background-color: #1abc9c;
-                    color: #fff;
-                    border: none;
-                    padding: 10px 15px;
-                    border-radius: 5px;
-                    margin: 5px;
-                    cursor: pointer;
-                }
-                .buttons button:hover {
-                    background-color: #16a085;
-                }
-                .buttons a {
-                    text-decoration: none;
-                    color: #fff;
-                }
-            </style>
-            <script>
-                function printReceipt() {
-                    window.print();
-                }
-                function downloadReceipt() {
-                    const receiptContent = document.querySelector('.receipt-container').innerHTML;
-                    const blob = new Blob([receiptContent], { type: 'text/html' });
-                    const link = document.createElement('a');
-                    link.href = URL.createObjectURL(blob);
-                    link.download = 'receipt.html';
-                    link.click();
-                }
-            </script>
-        </head>
-        <body>
-            <div class='receipt-container'>
-                <div class='header'>
-                    <h1>Order Receipt</h1>
-                    <p>Thank you for using our service!</p>
-                </div>
-                <div class='details'>
-                    <p><span class='highlight'>Customer:</span> " . htmlspecialchars($order['username']) . "</p>
-                    <p><span class='highlight'>Order ID:</span> " . htmlspecialchars($order['id']) . "</p>
-                    <p><span class='highlight'>Order Date:</span> " . htmlspecialchars($order['order_date']) . "</p>
-                    <p><span class='highlight'>Cart Items:</span> " . htmlspecialchars($order['cart_items']) . "</p>
-                    <p><span class='highlight'>Shipping Address:</span> " . htmlspecialchars($order['shipping_address']) . "</p>
-                </div>
-                <table class='order-summary'>
-                    <thead>
-                        <tr>
-                            <th>Item</th>
-                            <th>Quantity</th>
-                            <th>Unit Price</th>
-                            <th>Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Chili Garlic Bagoong</td>
-                            <td>1</td>
-                            <td>₱278.00</td>
-                            <td>₱278.00</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <div class='totals'>
-                    <p><strong>Subtotal:</strong> ₱278.00</p>
-                    <p><strong>Shipping Fee:</strong> ₱60.00</p>
-                    <p class='grand-total'><strong>Grand Total:</strong> ₱338.00</p>
-                </div>
-                <div class='details'>
-                    <p><span class='highlight'>Payment Method:</span> " . htmlspecialchars($order['payment_method']) . "</p>
-                </div>
-                <div class='buttons'>
-                    <button onclick='printReceipt()'>Print</button>
-                    <button onclick='downloadReceipt()'>Download</button>
-                    <button><a href='orders.php'>Back to Orders</a></button>
-                </div>
-            </div>
-        </body>
-        </html>
-        ";
+        // Generate and display the receipt
+        echo "<!DOCTYPE html>";
+        echo "<html lang='en'>";
+        echo "<head>";
+        echo "<meta charset='UTF-8'>";
+        echo "<meta name='viewport' content='width=device-width, initial-scale=1.0'>";
+        echo "<title>Order Receipt - Admin</title>";
+        echo "<link href='https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap' rel='stylesheet'>";
+        echo "<style>";
+        echo "body { font-family: 'Roboto', sans-serif; margin: 0; padding: 0; background: linear-gradient(to right, #f1f2f6, #c1c8e4); display: flex; justify-content: center; align-items: center; height: 100vh; }";
+        echo ".receipt { background-color: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); width: 100%; max-width: 800px; color: #333; border-top: 5px solid #3498db; }";
+        echo ".receipt h1 { color: #2c3e50; font-size: 30px; margin-bottom: 30px; text-align: center; letter-spacing: 1px; }";
+        echo ".receipt p { font-size: 16px; color: #555; line-height: 1.6; margin-bottom: 15px; }";
+        echo ".receipt .total { font-weight: bold; font-size: 22px; color: #e74c3c; margin-top: 20px; text-align: center; }";
+        echo ".receipt .highlight { color: #3498db; font-weight: bold; }";
+        echo ".receipt .btn { color: #fff; background-color: #3498db; padding: 12px 30px; border-radius: 5px; text-decoration: none; font-weight: 600; display: inline-block; text-align: center; width: auto; transition: background-color 0.3s; margin-top: 20px; margin-right: 10px; }";
+        echo ".receipt .btn:hover { background-color: #2980b9; }";
+        echo ".receipt .section-title { font-size: 18px; font-weight: bold; color: #2c3e50; margin-top: 20px; }";
+        echo ".receipt .section { background-color: #f7f8fa; padding: 15px; margin-bottom: 20px; border-radius: 8px; }";
+        echo "@media (max-width: 768px) { .receipt { padding: 20px; } }";
+        echo "</style>";
+        echo "</head>";
+        echo "<body>";
+
+        // Receipt Content
+        echo "<div class='receipt'>";
+        echo "<h1>Order Receipt</h1>";
+        
+        // Customer Information Section
+        echo "<div class='section'>";
+        echo "<p class='section-title'>Customer Information</p>";
+        echo "<p><strong>Customer:</strong> <span class='highlight'>" . htmlspecialchars($order['username']) . "</span></p>";
+        echo "<p><strong>Order ID:</strong> " . htmlspecialchars($order['id']) . "</p>";
+        echo "<p><strong>Order Date:</strong> " . htmlspecialchars($order['order_date']) . "</p>";
+        echo "</div>";
+
+        // Cart and Shipping Section
+        echo "<div class='section'>";
+        echo "<p class='section-title'>Order Details</p>";
+        echo "<p><strong>Cart Items:</strong> " . htmlspecialchars($order['cart_items']) . "</p>";
+        echo "<p><strong>Shipping Address:</strong> " . htmlspecialchars($order['shipping_address']) . "</p>";
+        echo "</div>";
+
+        // Total Amount Section
+        echo "<div class='section'>";
+        echo "<p class='total'><strong>Total Amount:</strong> ₱" . number_format($order['total_amount'], 2) . "</p>";
+        echo "<p><strong>Payment Method:</strong> " . htmlspecialchars($order['payment_method']) . "</p>";
+        echo "</div>";
+
+        // Buttons for Print, Download, and Dashboard
+        echo "<div style='text-align: center;'>";
+        echo "<a href='javascript:window.print()' class='btn'>Print Receipt</a>";
+        echo "<a href='download_receipt.php?order_id=" . $order['id'] . "' class='btn'>Download PDF</a>";
+        echo "<a href='admin_dashboard.php' class='btn'>Back to Dashboard</a>";
+        echo "</div>";
+        
+        echo "</div>";
+
+        echo "</body>";
+        echo "</html>";
     } else {
-        echo "Order not found.";
+        echo "<p style='text-align: center; color: #e74c3c;'>Order not found.</p>";
     }
 } else {
-    echo "Invalid request.";
+    echo "<p style='text-align: center; color: #e74c3c;'>Invalid request.</p>";
 }
 
+// Close the database connection
 $conn->close();
 ?>
-<script>
-    function printReceipt() {
-    window.print();
-}
-
-
-async function downloadReceipt() {
-    // Select the receipt content from the DOM
-    const receiptContent = document.querySelector('.receipt-container');
-    
-    // Import jsPDF from the global `jspdf` object
-    const { jsPDF } = window.jspdf;
-
-    // Create a new jsPDF instance
-    const pdf = new jsPDF();
-
-    // Generate the PDF using the selected HTML content
-    await pdf.html(receiptContent, {
-        callback: function (pdf) {
-            // Save the generated PDF with the name "receipt.pdf"
-            doc.save('receipt.pdf');
-        },
-        x: 10, // Adjust the X coordinate (horizontal margin)
-        y: 10, // Adjust the Y coordinate (vertical margin)
-    });
-}
-
-
-</script>

@@ -40,6 +40,7 @@ try {
     }
 
     // Handle form submission
+   // Check if the form was submitted
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Fetch form data
         $firstName = htmlspecialchars($_POST['firstname']);
@@ -51,7 +52,7 @@ try {
         $contactNumber = htmlspecialchars($_POST['num']);
         $paymentMethod = htmlspecialchars($_POST['payment_method']);
 
-        // Optional: Handle GCash payment proof upload
+        // Optional: Handle Gcash payment proof upload
         $gcashProofPath = null;
         if ($paymentMethod === 'Gcash Payment' && isset($_FILES['gcash_proof']) && $_FILES['gcash_proof']['error'] === UPLOAD_ERR_OK) {
             $uploadDir = '../../uploads/payment_proofs/';
@@ -68,9 +69,9 @@ try {
             }
         }
 
-        // Insert data into the `checkout` table
+        // Insert data into the checkout table
         $stmt = $conn->prepare("
-            INSERT INTO checkout (tbl_user_id, firstname, middlename, lastname, address, city, zip_code, contact_number, payment_method, gcash_proof, grand_total)
+            INSERT INTO checkout (id, firstname, middlename, lastname, address, city, zip_code, contact_number, payment_method, gcash_proof, grand_total)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
         $stmt->bind_param(
@@ -89,43 +90,22 @@ try {
         );
 
         if ($stmt->execute()) {
-            // Get the last inserted checkout ID
-            $checkout_id = $conn->insert_id;
-
-            // Insert each cart item into the `checkout_items` table
-            foreach ($cartItems as $item) {
-                $stmtItems = $conn->prepare("
-                    INSERT INTO checkout_items (checkout_id, item_name, item_price, item_quantity)
-                    VALUES (?, ?, ?, ?)
-                ");
-                if (!$stmtItems) {
-                    die("Prepare failed: " . $conn->error);
-                }
-
-                $stmtItems->bind_param(
-                    "isdi",
-                    $checkout_id,
-                    $item['name'],
-                    $item['price'],
-                    $item['quantity']
-                );
-
-                if (!$stmtItems->execute()) {
-                    die("Execute failed: " . $stmtItems->error);
-                }
-            }
+            // Get the last inserted order ID
+            $order_id = $conn->insert_id;
 
             // Redirect based on payment method
             if ($paymentMethod === "Cash on Delivery") {
-                header("Location: receipt.php?order_id=$checkout_id");
+                header("Location: receipt.php?order_id=$order_id");
             } elseif ($paymentMethod === "Gcash Payment") {
-                header("Location: ref.php?order_id=$checkout_id");
+                header("Location: ref.php?order_id=$order_id");
             }
             exit;
         } else {
             echo "Error: " . $stmt->error;
         }
     }
+
+
 } catch (Exception $e) {
     die("Error: " . $e->getMessage());
 } finally {

@@ -30,7 +30,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
 $tbl_user_id = intval($_SESSION['unique_id']);
 
 // Fetch user and checkout details
-$user_sql = "SELECT firstname, middlename, lastname, address, city, zip_code, contact_number, payment_method 
+$user_sql = "SELECT firstname, middlename, lastname, address, city, zip_code, contact_number, payment_method
              FROM checkout WHERE tbl_user_id = $tbl_user_id";
 $user_result = $conn->query($user_sql);
 
@@ -60,18 +60,18 @@ $grand_total = $subtotal + $shipping_fee;
 $shipping_address = "{$user['address']}, {$user['city']}, {$user['zip_code']}";
 
 // Check if an order already exists to prevent duplicate entries
-$order_check_sql = "SELECT order_id 
-                    FROM orders 
-                    WHERE tbl_user_id = $tbl_user_id 
-                    AND total_amount = $grand_total 
-                    AND shipping_address = '$shipping_address' 
+$order_check_sql = "SELECT id
+                    FROM orders
+                    WHERE tbl_user_id = $tbl_user_id
+                    AND total_amount = $grand_total
+                    AND shipping_address = '$shipping_address'
                     AND payment_method = '{$user['payment_method']}'";
 $order_check_result = $conn->query($order_check_sql);
 
 if ($order_check_result && $order_check_result->num_rows > 0) {
     // Fetch existing order ID
     $order_row = $order_check_result->fetch_assoc();
-    $order_id = $order_row['order_id'];
+    $order_id = $order_row['id'];
 } else {
     // Insert new order into the `orders` table
     $order_sql = "INSERT INTO orders (tbl_user_id, total_amount, shipping_address, payment_method)
@@ -82,6 +82,7 @@ if ($order_check_result && $order_check_result->num_rows > 0) {
         die("Error inserting order: " . $conn->error);
     }
 }
+
 ?>
 
 <!DOCTYPE html>

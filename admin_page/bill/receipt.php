@@ -1,9 +1,9 @@
 <?php
 // Database connection
-$host = "localhost"; // Replace with your database host
-$user = "root";      // Replace with your database username
-$password = "";      // Replace with your database password
-$database = "login_email_verification"; // Replace with your database name
+$host = "localhost"; 
+$user = "root";      
+$password = "";      
+$database = "login_email_verification"; 
 
 $conn = new mysqli($host, $user, $password, $database);
 
@@ -21,27 +21,30 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     echo "
     <script>
         alert('You must log in to access the cart.');
-        window.location.href = '../index.php'; // Redirect to the login page
+        window.location.href = '../index.php';
     </script>";
     exit;
 }
 
-// Get the logged-in user's ID securely from the session
-$tbl_user_id = intval($_SESSION['unique_id']);
+// Get the logged-in user's unique ID
+$unique_id = intval($_SESSION['unique_id']);
 
-// Fetch user and checkout details
-$user_sql = "SELECT firstname, middlename, lastname, address, city, zip_code, contact_number, payment_method
-             FROM checkout WHERE tbl_user_id = $tbl_user_id";
-$user_result = $conn->query($user_sql);
+// Fetch the latest checkout record for the user
+$checkout_sql = "SELECT checkout_id, firstname, middlename, lastname, address, city, zip_code, contact_number, payment_method
+                 FROM checkout 
+                 WHERE tbl_user_id = $unique_id
+                 ORDER BY checkout_id DESC 
+                 LIMIT 1";
+$checkout_result = $conn->query($checkout_sql);
 
-if ($user_result && $user_result->num_rows > 0) {
-    $user = $user_result->fetch_assoc();
+if ($checkout_result && $checkout_result->num_rows > 0) {
+    $user = $checkout_result->fetch_assoc();
+    $checkout_id = $user['checkout_id']; // Use `checkout_id` as the unique identifier
 } else {
     die("No checkout details found for this user.");
 }
-
 // Fetch cart items
-$cart_sql = "SELECT name, price, quantity FROM cart WHERE tbl_user_id = $tbl_user_id";
+$cart_sql = "SELECT name, price, quantity FROM cart WHERE tbl_user_id = $unique_id";
 $cart_result = $conn->query($cart_sql);
 
 if (!$cart_result || $cart_result->num_rows == 0) {
@@ -56,28 +59,25 @@ while ($row = $cart_result->fetch_assoc()) {
 }
 $grand_total = $subtotal + $shipping_fee;
 
-// Initialize shipping address
+// Prepare shipping address
 $shipping_address = "{$user['address']}, {$user['city']}, {$user['zip_code']}";
 
-// Check if an order already exists to prevent duplicate entries
-$order_check_sql = "SELECT id
-                    FROM orders
-                    WHERE tbl_user_id = $tbl_user_id
-                    AND total_amount = $grand_total
-                    AND shipping_address = '$shipping_address'
-                    AND payment_method = '{$user['payment_method']}'";
+// Check if an order already exists
+$order_check_sql = "SELECT checkout_id
+                    FROM checkout
+                    WHERE checkout_id = $checkout_id";
 $order_check_result = $conn->query($order_check_sql);
 
 if ($order_check_result && $order_check_result->num_rows > 0) {
     // Fetch existing order ID
     $order_row = $order_check_result->fetch_assoc();
-    $order_id = $order_row['id'];
+    $order_id = $order_row['checkout_id'];
 } else {
-    // Insert new order into the `orders` table
-    $order_sql = "INSERT INTO orders (tbl_user_id, total_amount, shipping_address, payment_method)
-                  VALUES ($tbl_user_id, $grand_total, '$shipping_address', '{$user['payment_method']}')";
+    // Insert a new order into the `orders` table
+    $order_sql = "INSERT INTO orders (tbl_user_id, checkout_id, total_amount, shipping_address, payment_method)
+                  VALUES ($unique_id, $checkout_id, $grand_total, '$shipping_address', '{$user['payment_method']}')";
     if ($conn->query($order_sql) === TRUE) {
-        $order_id = $conn->insert_id; // Get the auto-incremented order ID
+        $order_id = $conn->insert_id; 
     } else {
         die("Error inserting order: " . $conn->error);
     }
@@ -92,7 +92,6 @@ if ($order_check_result && $order_check_result->num_rows > 0) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order Receipt</title>
     <style>
-        /* Styles for the receipt */
         body {
             font-family: Arial, sans-serif;
             background-color: #f5f5f5;
@@ -114,35 +113,17 @@ if ($order_check_result && $order_check_result->num_rows > 0) {
             margin: 0;
             color: #333;
         }
-        .receipt-details, .order-summary {
-            margin-bottom: 20px;
-        }
         .order-summary table {
             width: 100%;
             border-collapse: collapse;
         }
         .order-summary th, .order-summary td {
             padding: 10px;
-            text-align: left;
             border-bottom: 1px solid #ddd;
-        }
-        .order-summary th {
-            background-color: #f8f8f8;
         }
         .total {
             text-align: right;
             font-weight: bold;
-            color: #333;
-        }
-        .button-container {
-            text-align: center;
-            margin: 20px 0;
-        }
-        .button-container button {
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            margin: 0 10px;
         }
     </style>
 </head>
@@ -152,9 +133,8 @@ if ($order_check_result && $order_check_result->num_rows > 0) {
             <h2>Order Receipt</h2>
             <p>Thank you for your purchase!</p>
         </div>
-        <div class="receipt-details">
+        <div class="details">
             <p><strong>Order Number:</strong> <?php echo $order_id; ?></p>
-            <p><strong>Order Date:</strong> <?php echo date('Y-m-d H:i:s'); ?></p>
             <p><strong>Customer Name:</strong> <?php echo "{$user['firstname']} {$user['middlename']} {$user['lastname']}"; ?></p>
             <p><strong>Shipping Address:</strong> <?php echo $shipping_address; ?></p>
             <p><strong>Phone Number:</strong> <?php echo $user['contact_number']; ?></p>
@@ -190,33 +170,7 @@ if ($order_check_result && $order_check_result->num_rows > 0) {
             <p class="total">Shipping Fee: ₱<?php echo number_format($shipping_fee, 2); ?></p>
             <p class="total">Grand Total: ₱<?php echo number_format($grand_total, 2); ?></p>
         </div>
-        <div class="footer">
-            <p>If you have any questions about your order, please contact us at mqsupport@gmail.com.</p>
-        </div>
     </div>
-    <div class="button-container">
-        <button onclick="printReceipt()">Print Receipt</button>
-        <button onclick="downloadPDF()">Download as PDF</button>
-    </div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
-    <script>
-        function printReceipt() {
-            window.print();
-        }
-
-        function downloadPDF() {
-            const receiptElement = document.getElementById('receipt');
-            const options = {
-                margin:       0.5,
-                filename:     'order_receipt.pdf',
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2 },
-                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-            };
-            html2pdf().set(options).from(receiptElement).save();
-        }
-    </script>
 </body>
 </html>
 

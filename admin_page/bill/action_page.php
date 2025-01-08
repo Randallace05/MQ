@@ -44,6 +44,7 @@ if (empty($cartItems)) {
 }
 
 // Check if the form was submitted
+// Check if the form was submitted
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Retrieve and sanitize input data
     $first_name = trim($_POST['firstname']);
@@ -85,59 +86,63 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
     }
 
-    // Loop through all cart items and insert them into the checkout table
+    // Combine all cart items into a single field
+    $cart_items_combined = [];
     foreach ($cartItems as $cartItem) {
-        if (!isset($cartItem['name'], $cartItem['price'], $cartItem['quantity'])) {
-            die("Cart item details are missing (name, price, or quantity). Please check the cart table.");
+        if (!isset($cartItem['cart_id'], $cartItem['name'], $cartItem['price'], $cartItem['quantity'])) {
+            die("Cart item details are missing (cart_id, name, price, or quantity). Please check the cart table.");
         }
 
-        // Extract cart item details
-        $cart_id = $cartItem['cart_id'];
-        $item_name = $cartItem['name'];
-        $item_price = $cartItem['price'];
-        $item_quantity = $cartItem['quantity'];
-
-        // Prepare SQL statement to prevent SQL injection
-        $stmt = $conn->prepare(
-            "INSERT INTO checkout (cart_id, tbl_user_id, item_name, item_price, item_quantity, firstname, middlename, lastname, address, city, zip_code, contact_number, payment_method, gcash_proof)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-        );
-        if ($stmt === false) {
-            die("Error preparing SQL statement: " . $conn->error);
-        }
-
-        // Bind parameters
-        $stmt->bind_param(
-            "iisdisssssssss",
-            $cart_id,
-            $tbl_user_id,
-            $item_name,
-            $item_price,
-            $item_quantity,
-            $first_name,
-            $middle_name,
-            $last_name,
-            $address,
-            $city,
-            $zip_code,
-            $contact_number,
-            $payment_method,
-            $gcash_proof_path
-        );
-
-        // Execute the query
-        if (!$stmt->execute()) {
-            echo "Error: " . $stmt->error;
-        }
-
-        // Close the statement
-        $stmt->close();
+        // Add each item to the combined array
+        $cart_items_combined[] = [
+            'name' => $cartItem['name'],
+            'price' => $cartItem['price'],
+            'quantity' => $cartItem['quantity']
+        ];
     }
 
-    // Redirect to receipt after processing all items
+    // Convert combined cart items into JSON format
+    $cart_items_json = json_encode($cart_items_combined);
+
+    // Insert data into the checkout table
+    $stmt = $conn->prepare(
+        "INSERT INTO checkout (tbl_user_id, cart_items, firstname, middlename, lastname, address, city, zip_code, contact_number, payment_method, gcash_proof)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+    );
+
+    if ($stmt === false) {
+        die("Error preparing SQL statement: " . $conn->error);
+    }
+
+    // Bind parameters
+    $stmt->bind_param(
+        "issssssssss",
+        $tbl_user_id,
+        $cart_items_json,
+        $first_name,
+        $middle_name,
+        $last_name,
+        $address,
+        $city,
+        $zip_code,
+        $contact_number,
+        $payment_method,
+        $gcash_proof_path
+    );
+
+    // Execute the query
+    if (!$stmt->execute()) {
+        die("Error: " . $stmt->error);
+    }
+
+    // Close the statement
+    $stmt->close();
+
+    // Redirect to receipt after processing
     header("Location: receipt.php");
     exit;
 }
+
 
 // Close the database connection
 $conn->close();

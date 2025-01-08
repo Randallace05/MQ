@@ -180,8 +180,8 @@ $conn->close(); // Close the database connection
                                         echo "<td>₱ " . number_format($order['total_amount'], 2) . "</td>";
                                         echo "<td>" . htmlspecialchars($order['payment_method']) . "</td>";
                                         echo "<td>";
-                                        echo "<a href='view_order.php?order_id=" . urlencode($order['order_id']) . "' class='btn btn-primary'>View</a> ";
-                                        echo "<a href='delete_order.php?order_id=" . urlencode($order['order_id']) . "' class='btn btn-danger'>Delete</a>";
+                                        echo "<a href='arrange_order.php?order_id=" . urlencode($order['order_id']) . "' class='btn btn-primary'>Arrange Order</a> ";
+                                        echo "<a href='delete_order.php?order_id=" . urlencode($order['order_id']) . "' class='btn btn-danger'>Cancel</a>";
                                         echo "</td>";
                                         echo "</tr>";
                                     }

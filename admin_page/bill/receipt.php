@@ -43,44 +43,40 @@ if ($checkout_result && $checkout_result->num_rows > 0) {
 } else {
     die("No checkout details found for this user.");
 }
+
 // Fetch cart items
+// Fetch cart items and store in an array
+$cart_items = [];
 $cart_sql = "SELECT name, price, quantity FROM cart WHERE tbl_user_id = $unique_id";
 $cart_result = $conn->query($cart_sql);
 
-if (!$cart_result || $cart_result->num_rows == 0) {
+if ($cart_result && $cart_result->num_rows > 0) {
+    while ($row = $cart_result->fetch_assoc()) {
+        $cart_items[] = $row;
+    }
+} else {
     die("No items in the cart for this user.");
 }
 
 // Calculate totals
 $subtotal = 0;
 $shipping_fee = 60; // Fixed shipping fee
-while ($row = $cart_result->fetch_assoc()) {
-    $subtotal += $row['price'] * $row['quantity'];
+foreach ($cart_items as $item) {
+    $subtotal += $item['price'] * $item['quantity'];
 }
 $grand_total = $subtotal + $shipping_fee;
 
 // Prepare shipping address
 $shipping_address = "{$user['address']}, {$user['city']}, {$user['zip_code']}";
 
-// Check if an order already exists
-$order_check_sql = "SELECT checkout_id
-                    FROM checkout
-                    WHERE checkout_id = $checkout_id";
-$order_check_result = $conn->query($order_check_sql);
+// Clear the cart
+$clear_cart_sql = "DELETE FROM cart WHERE tbl_user_id = $unique_id";
 
-if ($order_check_result && $order_check_result->num_rows > 0) {
-    // Fetch existing order ID
-    $order_row = $order_check_result->fetch_assoc();
-    $order_id = $order_row['checkout_id'];
+if ($conn->query($clear_cart_sql) === TRUE) {
+    echo "<script>console.log('Cart cleared successfully.')</script>";
 } else {
-    // Insert a new order into the `orders` table
-    $order_sql = "INSERT INTO orders (tbl_user_id, checkout_id, total_amount, shipping_address, payment_method)
-                  VALUES ($unique_id, $checkout_id, $grand_total, '$shipping_address', '{$user['payment_method']}')";
-    if ($conn->query($order_sql) === TRUE) {
-        $order_id = $conn->insert_id;
-    } else {
-        die("Error inserting order: " . $conn->error);
-    }
+    echo "<script>console.error('Error clearing the cart: " . $conn->error . "');</script>";
+    die("Error clearing the cart: " . $conn->error);
 }
 
 ?>
@@ -258,7 +254,7 @@ if ($order_check_result && $order_check_result->num_rows > 0) {
             <p>Thank you for your purchase!</p>
         </div>
         <div class="details">
-            <p><strong>Order Number:</strong> <?php echo $order_id; ?></p>
+            <p><strong>Order Number:</strong> <?php echo $checkout_id; ?></p>
             <p><strong>Customer Name:</strong> <?php echo "{$user['firstname']} {$user['middlename']} {$user['lastname']}"; ?></p>
             <p><strong>Shipping Address:</strong> <?php echo $shipping_address; ?></p>
             <p><strong>Phone Number:</strong> <?php echo $user['contact_number']; ?></p>
@@ -276,19 +272,18 @@ if ($order_check_result && $order_check_result->num_rows > 0) {
                 </thead>
                 <tbody>
                     <?php
-                    // Reset cart result pointer
-                    $cart_result = $conn->query($cart_sql);
-                    while ($row = $cart_result->fetch_assoc()) {
-                        $item_total = $row['price'] * $row['quantity'];
+                    foreach ($cart_items as $item) {
+                        $item_total = $item['price'] * $item['quantity'];
                         echo "<tr>
-                                <td>{$row['name']}</td>
-                                <td>{$row['quantity']}</td>
-                                <td>₱" . number_format($row['price'], 2) . "</td>
+                                <td>{$item['name']}</td>
+                                <td>{$item['quantity']}</td>
+                                <td>₱" . number_format($item['price'], 2) . "</td>
                                 <td>₱" . number_format($item_total, 2) . "</td>
-                              </tr>";
+                            </tr>";
                     }
                     ?>
                 </tbody>
+
             </table>
             <p class="total">Subtotal: ₱<?php echo number_format($subtotal, 2); ?></p>
             <p class="total">Shipping Fee: ₱<?php echo number_format($shipping_fee, 2); ?></p>

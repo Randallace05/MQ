@@ -43,9 +43,6 @@ if (empty($cartItems)) {
     die("No cart items found for this user.");
 }
 
-// Get the first cart_id (or modify logic as needed)
-$cart_id = $cartItems[0]['cart_id'];
-
 // Check if the form was submitted
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Retrieve and sanitize input data
@@ -88,46 +85,59 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
     }
 
-    // Prepare SQL statement to prevent SQL injection
-    $stmt = $conn->prepare("INSERT INTO checkout (cart, tbl_user_id, firstname, middlename, lastname, address, city, zip_code, contact_number, payment_method, gcash_proof) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-    if ($stmt === false) {
-        die("Error preparing SQL statement: " . $conn->error);
-    }
-
-    // Bind parameters
-    $stmt->bind_param(
-        "iisssssssss",
-        $cart_id,
-        $tbl_user_id,
-        $first_name,
-        $middle_name,
-        $last_name,
-        $address,
-        $city,
-        $zip_code,
-        $contact_number,
-        $payment_method,
-        $gcash_proof_path
-    );
-
-    // Execute the query
-    if ($stmt->execute()) {
-        // Redirect based on payment method
-        $order_id = $conn->insert_id;
-        if ($payment_method === "Cash on Delivery") {
-            header("Location: receipt.php?order_id=$order_id");
-        } elseif ($payment_method === "Gcash Payment") {
-            header("Location: receipt.php?order_id=$order_id");
+    // Loop through all cart items and insert them into the checkout table
+    foreach ($cartItems as $cartItem) {
+        if (!isset($cartItem['name'], $cartItem['price'], $cartItem['quantity'])) {
+            die("Cart item details are missing (name, price, or quantity). Please check the cart table.");
         }
-        exit;
-    } else {
-        echo "Error: " . $stmt->error;
+
+        // Extract cart item details
+        $cart_id = $cartItem['cart_id'];
+        $item_name = $cartItem['name'];
+        $item_price = $cartItem['price'];
+        $item_quantity = $cartItem['quantity'];
+
+        // Prepare SQL statement to prevent SQL injection
+        $stmt = $conn->prepare(
+            "INSERT INTO checkout (cart_id, tbl_user_id, item_name, item_price, item_quantity, firstname, middlename, lastname, address, city, zip_code, contact_number, payment_method, gcash_proof)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        );
+        if ($stmt === false) {
+            die("Error preparing SQL statement: " . $conn->error);
+        }
+
+        // Bind parameters
+        $stmt->bind_param(
+            "iisdisssssssss",
+            $cart_id,
+            $tbl_user_id,
+            $item_name,
+            $item_price,
+            $item_quantity,
+            $first_name,
+            $middle_name,
+            $last_name,
+            $address,
+            $city,
+            $zip_code,
+            $contact_number,
+            $payment_method,
+            $gcash_proof_path
+        );
+
+        // Execute the query
+        if (!$stmt->execute()) {
+            echo "Error: " . $stmt->error;
+        }
+
+        // Close the statement
+        $stmt->close();
     }
 
-    // Close the statement
-    $stmt->close();
+    // Redirect to receipt after processing all items
+    header("Location: receipt.php");
+    exit;
 }
 
 // Close the database connection
 $conn->close();
-?>

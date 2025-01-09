@@ -1,8 +1,10 @@
 <!-- session -->
- <?php
-    session_start();
-    include("conn/conn.php");
- ?>
+<?php 
+  session_start();
+  if(isset($_SESSION['unique_id'])){
+    header("location: user_page/shop.php");
+  }
+?>
 
 <head>
     <title>MQ Kitchen</title>

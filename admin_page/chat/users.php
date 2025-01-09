@@ -12,23 +12,17 @@
       <header>
         <div class="content">
           <?php 
-            $tbl_user_id = intval($_SESSION['unique_id']);
-
-            // Fetch user information
-            $user_query = $conn->prepare("SELECT * FROM tbl_user WHERE tbl_user_id = ?");
-            $user_query->bind_param("i", $tbl_user_id);
-            $user_query->execute();
-            $result = $user_query->get_result();
-            $user_data = $result->fetch_assoc();
-  
+            $sql = mysqli_query($conn, "SELECT * FROM tbl_user WHERE unique_id = {$_SESSION['unique_id']}");
+            if(mysqli_num_rows($sql) > 0){
+              $user = mysqli_fetch_assoc($sql);
+            }
           ?>
-          <img src="../../uploads/?php echo $user_data['img']; ?>" alt="">
+          <img src="php/images/<?php echo $user['img']; ?>" alt="">
           <div class="details">
-            <span><?php echo $user_data['first_name']. " " . $user_data['last_name'] ?></span>
-            <p><?php echo $user_data['status']; ?></p>
+            <span><?php echo $user['first_name']. " " . $user['last_name'] ?></span>
           </div>
         </div>
-        <a href="php/logout.php?logout_id=<?php echo $user_data['unique_id']; ?>" class="logout">Logout</a>
+        <a href="php/logout.php?logout_id=<?php echo $user['unique_id']; ?>" class="logout">Logout</a>
       </header>
       <div class="search">
         <span class="text">Select an user to start chat</span>

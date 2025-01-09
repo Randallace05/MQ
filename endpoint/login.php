@@ -7,14 +7,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = $_POST['password'];
 
     if (empty($username) || empty($password)) {
-        echo json_encode(["error" => "Please fill in both username and password."]);
+        $_SESSION['login_error'] = "Please fill in both username and password.";
+        header("Location: ../index.php");
         exit;
     }
-    
-    $query = "SELECT unique_id, tbl_user_id, password, username, user_role FROM tbl_user WHERE username = ?";
+
+    $query = "SELECT tbl_user_id, password, username, user_role FROM tbl_user WHERE username = ?";
     $stmt = $conn->prepare($query);
     if ($stmt === false) {
-        echo json_encode(["error" => "An error occurred. Please try again later."]);
+        $_SESSION['login_error'] = "An error occurred. Please try again later.";
+        header("Location: ../index.php");
         exit;
     }
 
@@ -26,13 +28,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $user = $result->fetch_assoc();
         if (password_verify($password, $user['password'])) {
             $status = "Active now";
-            $sql2 = "UPDATE tbl_user SET status = ? WHERE unique_id = ?";
+            $sql2 = "UPDATE tbl_user SET status = ? WHERE tbl_user_id = ?";
             $stmt2 = $conn->prepare($sql2);
             if ($stmt2 === false) {
-                echo json_encode(["error" => "An error occurred. Please try again later."]);
+                $_SESSION['login_error'] = "An error occurred. Please try again later.";
+                header("Location: ../index.php");
                 exit;
             }
-            $stmt2->bind_param("si", $status, $user['unique_id']);
+            $stmt2->bind_param("si", $status, $user['tbl_user_id']);
             $stmt2->execute();
             $stmt2->close();
 
@@ -42,7 +45,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION['loggedin'] = true;
             $_SESSION['username'] = $user['username'];
             $_SESSION['user_role'] = $user['user_role'];
-            $_SESSION['unique_id'] = $user['unique_id'];
+            $_SESSION['unique_id'] = $user['tbl_user_id'];
 
             // Redirect based on user role
             switch ($user['user_role']) {
@@ -62,17 +65,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
             exit();
         } else {
-            echo json_encode(["error" => "Incorrect password."]);
+            $_SESSION['login_error'] = "Incorrect password.";
+            header("Location: ../index.php");
         }
     } else {
-        echo json_encode(["error" => "User not found."]);
+        $_SESSION['login_error'] = "User not found.";
+        header("Location: ../index.php");
     }
 
     $stmt->close();
 } else {
-    echo json_encode(["error" => "Invalid request method."]);
+    header("Location: ../index.php");
 }
 
 $conn->close();
 ?>
-

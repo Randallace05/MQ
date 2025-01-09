@@ -1,5 +1,7 @@
 <?php
-    session_start();
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+      }
     include_once "config.php";
 
     $outgoing_id = $_SESSION['unique_id'];

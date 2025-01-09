@@ -1,47 +1,109 @@
-<?php 
-session_start();
-include_once "php/config.php";
-
-if (!isset($_SESSION['unique_id'])) {
-    header("location: ../index.php");
-    exit;
-}
-
-$sql = mysqli_query($conn, "SELECT * FROM tbl_user WHERE unique_id = {$_SESSION['unique_id']}");
-if (mysqli_num_rows($sql) > 0) {
-    $row = mysqli_fetch_assoc($sql);
-} else {
-    die("User not found or session expired. Please <a href='../../index.php'>login again</a>.");
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+  session_start();
 }
 ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <?php include("../includesAdmin/header.php"); ?>
+</head>
+<body id="page-top">
 <?php include_once "header.php"; ?>
 
-<body>
-  <div class="wrapper">
-    <section class="users">
-      <header>
-        <div class="content">
-          <img src="../uploads/<?php echo htmlspecialchars($row['img']); ?>" alt="">
-          <div class="details">
-            <span><?php echo htmlspecialchars($row['first_name']) . " " . htmlspecialchars($row['last_name']); ?></span>
-            <p><?php echo htmlspecialchars($row['status']); ?></p>
-          </div>
+
+    <!-- Page Wrapper -->
+    <div id="wrapper">
+        <!-- Sidebar -->
+        <?php include("../includesAdmin/sidebar.php"); ?>
+        <!-- End of Sidebar -->
+
+        <!-- Content Wrapper -->
+        <div id="content-wrapper" class="d-flex flex-column">
+            <!-- Main Content -->
+            <div id="content">
+                <!-- Topbar -->
+                <?php include("../includesAdmin/topbar.php"); ?>
+                <!-- End of Topbar -->
+
+                <!-- Begin Page Content -->
+                <div class="container-fluid">
+                    <!-- Page Heading -->
+                    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                        <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+                        <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                            <i class="fas fa-download fa-sm text-white-50"></i> Generate Report
+                        </a>
+                    </div>
+
+                    <!-- Content Row -->
+                    <div class="row">
+                      <div class="wrapper">
+                        <section class="users">
+                          <header>
+                            <div class="content">
+                              <img src="../uploads/<?php echo htmlspecialchars($row['img']); ?>" alt="profile">
+                              <div class="details">
+                                <span><?php echo htmlspecialchars($row['first_name']) . " " . htmlspecialchars($row['last_name']); ?></span>
+                                <p><?php echo htmlspecialchars($row['status']); ?></p>
+                              </div>
+                            </div>
+                            <a href="php/logout.php?logout_id=<?php echo $row['unique_id']; ?>" class="logout">Logout</a>
+                          </header>
+                          <div class="search">
+                            <span class="text">Select a user to start chat</span>
+                            <input type="text" placeholder="Enter name to search..."> 
+                            <button><i class="fas fa-search"></i></button>
+                          </div>
+                          <div class="users-list">
+                      
+                          </div>
+                        </section>
+                      </div>
+
+                     
+                    </div>
+                </div>
+                <!-- /.container-fluid -->
+            </div>
+            <!-- End of Main Content -->
+
+            <!-- Footer -->
+            <?php include ('../includesAdmin/footer.php');?>
+            <!-- End of Footer -->
         </div>
-        <a href="php/logout.php?logout_id=<?php echo $row['unique_id']; ?>" class="logout">Logout</a>
-      </header>
-      <div class="search">
-        <span class="text">Select a user to start chat</span>
-        <input type="text" placeholder="Enter name to search..."> 
-        <button><i class="fas fa-search"></i></button>
-      </div>
-      <div class="users-list">
-  
-      </div>
-    </section>
-  </div>
+        <!-- End of Content Wrapper -->
+    </div>
+    <!-- End of Page Wrapper -->
 
-  <script src="javascript/users.js"></script>
+    <!-- Logout Modal-->
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                    <a class="btn btn-primary" href="../chat/php/logout.php?logout_id=<?php echo $_SESSION['unique_id']; ?>">Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <!-- script -->
+    <?php include("../includesAdmin/script.php"); ?>
+    <!-- end of script -->
+
+     <script src="javascript/users.js"></script>
 </body>
 </html>
 

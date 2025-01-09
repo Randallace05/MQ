@@ -20,6 +20,30 @@ if (isset($_GET['order_id'])) {
     // Check if the order exists
     if ($result->num_rows > 0) {
         $order = $result->fetch_assoc();
+
+        // Insert order into transaction history
+        $insert_sql = "INSERT INTO transaction_history (order_id, username, order_date, total_amount, shipping_address, payment_method, cart_items)
+                       VALUES (?, ?, ?, ?, ?, ?, ?)";
+        $insert_stmt = $conn->prepare($insert_sql);
+        $insert_stmt->bind_param(
+            "issdsss",
+            $order['id'],
+            $order['username'],
+            $order['order_date'],
+            $order['total_amount'],
+            $order['shipping_address'],
+            $order['payment_method'],
+            $order['cart_items']
+        );
+
+        if ($insert_stmt->execute()) {
+            // Delete the order from the orders table
+            $delete_sql = "DELETE FROM orders WHERE id = ?";
+            $delete_stmt = $conn->prepare($delete_sql);
+            $delete_stmt->bind_param("i", $order_id);
+            $delete_stmt->execute();
+        }
+
         // Generate and display the receipt
         echo "<!DOCTYPE html>";
         echo "<html lang='en'>";
@@ -47,7 +71,7 @@ if (isset($_GET['order_id'])) {
         // Receipt Content
         echo "<div class='receipt'>";
         echo "<h1>Order Receipt</h1>";
-        
+
         // Customer Information Section
         echo "<div class='section'>";
         echo "<p class='section-title'>Customer Information</p>";
@@ -75,7 +99,7 @@ if (isset($_GET['order_id'])) {
         echo "<a href='download_receipt.php?order_id=" . $order['id'] . "' class='btn'>Download PDF</a>";
         echo "<a href='admin_dashboard.php' class='btn'>Back to Dashboard</a>";
         echo "</div>";
-        
+
         echo "</div>";
 
         echo "</body>";

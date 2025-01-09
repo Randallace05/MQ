@@ -1,22 +1,45 @@
 <?php
-include ("../chat/php/config.php");
-
-$query = "SELECT unique_id, first_name, last_name FROM tbl_user"; // Replace with your actual query
-$result = mysqli_query($conn, $query); // Use $conn here
-
-if (!$result) {
-    die("Query failed: " . mysqli_error($conn)); // Error handling for query
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
 }
 
-if (mysqli_num_rows($result) > 0) {
-    $row = mysqli_fetch_assoc($result); // Fetch the first row
-    echo "Unique ID: " . htmlspecialchars($row['unique_id']) . "<br>";
-    echo "Name: " . htmlspecialchars($row['first_name']) . " " . htmlspecialchars($row['last_name']) . "<br>";
+if (!isset($_SESSION['unique_id'])) {
+    echo "Session 'unique_id' is not set.";
+    exit;
+}
+
+// Include database connection
+include '../../conn/conn.php';
+
+$logged_in_user_id = intval($_SESSION['unique_id']);
+
+// Query to fetch user details
+$sql = "SELECT tbl_user_id, first_name, status, last_name FROM tbl_user WHERE tbl_user_id = ?";
+$stmt = $conn->prepare($sql);
+
+if ($stmt === false) {
+    die("Error preparing the query: " . $conn->error);
+}
+
+$stmt->bind_param("i", $logged_in_user_id);
+
+if (!$stmt->execute()) {
+    die("Error executing the query: " . $stmt->error);
+}
+
+$result = $stmt->get_result();
+
+if ($result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+    // echo "Unique ID: " . htmlspecialchars($row['tbl_user_id']) . "<br>";
+    // echo "Name: " . htmlspecialchars($row['first_name']) . " " . htmlspecialchars($row['last_name']) . "<br>";
 } else {
-    echo "No records found.";
+    echo "No records found for the logged-in user.";
 }
 
-mysqli_close($conn); // Close the connection
+$stmt->close();
+$conn->close();
+
 ?>
 
 <style>
@@ -172,7 +195,15 @@ mysqli_close($conn); // Close the connection
     <li class="nav-item dropdown no-arrow">
         <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
             data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <span class="mr-2 d-none d-lg-inline text-gray-600 small"><?php echo htmlspecialchars($row['first_name']) . " " . htmlspecialchars($row['last_name']); ?></span>
+            <span class="mr-2 d-none d-lg-inline text-gray-600 small">
+                <?php 
+                if (isset($row['first_name']) && isset($row['last_name'])) {
+                    echo htmlspecialchars($row['first_name']) . " " . htmlspecialchars($row['last_name']);
+                } else {
+                    echo "User";
+                }
+                ?>
+            </span>
             <img class="img-profile rounded-circle"
                 src="img/undraw_profile.svg">
         </a>
@@ -216,7 +247,7 @@ mysqli_close($conn); // Close the connection
                 <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                    <a class="btn btn-primary" href="../chat/php/logout.php?logout_id=<?php echo $row['unique_id']; ?>">Logout</a>
+                    <a class="btn btn-primary" href="../chat/php/logout.php?logout_id=<?php echo isset($row['unique_id']) ? $row['unique_id'] : $row['tbl_user_id']; ?>">Logout</a>
                 </div>
             </div>
         </div>

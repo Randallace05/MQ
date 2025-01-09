@@ -35,10 +35,9 @@
                 <!-- Login Area -->
                 <div class="login-container">
                     <div class="login-form" id="loginForm">
-                        <!-- <h2 class="text-center">Welcome to      </h2> -->
                         <img src="uploads/welcome to.png" alt="MO Kitchen" style="width: 250px; margin-top:60px;">
                         <p class="text-center">Fill your login details.</p>
-                        <form action="endpoint/login.php" method="POST">
+                        <form id="loginFormSubmit" action="endpoint/login.php" method="POST">
                             <div class="form-group">
                                 <label for="username">Username:</label>
                                 <input type="text" class="form-control" id="username" name="username">
@@ -47,9 +46,10 @@
                                 <label for="password">Password:</label>
                                 <input type="password" class="form-control" id="password" name="password">
                             </div>
-                            <p>No Account? Register <span  class="switch-form-link" onclick="showRegistrationForm()">Here.</span></p>
-                            <button type="submit" class="btn btn-secondary login-btn form-control" >Login</button>
+                            <p>No Account? Register <span class="switch-form-link" onclick="showRegistrationForm()">Here.</span></p>
+                            <button type="submit" class="btn btn-secondary login-btn form-control">Login</button>
                         </form>
+                        <div class="error-text"></div>
                     </div>
                 </div>
                 <!-- End Login Area -->
@@ -164,6 +164,7 @@
     <?php include("includes/footer.php"); ?>
 <!-- End Footer Section -->
 
+<script src="admin_page/chat/javascript/login.js"></script>
 
 <script>
     const loginForm = document.getElementById('loginForm');

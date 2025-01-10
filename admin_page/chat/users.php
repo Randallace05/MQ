@@ -16,7 +16,7 @@
         <div class="content">
           <?php
             // Use tbl_user_id instead of unique_id
-            $sql = mysqli_query($conn, "SELECT * FROM tbl_user WHERE tbl_user_id = {$_SESSION['unique_id']}");
+            $sql = mysqli_query($conn, "SELECT * FROM tbl_user WHERE unique_id = {$_SESSION['unique_id']}");
 
             // Check if the user exists
             if(mysqli_num_rows($sql) > 0){

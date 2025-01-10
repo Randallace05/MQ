@@ -12,7 +12,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit;
     }
 
-    $query = "SELECT tbl_user_id, password, username, user_role FROM tbl_user WHERE username = ?";
+    $query = "SELECT tbl_user_id, unique_id, password, username, user_role FROM tbl_user WHERE username = ?";
     $stmt = $conn->prepare($query);
     if ($stmt === false) {
         $_SESSION['login_error'] = "An error occurred. Please try again later.";
@@ -42,10 +42,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // Regenerate session ID
             session_regenerate_id(true);
 
+            $_SESSION['unique_id'] = $user['unique_id'];
+            $_SESSION['tbl_user_id'] = $user['tbl_user_id'];
             $_SESSION['loggedin'] = true;
             $_SESSION['username'] = $user['username'];
             $_SESSION['user_role'] = $user['user_role'];
-            $_SESSION['unique_id'] = $user['tbl_user_id'];
+
 
             // Redirect based on user role
             switch ($user['user_role']) {

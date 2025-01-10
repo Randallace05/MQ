@@ -7,10 +7,10 @@ if (isset($_GET['order_id'])) {
     $order_id = intval($_GET['order_id']);
 
     // Fetch order details from the database
-    $sql = "SELECT tbl_user.username, orders.*, checkout.cart_items 
-            FROM tbl_user 
-            INNER JOIN orders ON tbl_user.tbl_user_id = orders.tbl_user_id 
-            LEFT JOIN checkout ON orders.id = checkout.orders_id 
+    $sql = "SELECT tbl_user.username, orders.*, checkout.cart_items
+            FROM tbl_user
+            INNER JOIN orders ON tbl_user.tbl_user_id = orders.tbl_user_id
+            LEFT JOIN checkout ON orders.id = checkout.orders_id
             WHERE orders.id = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $order_id);
@@ -97,7 +97,7 @@ if (isset($_GET['order_id'])) {
         echo "<div style='text-align: center;'>";
         echo "<a href='javascript:window.print()' class='btn'>Print Receipt</a>";
         echo "<a href='download_receipt.php?order_id=" . $order['id'] . "' class='btn'>Download PDF</a>";
-        echo "<a href='admin_dashboard.php' class='btn'>Back to Dashboard</a>";
+        echo "<a href='orders.php' class='btn'>Back to Dashboard</a>";
         echo "</div>";
 
         echo "</div>";

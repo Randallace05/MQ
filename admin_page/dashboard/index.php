@@ -79,7 +79,6 @@
     </div>
 
     <!-- script -->
-    <?php include("../includesAdmin/script.php"); ?>
     <!-- end of script -->
 </body>
 </html>

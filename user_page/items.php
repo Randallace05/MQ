@@ -36,7 +36,7 @@ $related_products = $related_products_result->fetch_all(MYSQLI_ASSOC);
 // Add to cart logic
 if (isset($_POST['add_to_cart'])) {
     // Check if the user is logged in
-    $tbl_user_id = $_SESSION['unique_id'] ?? null; // Ensure user ID is retrieved from session
+    $tbl_user_id = $_SESSION['tbl_user_id'] ?? null; // Ensure user ID is retrieved from session
     if (!$tbl_user_id) {
         $_SESSION['error_message'] = "You need to log in to add items to your cart.";
         header("Location: " . $_SERVER['REQUEST_URI']); // Redirect to refresh the page
@@ -123,7 +123,7 @@ if (isset($_POST['add_to_cart'])) {
 
 // Add to wishlist logic
 if (isset($_POST['add_to_wishlist'])) {
-    $tbl_user_id = $_SESSION['unique_id']; // Assuming you store the user ID in the session
+    $tbl_user_id = $_SESSION['tbl_user_id']; // Assuming you store the user ID in the session
 
     // Check if the product is already in the wishlist
     $check_wishlist = $conn->prepare("SELECT * FROM wishlist WHERE product_id = ? AND tbl_user_id = ?");
@@ -180,6 +180,13 @@ $review_stmt->bind_param("i", $product_id);
 $review_stmt->execute();
 $reviews_result = $review_stmt->get_result();
 $reviews = $reviews_result->fetch_all(MYSQLI_ASSOC);
+
+$total_rating = 0;
+$review_count = count($reviews);
+foreach ($reviews as $review) {
+    $total_rating += $review['rating'];
+}
+$average_rating = $review_count > 0 ? round($total_rating / $review_count, 1) : 0;
 
 ?>
 
@@ -461,11 +468,22 @@ $reviews = $reviews_result->fetch_all(MYSQLI_ASSOC);
 
             <div class="col-md-6">
                 <h1 class="product-title"><?php echo htmlspecialchars($product['name']); ?></h1>
-
+                
+                <!-- average of rating -->
                 <div class="chili-rating">
-                    <?php for($i = 0; $i < 5; $i++): ?>
-                        <i class="fas fa-pepper-hot"></i>
-                    <?php endfor; ?>
+                <?php
+                            $full_chilies = floor($average_rating);
+                            $half_chili = $average_rating - $full_chilies >= 0.5;
+                            for ($i = 1; $i <= 5; $i++):
+                                if ($i <= $full_chilies): ?>
+                                    <i class="fas fa-pepper-hot" style="color: #ff0000;"></i>
+                                <?php elseif ($i == $full_chilies + 1 && $half_chili): ?>
+                                    <i class="fas fa-pepper-hot" style="color: #ff0000; opacity: 0.5;"></i>
+                                <?php else: ?>
+                                    <i class="fas fa-pepper-hot" style="color: #c2bdbd;"></i>
+                                <?php endif;
+                            endfor; ?>
+                            <span>(<?php echo number_format($average_rating, 1); ?>)</span>
                 </div>
 
                 <div class="product-price">

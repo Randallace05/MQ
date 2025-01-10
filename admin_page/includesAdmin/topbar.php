@@ -41,52 +41,6 @@ $conn->close();
 
 ?>
 
-<!-- Rest of your HTML code -->
-
-<!-- Update the user information display -->
-<li class="nav-item dropdown no-arrow">
-    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
-        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-        <span class="mr-2 d-none d-lg-inline text-gray-600 small">
-            <?php 
-            if (isset($row['first_name']) && isset($row['last_name'])) {
-                echo htmlspecialchars($row['first_name']) . " " . htmlspecialchars($row['last_name']);
-            } else {
-                echo "User";
-            }
-            ?>
-        </span>
-        <img class="img-profile rounded-circle" src="img/undraw_profile.svg">
-    </a>
-    <!-- Dropdown menu items -->
-</li>
-
-<!-- Rest of your HTML code -->
-
-<!-- Logout Modal -->
-<div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
-                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">×</span>
-                </button>
-            </div>
-            <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                <a class="btn btn-primary" href="../chat/php/logout.php?logout_id=<?php echo isset($row['unique_id']) ? $row['unique_id'] : $row['tbl_user_id']; ?>">Logout</a>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- End of Topbar -->
-
-
-
 <style>
     .btn-css{
         color:#fff;
@@ -278,7 +232,7 @@ $conn->close();
 </ul>
 
 
-<!-- Logout Modal-->
+<!-- Logout Modal -->
 <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
     aria-hidden="true">
     <div class="modal-dialog" role="document">

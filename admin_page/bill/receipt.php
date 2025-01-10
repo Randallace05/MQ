@@ -27,7 +27,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
 }
 
 // Get the logged-in user's unique ID
-$unique_id = intval($_SESSION['unique_id']);
+$unique_id = intval($_SESSION['tbl_user_id']);
 
 // Fetch the latest checkout record for the user
 $checkout_sql = "SELECT checkout_id, firstname, middlename, lastname, address, city, zip_code, contact_number, payment_method

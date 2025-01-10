@@ -34,13 +34,25 @@ $related_products_result = $related_stmt->get_result();
 $related_products = $related_products_result->fetch_all(MYSQLI_ASSOC);
 
 // Add to cart logic
-// Add to cart logic
 if (isset($_POST['add_to_cart'])) {
     // Check if the user is logged in
-    $tbl_user_id = $_SESSION['tbl_user_id'] ?? null; // Ensure user ID is retrieved from session
+    $tbl_user_id = $_SESSION['unique_id'] ?? null; // Ensure user ID is retrieved from session
     if (!$tbl_user_id) {
         $_SESSION['error_message'] = "You need to log in to add items to your cart.";
         header("Location: " . $_SERVER['REQUEST_URI']); // Redirect to refresh the page
+        exit;
+    }
+
+    // Verify if tbl_user_id exists in tbl_user table
+    $user_check_query = "SELECT tbl_user_id FROM tbl_user WHERE tbl_user_id = ?";
+    $user_check_stmt = $conn->prepare($user_check_query);
+    $user_check_stmt->bind_param("i", $tbl_user_id);
+    $user_check_stmt->execute();
+    $user_check_result = $user_check_stmt->get_result();
+
+    if ($user_check_result->num_rows === 0) {
+        $_SESSION['error_message'] = "Invalid user session. Please log in again.";
+        header("Location: ../index.php");
         exit;
     }
 
@@ -109,11 +121,9 @@ if (isset($_POST['add_to_cart'])) {
 }
 
 
-
-
 // Add to wishlist logic
 if (isset($_POST['add_to_wishlist'])) {
-    $tbl_user_id = $_SESSION['tbl_user_id']; // Assuming you store the user ID in the session
+    $tbl_user_id = $_SESSION['unique_id']; // Assuming you store the user ID in the session
 
     // Check if the product is already in the wishlist
     $check_wishlist = $conn->prepare("SELECT * FROM wishlist WHERE product_id = ? AND tbl_user_id = ?");
@@ -144,36 +154,33 @@ if (isset($_POST['submit_review'])) {
     }
 
     $review_text = trim($_POST['review_text']);
-    $username = $_SESSION['username'] ?? 'Anonymous';
+    $rating = intval($_POST['rating']);
+    $is_anonymous = isset($_POST['is_anonymous']) ? 1 : 0;
+    $username = $is_anonymous ? 'Anonymous' : ($_SESSION['username'] ?? 'Anonymous');
 
-    if (!empty($review_text)) {
-        $insert_review = $conn->prepare("INSERT INTO reviews (product_id, tbl_user_id, username, review_text) VALUES (?, ?, ?, ?)");
-        $insert_review->bind_param("iiss", $product_id, $tbl_user_id, $username, $review_text);
+    if (!empty($review_text) && $rating > 0 && $rating <= 5) {
+        $insert_review = $conn->prepare("INSERT INTO reviews (product_id, tbl_user_id, username, review_text, rating, is_anonymous) VALUES (?, ?, ?, ?, ?, ?)");
+        $insert_review->bind_param("iissii", $product_id, $tbl_user_id, $username, $review_text, $rating, $is_anonymous);
         if ($insert_review->execute()) {
             $_SESSION['success_message'] = "Review submitted successfully.";
         } else {
             $_SESSION['error_message'] = "Failed to submit review.";
         }
     } else {
-        $_SESSION['error_message'] = "Review cannot be empty.";
+        $_SESSION['error_message'] = "Please provide both a rating and a review.";
     }
     header("Location: " . $_SERVER['REQUEST_URI']);
     exit;
 }
 
 // Fetch existing reviews for the product
-$review_query = "SELECT username, review_text, created_at FROM reviews WHERE product_id = ? ORDER BY created_at DESC";
+$review_query = "SELECT username, review_text, rating, created_at, is_anonymous FROM reviews WHERE product_id = ? ORDER BY created_at DESC";
 $review_stmt = $conn->prepare($review_query);
 $review_stmt->bind_param("i", $product_id);
 $review_stmt->execute();
 $reviews_result = $review_stmt->get_result();
 $reviews = $reviews_result->fetch_all(MYSQLI_ASSOC);
-?>
-<?php
-require_once '../endpoint/session_config.php';
-include '../conn/conn.php';
 
-// ... (keep existing PHP logic until the HTML part)
 ?>
 
 <!DOCTYPE html>
@@ -373,6 +380,31 @@ include '../conn/conn.php';
         transition: background-color 0.3s ease;
     }
 
+    .chili-rating {
+    font-size: 24px;
+    cursor: pointer;
+    }
+
+    .chili-rating .chili {
+        color: #c2bdbd;
+        transition: color 0.2s ease;
+    }
+
+    .chili-rating .chili.active {
+        color: #ff0000;
+    }
+        
+    .review-form {
+        background-color: #f9f9f9;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    .anonymous-toggle {
+         margin-top: 10px;
+    }
+
     .btn-primary:hover {
         background-color: #cc0000;
     }
@@ -482,43 +514,96 @@ include '../conn/conn.php';
                 <?php endif; ?>
             </div>
             <div class="container mt-5">
-            <h3 class="mb-4">Customer Reviews</h3>
+    <h3 class="mb-4">Customer Reviews</h3>
 
-            <!-- Review Submission Form -->
-            <?php if (isset($_SESSION['unique_id'])): ?>
-                <form method="post" class="mb-4 p-4 border rounded bg-light">
-                    <div class="mb-3">
-                        <label for="review_text" class="form-label" style="font-weight: bold;">Write a Review:</label>
-                        <textarea name="review_text" id="review_text" rows="3" class="form-control" placeholder="Share your thoughts about this product..." required></textarea>
-                    </div>
-                    <button type="submit" name="submit_review" class="btn btn-primary w-100">Submit Review</button>
-                </form>
-            <?php else: ?>
-                <p><a href="../user_page/login.php">Log in</a> to write a review.</p>
-            <?php endif; ?>
+    <!-- Review Submission Form -->
+    <?php if (isset($_SESSION['unique_id'])): ?>
+        <form method="post" class="review-form">
+            <div class="mb-3">
+                <label for="rating" class="form-label">Rating:</label>
+                <div class="chili-rating submission-chilies">
+                    <?php for($i = 1; $i <= 5; $i++): ?>
+                        <i class="fa-solid fa-pepper-hot chili" 
+                           data-rating="<?php echo $i; ?>" 
+                           style="color: #c2bdbd; --fa-rotate-angle: 320deg;">
+                        </i>
+                    <?php endfor; ?>
+                </div>
+                <input type="hidden" name="rating" id="rating" value="0" required>
+            </div>
+            <div class="mb-3">
+                <label for="review_text" class="form-label">Your Review:</label>
+                <textarea name="review_text" id="review_text" rows="3" class="form-control" required></textarea>
+            </div>
+            <div class="mb-3 form-check anonymous-toggle">
+                <input type="checkbox" class="form-check-input" id="is_anonymous" name="is_anonymous">
+                <label class="form-check-label" for="is_anonymous">Post anonymously</label>
+            </div>
+            <button type="submit" name="submit_review" class="btn btn-primary">Submit Review</button>
+        </form>
+    <?php else: ?>
+        <p><a href="../user_page/login.php">Log in</a> to write a review.</p>
+    <?php endif; ?>
 
-            <!-- Display Reviews -->
-            <?php if (!empty($reviews)): ?>
-                <?php foreach ($reviews as $review): ?>
-                    <div class="review mb-4 p-4 border rounded bg-white shadow-sm">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h5 class="mb-0 text-primary"><?php echo htmlspecialchars($review['username']); ?></h5>
-                            <small class="text-muted"><?php echo date("F j, Y, g:i a", strtotime($review['created_at'])); ?></small>
-                        </div>
-                        <p class="mt-2 mb-0" style="line-height: 1.6;"><?php echo nl2br(htmlspecialchars($review['review_text'])); ?></p>
-                    </div>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <p class="text-muted">No reviews yet. Be the first to review this product!</p>
-            <?php endif; ?>
-        </div>
-        </div>
+    <!-- Display Reviews -->
+    <?php if (!empty($reviews)): ?>
+        <?php foreach ($reviews as $review): ?>
+            <div class="review mb-4 p-4 border rounded bg-white shadow-sm">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="mb-0 text-primary">
+                        <?php echo htmlspecialchars($review['is_anonymous'] ? 'Anonymous' : $review['username']); ?>
+                    </h5>
+                    <small class="text-muted"><?php echo date("F j, Y, g:i a", strtotime($review['created_at'])); ?></small>
+                </div>
+                <div class="chili-rating display-chilies mb-2">
+                    <?php for($i = 1; $i <= 5; $i++): ?>
+                        <i class="fa-solid fa-pepper-hot chili <?php echo $i <= $review['rating'] ? 'active' : ''; ?>" 
+                           style="color: <?php echo $i <= $review['rating'] ? '#ff0000' : '#c2bdbd'; ?>; --fa-rotate-angle: 320deg;">
+                        </i>
+                    <?php endfor; ?>
+                </div>
+                <p class="mt-2 mb-0" style="line-height: 1.6;"><?php echo nl2br(htmlspecialchars($review['review_text'])); ?></p>
+            </div>
+        <?php endforeach; ?>
+    <?php else: ?>
+        <p class="text-muted">No reviews yet. Be the first to review this product!</p>
+    <?php endif; ?>
+</div>
+
     </div>
 
     <script>
         function updateMainImage(src) {
             document.getElementById('mainImage').src = src;
         }
+
+        document.addEventListener('DOMContentLoaded', () => {
+    // Submission chilies
+    const submissionChilies = document.querySelectorAll('.submission-chilies .chili');
+    const ratingInput = document.getElementById('rating');
+
+    submissionChilies.forEach((chili, index) => {
+        chili.addEventListener('mouseover', () => {
+            submissionChilies.forEach((c, i) => {
+                c.style.color = i <= index ? '#ff0000' : '#c2bdbd';
+            });
+        });
+
+        chili.addEventListener('mouseout', () => {
+            submissionChilies.forEach((c, i) => {
+                c.style.color = i < ratingInput.value ? '#ff0000' : '#c2bdbd';
+            });
+        });
+
+        chili.addEventListener('click', () => {
+            ratingInput.value = index + 1;
+            submissionChilies.forEach((c, i) => {
+                c.classList.toggle('active', i <= index);
+            });
+        });
+    });
+});
+   
     </script>
 </body>
 </html>

@@ -15,7 +15,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
 }
 
 // Get the logged-in user's ID
-$tbl_user_id = intval($_SESSION['unique_id']); // Assuming `tbl_user_id` is securely stored in the session
+$tbl_user_id = intval($_SESSION['tbl_user_id']); // Assuming `tbl_user_id` is securely stored in the session
 
 // Delete all items from the cart for the logged-in user
 $delete_cart_query = $conn->prepare("DELETE FROM `cart` WHERE `tbl_user_id` = ?");

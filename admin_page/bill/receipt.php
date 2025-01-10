@@ -293,7 +293,7 @@ if ($conn->query($clear_cart_sql) === TRUE) {
     <div class="actions">
         <button id="print-btn">Print</button>
         <button id="download-btn">Download PDF</button>
-        <a href="user_page/shop.php" class="back-btn">Back to Shop</a>
+        <a href="../user_page/shop.php" class="back-btn">Back to Shop</a>
     </div>
 </div>
 </body>

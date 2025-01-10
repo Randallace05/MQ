@@ -232,6 +232,17 @@ ALTER TABLE `tbl_user`
   MODIFY `tbl_user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=65;
 COMMIT;
 
+CREATE TABLE transaction_history (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id INT NOT NULL,
+    username VARCHAR(255) NOT NULL,
+    order_date DATETIME NOT NULL,
+    total_amount DECIMAL(10, 2) NOT NULL,
+    shipping_address TEXT NOT NULL,
+    payment_method VARCHAR(50) NOT NULL,
+    cart_items TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
 
 

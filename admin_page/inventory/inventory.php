@@ -1,19 +1,27 @@
 <?php
-// Database connection
-$conn = new mysqli("localhost", "root", "", "login_email_verification");
+// Include the database connection
+include("../../conn/conn.php");
 
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+function fetchInventory($conn) {
+    $sql = "SELECT * FROM transaction_history ORDER BY order_date DESC";
+    $result = $conn->query($sql);
+
+    if (!$result) {
+        die("Query Error: " . $conn->error); // Debugging query errors
+    }
+
+    $inventory = [];
+    if ($result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $inventory[] = $row;
+        }
+    }
+    return $inventory;
 }
 
-// Get sorting order from query parameter
-$sort_order = isset($_GET['sort']) ? $_GET['sort'] : 'asc';
-$order_by = ($sort_order === 'desc') ? 'DESC' : 'ASC';
+$inventory = fetchInventory($conn);
 
-// Fetch data from 'products' table with sorting
-$sql = "SELECT id, name, stock, price, description FROM products ORDER BY stock $order_by";
-$result = $conn->query($sql);
+$conn->close(); // Close the database connection
 ?>
 
 <!DOCTYPE html>
@@ -26,11 +34,54 @@ $result = $conn->query($sql);
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Inventory</title>
+    <title>Order History</title>
     <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="../dashboard/css/sb-admin-2.min.css" rel="stylesheet">
-</head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
 
+        .container {
+            width: 80%;
+            margin: 50px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f4f4f4;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
 <body id="page-top">
     <div id="wrapper">
         <?php include("../includesAdmin/sidebar.php"); ?>
@@ -39,63 +90,41 @@ $result = $conn->query($sql);
                 <?php include("../includesAdmin/topbar.php"); ?>
                 <div class="container-fluid">
                     <div class="d-flex align-items-center justify-content-between mb-2">
-                        <h1 class="h3 text-gray-800">Inventory</h1>
-                        <select id="sortDropdown" class="form-control w-auto" onchange="sortInventory()">
-                            <option value="asc" <?php echo $sort_order === 'asc' ? 'selected' : ''; ?>>Low to High Stocks</option>
-                            <option value="desc" <?php echo $sort_order === 'desc' ? 'selected' : ''; ?>>High to Low Stocks</option>
-                        </select>
-                    </div>
-                    <div class="card shadow mb-4">
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-bordered" id="inventoryTable" width="100%" cellspacing="0">
-                                    <thead>
-                                        <tr>
-                                            <th>Product ID</th>
-                                            <th>Product Name</th>
-                                            <th>Stocks</th>
-                                            <th>Price</th>
-                                            <th>Action Name</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php
-                                        if ($result->num_rows > 0) {
-                                            while ($row = $result->fetch_assoc()) {
-                                                echo "<tr>";
-                                                echo "<td>" . $row['id'] . "</td>"; // Display Product ID
-                                                echo "<td>" . $row['name'] . "</td>";
-                                                echo "<td>" . $row['stock'] . "</td>";
-                                                echo "<td>" . $row['price'] . "</td>";
-                                                echo "<td>
-                                                        <button class='btn btn-primary btn-sm' onclick='addStock(" . $row['id'] . ")'>Add Stock</button>
-                                                    </td>";
-                                                echo "<td>
-                                                        <button class='btn btn-primary btn-sm'>Edit</button> 
-                                                        <button class='btn btn-danger btn-sm'>Delete</button>
-                                                    </td>";
-                                                echo "</tr>";
-                                            }
-                                        } else {
-                                            echo "<tr><td colspan='6'>No products found.</td></tr>";
-                                        }
-                                        ?>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <footer class="sticky-footer bg-white">
-                <div class="container my-auto">
-                    <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; Your Website 2024</span>
-                    </div>
-                </div>
-            </footer>
-        </div>
+<body>
+    <div class="container">
+        <h1>Order History</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Customer</th>
+                    <th>Order Date</th>
+                    <th>Shipping Address</th>
+                    <th>Total Amount</th>
+                    <th>Payment Method</th>
+                    <th>Cart Items</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                if (!empty($inventory)) {
+                    foreach ($inventory as $item) {
+                        echo "<tr>";
+                        echo "<td>" . htmlspecialchars($item['order_id']) . "</td>";
+                        echo "<td>" . htmlspecialchars($item['username']) . "</td>";
+                        echo "<td>" . htmlspecialchars($item['order_date']) . "</td>";
+                        echo "<td>" . htmlspecialchars($item['shipping_address']) . "</td>";
+                        echo "<td>₱ " . number_format($item['total_amount'], 2) . "</td>";
+                        echo "<td>" . htmlspecialchars($item['payment_method']) . "</td>";
+                        echo "<td>" . htmlspecialchars($item['cart_items']) . "</td>";
+                        echo "</tr>";
+                    }
+                } else {
+                    echo "<tr><td colspan='7'>No transaction history found.</td></tr>";
+                }
+                ?>
+            </tbody>
+        </table>
     </div>
     <script src="vendor/jquery/jquery.min.js"></script>
     <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
@@ -117,7 +146,3 @@ $result = $conn->query($sql);
 </body>
 
 </html>
-
-<?php
-$conn->close();
-?>

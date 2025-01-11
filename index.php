@@ -11,7 +11,7 @@
     <link rel="icon" type="image/x-icon" href="uploads/sili.ico" />
 </head>
 
-<!-- <?php include("loader.php"); ?> -->
+<?php include("loader.php"); ?>
 
 <!-- start include header -->
     <?php include("includes/header.php"); ?>
@@ -27,7 +27,7 @@
 
     <!-- Main Container -->
     <div class="container">
-        <div class="flex-container">
+        <div class="flex-container"> 
             <!-- Image Section -->
             <div class="image-container">
                 <img src="uploads/try3.png" alt="MO Kitchen">

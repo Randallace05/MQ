@@ -353,23 +353,6 @@
     </div>
 
     <script>
-        function toggleDropdown(event) {
-            event.stopPropagation();
-            const dropdown = document.querySelector('.dropdown-content');
-            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-        }
-
-        window.onclick = function(event) {
-            if (!event.target.matches('.user-icon')) {
-                const dropdowns = document.getElementsByClassName("dropdown-content");
-                for (let i = 0; i < dropdowns.length; i++) {
-                    const openDropdown = dropdowns[i];
-                    if (openDropdown.style.display === 'block') {
-                        openDropdown.style.display = 'none';
-                    }
-                }
-            }
-        };
 
         function fetchSearchResults(query) {
             const resultsContainer = document.getElementById('searchResults');
@@ -399,50 +382,72 @@
                 })
                 .catch(error => console.error('Error fetching search results:', error));
         }
-        function toggleNotifications(event) {
-    event.stopPropagation();
-    const notificationsList = document.getElementById('notificationsList');
-    notificationsList.style.display = notificationsList.style.display === 'block' ? 'none' : 'block';
-}
+        function toggleDropdown(event) {
+        event.stopPropagation();
+        const userDropdown = document.querySelector('.user-dropdown .dropdown-content');
+        const notificationsDropdown = document.querySelector('.notifications-dropdown .dropdown-content');
 
-function fetchNotifications() {
-    const notificationsCount = document.getElementById('notificationCount');
-    const notificationsList = document.getElementById('notificationsList');
+        // Close notifications dropdown if open
+        notificationsDropdown.style.display = 'none';
 
-    // Example of fetching notifications from a server
-    fetch('fetch_notifications.php')
-        .then(response => response.json())
-        .then(notifications => {
-            notificationsCount.textContent = notifications.length;
+        // Toggle user dropdown
+        userDropdown.style.display = userDropdown.style.display === 'block' ? 'none' : 'block';
+    }
 
-            if (notifications.length > 0) {
-                notificationsList.innerHTML = `
-                    <div class="dropdown-header">Notifications</div>
-                    ${notifications.map(notification => `
-                        <div class="notification-item">
-                            ${notification.message}
-                        </div>
-                    `).join('')}
-                `;
-            } else {
-                notificationsList.innerHTML = `
-                    <div class="dropdown-header">Notifications</div>
-                    <div class="dropdown-empty">No new notifications</div>
-                `;
-            }
-        })
-        .catch(error => console.error('Error fetching notifications:', error));
-}
+    function toggleNotifications(event) {
+        event.stopPropagation();
+        const notificationsDropdown = document.querySelector('.notifications-dropdown .dropdown-content');
+        const userDropdown = document.querySelector('.user-dropdown .dropdown-content');
 
-// Close dropdown when clicking outside
-window.onclick = function(event) {
-    const dropdowns = document.querySelectorAll('.dropdown-content');
-    dropdowns.forEach(dropdown => {
-        if (!event.target.closest('.notifications-dropdown')) {
-            dropdown.style.display = 'none';
+        // Close user dropdown if open
+        userDropdown.style.display = 'none';
+
+        // Toggle notifications dropdown
+        notificationsDropdown.style.display = notificationsDropdown.style.display === 'block' ? 'none' : 'block';
+    }
+
+    // Close both dropdowns when clicking outside
+    window.onclick = function(event) {
+        const userDropdown = document.querySelector('.user-dropdown .dropdown-content');
+        const notificationsDropdown = document.querySelector('.notifications-dropdown .dropdown-content');
+
+        if (!event.target.closest('.user-dropdown')) {
+            userDropdown.style.display = 'none';
         }
-    });
-};
+
+        if (!event.target.closest('.notifications-dropdown')) {
+            notificationsDropdown.style.display = 'none';
+        }
+    };
+
+    function fetchNotifications() {
+        const notificationsCount = document.getElementById('notificationCount');
+        const notificationsList = document.getElementById('notificationsList');
+
+        // Example of fetching notifications from a server
+        fetch('fetch_notifications.php')
+            .then(response => response.json())
+            .then(notifications => {
+                notificationsCount.textContent = notifications.length;
+
+                if (notifications.length > 0) {
+                    notificationsList.innerHTML = `
+                        <div class="dropdown-header">Notifications</div>
+                        ${notifications.map(notification => `
+                            <div class="notification-item">
+                                ${notification.message}
+                            </div>
+                        `).join('')}
+                    `;
+                } else {
+                    notificationsList.innerHTML = `
+                        <div class="dropdown-header">Notifications</div>
+                        <div class="dropdown-empty">No new notifications</div>
+                    `;
+                }
+            })
+            .catch(error => console.error('Error fetching notifications:', error));
+    }
 
     </script>
 </body>

@@ -2,9 +2,14 @@
   session_start();
   include_once "php/config.php";
 
-  // Redirect to login if unique_id is not set
   if(!isset($_SESSION['unique_id'])){
     header("location: login.php");
+    exit;
+  }
+
+  $current_user_role = $_SESSION['user_role'];
+  if($current_user_role === 'customer'){
+    header("location: index.php"); // Redirect customers to a non-chat page
     exit;
   }
 ?>
@@ -15,26 +20,18 @@
       <header>
         <div class="content">
           <?php
-            // Use tbl_user_id instead of unique_id
             $sql = mysqli_query($conn, "SELECT * FROM tbl_user WHERE unique_id = {$_SESSION['unique_id']}");
-
-            // Check if the user exists
             if(mysqli_num_rows($sql) > 0){
-              $user = mysqli_fetch_assoc($sql);
-          ?>
-              <img src="php/images/<?php echo htmlspecialchars($user['img'], ENT_QUOTES, 'UTF-8'); ?>" alt="">
-              <div class="details">
-                <span><?php echo htmlspecialchars($user['first_name'], ENT_QUOTES, 'UTF-8') . " " . htmlspecialchars($user['last_name'], ENT_QUOTES, 'UTF-8'); ?></span>
-              </div>
-          <?php
-            } else {
-              echo "<p>User not found. Please log in again.</p>";
-              echo '<a href="login.php">Go to Login</a>';
-              exit;
+              $row = mysqli_fetch_assoc($sql);
             }
           ?>
+          <img src="php/images/<?php echo htmlspecialchars($row['img']); ?>" alt="">
+          <div class="details">
+            <span><?php echo htmlspecialchars($row['first_name'] . " " . $row['last_name']); ?></span>
+            <p><?php echo htmlspecialchars($row['status']); ?></p>
+          </div>
         </div>
-        <a href="php/logout.php?logout_id=<?php echo htmlspecialchars($user['tbl_user_id'], ENT_QUOTES, 'UTF-8'); ?>" class="logout">Logout</a>
+        <a href="php/logout.php?logout_id=<?php echo $row['unique_id']; ?>" class="logout">Logout</a>
       </header>
       <div class="search">
         <span class="text">Select a user to start chat</span>
@@ -42,7 +39,7 @@
         <button><i class="fas fa-search"></i></button>
       </div>
       <div class="users-list">
-
+  
       </div>
     </section>
   </div>
@@ -51,3 +48,4 @@
 
 </body>
 </html>
+

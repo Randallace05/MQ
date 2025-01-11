@@ -11,6 +11,9 @@
     <!-- Bootstrap icons-->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" />
     <!-- Core theme CSS (includes Bootstrap)-->
+
+    <!-- chat css -->
+    <link rel="stylesheet" href="chat.css">
     <style>
         * {
             margin: 0;
@@ -348,7 +351,7 @@
                     }
 
                     // Display the message icon
-                    echo '<a href="../user_page/orders.php">
+                    echo '<a href="../includes/chat.php" class="message-icon">
                             <i class="fa-regular fa-message"></i>';
                     // Conditionally display the notification count badge
                     if ($notification_count > 0) {
@@ -394,6 +397,8 @@
             <hr>
         </div>
     </div>
+
+
 
     <script>
 
@@ -491,7 +496,7 @@
             })
             .catch(error => console.error('Error fetching notifications:', error));
     }
-
     </script>
+    
 </body>
 </html>

@@ -67,7 +67,7 @@
     <li class="nav-item">
         <a class="nav-link" href="../inventory/inventory.php">
             <i class="fa-solid fa-cart-shopping"></i>
-            <span>Inventory</span></a>
+            <span>Transaction History</span></a>
     </li>
 
 

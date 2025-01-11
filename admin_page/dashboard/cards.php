@@ -22,6 +22,27 @@ $totalDistributorsQuery = "SELECT COUNT(*) AS total_distributors FROM tbl_user W
 $totalDistributorsResult = $conn->query($totalDistributorsQuery);
 $totalDistributors = $totalDistributorsResult->fetch_assoc()['total_distributors'];
 
+$totalDishesQuery = "
+    SELECT SUM(
+        CAST(
+            SUBSTRING_INDEX(
+                SUBSTRING_INDEX(cart_items, 'x', 1),
+                '(',
+                -1
+            ) AS UNSIGNED
+        )
+    ) AS total_dishes
+    FROM transaction_history
+";
+
+$totalDishesResult = $conn->query($totalDishesQuery);
+$totalDishes = $totalDishesResult->fetch_assoc()['total_dishes'] ?? 0;
+
+$totalEarningsQuery = "SELECT SUM(total_amount) AS total_earnings FROM transaction_history";
+$totalEarningsResult = $conn->query($totalEarningsQuery);
+$totalEarnings = $totalEarningsResult->fetch_assoc()['total_earnings'] ?? 0;
+
+
 $conn->close();
 ?>                       
                        <!-- Users Example -->
@@ -50,7 +71,7 @@ $conn->close();
                                         <div class="col mr-2">
                                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                                                 Dish Ordered</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">215,000</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $totalDishes; ?></div>
                                         </div>
                                         <div class="col-auto">
                                             <i class="fas fa-solid fa-jar fa-2x text-gray-300"></i>
@@ -67,8 +88,8 @@ $conn->close();
                                     <div class="row no-gutters align-items-center">
                                         <div class="col mr-2">
                                             <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                                Earnings</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">18</div>
+                                                Total Earnings</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">₱<?php echo number_format($totalEarnings, 2); ?></div>
                                         </div>
                                         <div class="col-auto">
                                             <i class="fas fa-solid fa-peso-sign fa-2x text-gray-300"></i>

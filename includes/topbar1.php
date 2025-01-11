@@ -203,6 +203,50 @@
         .search-results .result-item:hover {
             background-color: #f7f7f7; /* Add hover effect */
         }
+        .notifications-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .notifications-dropdown .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: white;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+            width: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+            border-radius: 5px;
+        }
+
+        .notifications-dropdown .dropdown-content .dropdown-header {
+            padding: 10px;
+            font-weight: bold;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .notifications-dropdown .dropdown-content .dropdown-empty {
+            padding: 10px;
+            text-align: center;
+            color: #666;
+        }
+
+        .notifications-dropdown .dropdown-content .notification-item {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .notifications-dropdown .dropdown-content .notification-item:hover {
+            background-color: #f7f7f7;
+        }
+
+        .notifications-dropdown .dropdown-content .notification-item:last-child {
+            border-bottom: none;
+        }
+
     </style>
 </head>
 <body>
@@ -242,6 +286,19 @@
         }
         $wishlist_stmt->close();
     }
+    // Insert a notification when the user places an order
+        if ($conn && $tbl_user_id) {
+            $message = "Your order has been placed.";
+            $stmt = $conn->prepare("INSERT INTO notifications (tbl_user_id, message) VALUES (?, ?)");
+            $stmt->bind_param("is", $tbl_user_id, $message);
+            $stmt->execute();
+            $stmt->close();
+        }
+        // Mark notifications as read
+        $stmt = $conn->prepare("UPDATE notifications SET is_read = 1 WHERE tbl_user_id = ? AND is_read = 0");
+        $stmt->bind_param("i", $tbl_user_id);
+        $stmt->execute();
+        $stmt->close();
 
     ?>
 
@@ -269,6 +326,17 @@
             <a href="../user_page/cart.php"><i class="fa-solid fa-cart-shopping"></i>
                 <span class="icon-badge"><?php echo $row_count; ?></span>
             </a>
+            <div class="notifications-dropdown">
+        <a href="#" class="notifications-icon" onclick="toggleNotifications(event)">
+            <i class="fa-regular fa-bell"></i>
+            <span class="icon-badge" id="notificationCount">0</span>
+        </a>
+        <div class="dropdown-content" id="notificationsList">
+            <div class="dropdown-header">Notifications</div>
+            <!-- Notifications will be loaded dynamically -->
+            <div class="dropdown-empty">No new notifications</div>
+        </div>
+    </div>
             <div class="user-dropdown">
                 <a href="#" class="user-icon" onclick="toggleDropdown(event)">
                     <i class="fa-regular fa-user"></i>
@@ -331,6 +399,51 @@
                 })
                 .catch(error => console.error('Error fetching search results:', error));
         }
+        function toggleNotifications(event) {
+    event.stopPropagation();
+    const notificationsList = document.getElementById('notificationsList');
+    notificationsList.style.display = notificationsList.style.display === 'block' ? 'none' : 'block';
+}
+
+function fetchNotifications() {
+    const notificationsCount = document.getElementById('notificationCount');
+    const notificationsList = document.getElementById('notificationsList');
+
+    // Example of fetching notifications from a server
+    fetch('fetch_notifications.php')
+        .then(response => response.json())
+        .then(notifications => {
+            notificationsCount.textContent = notifications.length;
+
+            if (notifications.length > 0) {
+                notificationsList.innerHTML = `
+                    <div class="dropdown-header">Notifications</div>
+                    ${notifications.map(notification => `
+                        <div class="notification-item">
+                            ${notification.message}
+                        </div>
+                    `).join('')}
+                `;
+            } else {
+                notificationsList.innerHTML = `
+                    <div class="dropdown-header">Notifications</div>
+                    <div class="dropdown-empty">No new notifications</div>
+                `;
+            }
+        })
+        .catch(error => console.error('Error fetching notifications:', error));
+}
+
+// Close dropdown when clicking outside
+window.onclick = function(event) {
+    const dropdowns = document.querySelectorAll('.dropdown-content');
+    dropdowns.forEach(dropdown => {
+        if (!event.target.closest('.notifications-dropdown')) {
+            dropdown.style.display = 'none';
+        }
+    });
+};
+
     </script>
 </body>
 </html>

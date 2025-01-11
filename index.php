@@ -11,7 +11,7 @@
     <link rel="icon" type="image/x-icon" href="uploads/sili.ico" />
 </head>
 
-<?php include("loader.php"); ?>
+<!-- <?php include("loader.php"); ?> -->
 
 <!-- start include header -->
     <?php include("includes/header.php"); ?>

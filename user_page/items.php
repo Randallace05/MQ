@@ -198,7 +198,7 @@ $average_rating = $review_count > 0 ? round($total_rating / $review_count, 1) : 
     <title><?php echo htmlspecialchars($product['name']); ?> - Product Details</title>
     <link href="css/styles.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
+<style>
     body {
         font-family: 'Arial', sans-serif;
         line-height: 1.6;
@@ -415,6 +415,7 @@ $average_rating = $review_count > 0 ? round($total_rating / $review_count, 1) : 
     .btn-primary:hover {
         background-color: #cc0000;
     }
+    
 
     @media (max-width: 768px) {
         .main-image-container {
@@ -439,6 +440,71 @@ $average_rating = $review_count > 0 ? round($total_rating / $review_count, 1) : 
     }
 </style>
 
+<style>
+.rating-summary {
+    background: #fff;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.overall-rating {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #ff0000;
+}
+
+.filter-btn {
+    padding: 0.5rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.filter-btn:hover, .filter-btn.active {
+    background: #ff0000;
+    color: white;
+    border-color: #ff0000;
+}
+
+.review-item {
+    transition: all 0.3s ease;
+    margin-bottom: 1.5rem;
+}
+
+.review-avatar img {
+    object-fit: cover;
+    border: 2px solid #ddd;
+}
+
+.pagination .btn {
+    min-width: 40px;
+}
+
+.chili-rating {
+    font-size: 1rem;
+}
+
+.chili-rating i {
+    margin-right: 2px;
+}
+
+#reviews-section {
+    scroll-margin-top: 20px;
+}
+
+@media (max-width: 768px) {
+    .rating-filters {
+        flex-wrap: wrap;
+    }
+    
+    .filter-btn {
+        font-size: 0.875rem;
+    }
+}
+</style>
 </head>
 <body>
     <?php include("../includes/topbar1.php"); ?>
@@ -531,7 +597,7 @@ $average_rating = $review_count > 0 ? round($total_rating / $review_count, 1) : 
                     <p class="text-danger">This product is out of stock.</p>
                 <?php endif; ?>
             </div>
-            <div class="container mt-5">
+        
     <h3 class="mb-4">Customer Reviews</h3>
 
     <!-- Review Submission Form -->
@@ -563,31 +629,183 @@ $average_rating = $review_count > 0 ? round($total_rating / $review_count, 1) : 
         <p><a href="../user_page/login.php">Log in</a> to write a review.</p>
     <?php endif; ?>
 
-    <!-- Display Reviews -->
-    <?php if (!empty($reviews)): ?>
-        <?php foreach ($reviews as $review): ?>
-            <div class="review mb-4 p-4 border rounded bg-white shadow-sm">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h5 class="mb-0 text-primary">
-                        <?php echo htmlspecialchars($review['is_anonymous'] ? 'Anonymous' : $review['username']); ?>
-                    </h5>
-                    <small class="text-muted"><?php echo date("F j, Y, g:i a", strtotime($review['created_at'])); ?></small>
+ <!-- Product Ratings Section -->
+<div class="container mt-5" id="reviews-section">
+    <h2 class="mb-4">Product Ratings</h2>
+    
+    <!-- Overall Rating Display -->
+    <div class="rating-summary bg-white p-4 rounded-lg shadow-sm mb-4">
+        <div class="d-flex align-items-center gap-4">
+            <div>
+                <div class="overall-rating text-4xl font-bold text-red-500">
+                    <?php echo number_format($average_rating, 1); ?>
                 </div>
-                <div class="chili-rating display-chilies mb-2">
-                    <?php for($i = 1; $i <= 5; $i++): ?>
-                        <i class="fa-solid fa-pepper-hot chili <?php echo $i <= $review['rating'] ? 'active' : ''; ?>" 
-                           style="color: <?php echo $i <= $review['rating'] ? '#ff0000' : '#c2bdbd'; ?>; --fa-rotate-angle: 320deg;">
-                        </i>
-                    <?php endfor; ?>
-                </div>
-                <p class="mt-2 mb-0" style="line-height: 1.6;"><?php echo nl2br(htmlspecialchars($review['review_text'])); ?></p>
+                <div class="text-gray-600">out of 5</div>
             </div>
-        <?php endforeach; ?>
-    <?php else: ?>
-        <p class="text-muted">No reviews yet. Be the first to review this product!</p>
-    <?php endif; ?>
-</div>
+            <div class="flex-grow-1">
+                <div class="chili-rating">
+                    <?php
+                    $full_chilies = floor($average_rating);
+                    $half_chili = $average_rating - $full_chilies >= 0.5;
+                    for ($i = 1; $i <= 5; $i++):
+                        if ($i <= $full_chilies): ?>
+                            <i class="fas fa-pepper-hot" style="color: #ff0000;"></i>
+                        <?php elseif ($i == $full_chilies + 1 && $half_chili): ?>
+                            <i class="fas fa-pepper-hot" style="color: #ff0000; opacity: 0.5;"></i>
+                        <?php else: ?>
+                            <i class="fas fa-pepper-hot" style="color: #c2bdbd;"></i>
+                        <?php endif;
+                    endfor; ?>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <!-- Rating Filters -->
+    <div class="rating-filters d-flex gap-2 mb-4">
+        <?php
+        // Get count for each rating
+        $rating_counts = [];
+        $stmt = $conn->prepare("SELECT rating, COUNT(*) as count FROM reviews WHERE product_id = ? GROUP BY rating ORDER BY rating DESC");
+        $stmt->bind_param("i", $product_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        while ($row = $result->fetch_assoc()) {
+            $rating_counts[$row['rating']] = $row['count'];
+        }
+
+        // Calculate total reviews
+        $total_reviews = array_sum($rating_counts);
+        ?>
+        
+        <button class="filter-btn active" data-rating="all">
+            All (<?php echo $total_reviews; ?>)
+        </button>
+        <?php for ($i = 5; $i >= 1; $i--): ?>
+            <button class="filter-btn" data-rating="<?php echo $i; ?>">
+                <?php echo $i; ?> Star (<?php echo $rating_counts[$i] ?? 0; ?>)
+            </button>
+        <?php endfor; ?>
+    </div>
+</div>
+    <!-- Reviews List -->
+    <div class="reviews-container">
+        <?php
+        // Get current page from URL or AJAX request
+        $page = isset($_GET['review_page']) ? (int)$_GET['review_page'] : 1;
+        $reviews_per_page = 3;
+        $offset = ($page - 1) * $reviews_per_page;
+
+        // Modify query based on filter
+        $rating_filter = isset($_GET['rating']) ? (int)$_GET['rating'] : 0;
+        $rating_condition = $rating_filter > 0 ? "AND r.rating = ?" : "";
+
+        $review_query = "SELECT r.*, u.img
+                        FROM reviews r 
+                        LEFT JOIN tbl_user u ON r.tbl_user_id = u.tbl_user_id 
+                        WHERE r.product_id = ? $rating_condition
+                        ORDER BY r.created_at DESC 
+                        LIMIT ? OFFSET ?";
+
+        $stmt = $conn->prepare($review_query);
+        if ($rating_filter > 0) {
+            $stmt->bind_param("iiii", $product_id, $rating_filter, $reviews_per_page, $offset);
+        } else {
+            $stmt->bind_param("iii", $product_id, $reviews_per_page, $offset);
+        }
+        $stmt->execute();
+        $reviews = $stmt->get_result();
+
+        while ($review = $reviews->fetch_assoc()):
+        ?>
+        <br>
+            <div class="review-item bg-white p-4 rounded-lg shadow-sm mb-4" data-rating="<?php echo $review['rating']; ?>">
+                <div class="d-flex gap-4">
+                    <!-- User Profile Image -->
+                    <div class="review-avatar">
+                        <?php if ($review['is_anonymous']): ?>
+                            <img src="../assets/default-avatar.png" alt="Anonymous" class="rounded-circle" width="48" height="48">
+                        <?php else: ?>
+                            <img src="<?php echo $review['profile_image'] ?? '../assets/default-avatar.png'; ?>" 
+                                 alt="<?php echo htmlspecialchars($review['username']); ?>" 
+                                 class="rounded-circle" 
+                                 width="48" 
+                                 height="48">
+                        <?php endif; ?>
+                    </div>
+                    
+                    <!-- Review Content -->
+                    <div class="flex-grow-1">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <h5 class="mb-0">
+                                    <?php echo htmlspecialchars($review['is_anonymous'] ? 'Anonymous' : $review['username']); ?>
+                                </h5>
+                                <div class="text-gray-500 text-sm">
+                                    <?php echo date("Y-m-d H:i", strtotime($review['created_at'])); ?>
+                                </div>
+                            </div>
+                            <div class="chili-rating">
+                                <?php for($i = 1; $i <= 5; $i++): ?>
+                                    <i class="fa-solid fa-pepper-hot <?php echo $i <= $review['rating'] ? 'active' : ''; ?>"
+                                       style="color: <?php echo $i <= $review['rating'] ? '#ff0000' : '#c2bdbd'; ?>;">
+                                    </i>
+                                <?php endfor; ?>
+                            </div>
+                        </div>
+                        <p class="review-text mb-0">
+                            <?php echo nl2br(htmlspecialchars($review['review_text'])); ?>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        <?php endwhile; ?>
+
+         <!-- Pagination -->
+         <?php
+        $total_reviews_query = "SELECT COUNT(*) as total FROM reviews WHERE product_id = ? " . 
+                              ($rating_filter > 0 ? "AND rating = ?" : "");
+        $stmt = $conn->prepare($total_reviews_query);
+        if ($rating_filter > 0) {
+            $stmt->bind_param("ii", $product_id, $rating_filter);
+        } else {
+            $stmt->bind_param("i", $product_id);
+        }
+        $stmt->execute();
+        $total_reviews = $stmt->get_result()->fetch_assoc()['total'];
+        $total_pages = ceil($total_reviews / $reviews_per_page);
+
+        if ($total_pages > 1):
+        ?>
+            <div class="pagination d-flex justify-content-center align-items-center gap-2 mt-4">
+                <a href="javascript:void(0)" 
+                   onclick="loadReviewPage(<?php echo max(1, $page - 1); ?>)"
+                   class="btn btn-outline-primary <?php echo $page <= 1 ? 'disabled' : ''; ?>">
+                    Previous
+                </a>
+                
+                <?php
+                $start_page = max(1, $page - 2);
+                $end_page = min($total_pages, $start_page + 4);
+                if ($end_page - $start_page < 4) {
+                    $start_page = max(1, $end_page - 4);
+                }
+                for ($i = $start_page; $i <= $end_page; $i++):
+                ?>
+                    <a href="javascript:void(0)" 
+                       onclick="loadReviewPage(<?php echo $i; ?>)"
+                       class="btn <?php echo $i === $page ? 'btn-primary' : 'btn-outline-primary'; ?>">
+                        <?php echo $i; ?>
+                    </a>
+                <?php endfor; ?>
+                
+                <a href="javascript:void(0)" 
+                   onclick="loadReviewPage(<?php echo min($total_pages, $page + 1); ?>)"
+                   class="btn btn-outline-primary <?php echo $page >= $total_pages ? 'disabled' : ''; ?>">
+                    Next
+                </a>
+            </div>
+        <?php endif; ?>
     </div>
 
     <script>
@@ -622,7 +840,110 @@ $average_rating = $review_count > 0 ? round($total_rating / $review_count, 1) : 
     });
 });
    
+</script>
+   
+<script>
+function loadReviewPage(page, rating = 0) {
+    const reviewsSection = document.querySelector('.reviews-container');
+    
+    // Create URL with parameters
+    const url = new URL(window.location.href);
+    url.searchParams.set('review_page', page);
+    if (rating > 0) {
+        url.searchParams.set('rating', rating);
+    }
+    
+    // Use fetch to get new reviews
+    fetch(url)
+        .then(response => response.text())
+        .then(html => {
+            // Create a temporary container
+            const temp = document.createElement('div');
+            temp.innerHTML = html;
+            
+            // Find the reviews container in the response
+            const newReviews = temp.querySelector('.reviews-container');
+            
+            // Replace the current reviews with new ones
+            if (newReviews) {
+                reviewsSection.innerHTML = newReviews.innerHTML;
+            }
+            
+            // Update URL without page reload
+            window.history.pushState({}, '', url);
+        });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    
+    filterButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            // Update active button
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            
+            // Load first page with selected rating
+            const rating = button.dataset.rating;
+            loadReviewPage(1, rating === 'all' ? 0 : rating);
+        });
+    });
+});
+</script>
+<script>
+        function loadReviewPage(page, rating = 0) {
+            const reviewsSection = document.querySelector('.reviews-container');
+            
+            // Create URL with parameters
+            const url = new URL(window.location.href);
+            url.searchParams.set('review_page', page);
+            if (rating > 0) {
+                url.searchParams.set('rating', rating);
+            } else {
+                url.searchParams.delete('rating');
+            }
+            
+            // Use fetch to get new reviews
+            fetch(url)
+                .then(response => response.text())
+                .then(html => {
+                    // Create a temporary container
+                    const temp = document.createElement('div');
+                    temp.innerHTML = html;
+                    
+                    // Find the reviews container in the response
+                    const newReviews = temp.querySelector('.reviews-container');
+                    
+                    // Replace the current reviews with new ones
+                    if (newReviews) {
+                        reviewsSection.innerHTML = newReviews.innerHTML;
+                    }
+                    
+                    // Update URL without page reload
+                    window.history.pushState({}, '', url);
+                    
+                    // Scroll to the reviews section
+                    document.getElementById('reviews-section').scrollIntoView({ behavior: 'smooth' });
+                });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            
+            filterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Update active button
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    
+                    // Load first page with selected rating
+                    const rating = button.dataset.rating;
+                    loadReviewPage(1, rating === 'all' ? 0 : rating);
+                });
+            });
+        });
     </script>
+    
 </body>
 </html>
 

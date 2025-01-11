@@ -300,6 +300,18 @@
         $stmt->execute();
         $stmt->close();
 
+            // Fetch user role and display message icon conditionally
+        if ($conn && $tbl_user_id) {
+            $user_role_stmt = $conn->prepare("SELECT user_role FROM tbl_user WHERE tbl_user_id = ?");
+            $user_role_stmt->bind_param("i", $tbl_user_id);
+            $user_role_stmt->execute();
+            $user_role_result = $user_role_stmt->get_result();
+            if ($user_role_result) {
+                $user_role_data = $user_role_result->fetch_assoc();
+                $user_role = $user_role_data['user_role'] ?? null;
+            }
+            $user_role_stmt->close();
+        }
     ?>
 
     <div class="z-index">
@@ -318,13 +330,44 @@
                     <div class="search-results" id="searchResults"></div>
                 </div>
             </nav>
+            <!-- Message for Distributor -->
+            <?php
+                if ($user_role === 'distributor') {
+                    // Fetch unread notification count for the user
+                    $notification_count = 0;
+                    if ($conn && $tbl_user_id) {
+                        $stmt = $conn->prepare("SELECT COUNT(*) as count FROM notifications WHERE tbl_user_id = ? AND is_read = 0");
+                        $stmt->bind_param("i", $tbl_user_id);
+                        $stmt->execute();
+                        $result = $stmt->get_result();
+                        if ($result) {
+                            $data = $result->fetch_assoc();
+                            $notification_count = $data['count'] ?? 0;
+                        }
+                        $stmt->close();
+                    }
+
+                    // Display the message icon
+                    echo '<a href="../user_page/orders.php">
+                            <i class="fa-regular fa-message"></i>';
+                    // Conditionally display the notification count badge
+                    if ($notification_count > 0) {
+                        echo '<span class="icon-badge" id="notificationCount">' . $notification_count . '</span>';
+                    }
+                    echo '</a>';
+                }
+                ?>
+
             <a href="../user_page/wishlist.php">
                 <i class="fa-regular fa-heart"></i>
-                <span class="icon-badge"><?php echo $wishlist_count; ?></span>
+                <span class="icon-badge">
+                    <?php echo $wishlist_count; ?></span>
             </a>
 
             <a href="../user_page/cart.php"><i class="fa-solid fa-cart-shopping"></i>
-                <span class="icon-badge"><?php echo $row_count; ?></span>
+                <span class="icon-badge">
+
+                    <?php echo $row_count; ?></span>
             </a>
             <div class="notifications-dropdown">
         <a href="#" class="notifications-icon" onclick="toggleNotifications(event)">

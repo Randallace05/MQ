@@ -1,30 +1,52 @@
 <?php
-    include '../../conn/conn.php'; // Assuming your conn.php uses MySQLi connection
+include '../../conn/conn.php'; // Database connection
 
-    // Get selected user role
-    $selectedRole = isset($_GET['user_role']) ? $_GET['user_role'] : 'all';
+// Start session if not already started
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
+/**
+ * Fetch users based on the selected role.
+ *
+ * @param mysqli $conn The database connection.
+ * @param string $selectedRole The role to filter by (default: 'all').
+ * @return array The fetched user data.
+ */
+function fetchUsers($conn, $selectedRole = 'all') {
     // Adjust SQL query based on selected role
     if ($selectedRole == 'all') {
-        $query = "SELECT first_name, last_name, user_role FROM tbl_user WHERE user_role != 'admin'";
+        $sql = "SELECT username, user_role FROM tbl_user WHERE user_role != 'admin'";
+        $stmt = $conn->prepare($sql);
     } else {
-        $query = "SELECT first_name, last_name, user_role FROM tbl_user WHERE user_role = ? AND user_role != 'admin'";
-    }
-
-    // Prepare the query
-    $stmt = $conn->prepare($query);
-
-    // Bind the parameter if a specific role is selected
-    if ($selectedRole != 'all') {
+        $sql = "SELECT username, user_role FROM tbl_user WHERE user_role = ? AND user_role != 'admin'";
+        $stmt = $conn->prepare($sql);
         $stmt->bind_param('s', $selectedRole);
     }
 
     // Execute the query
     $stmt->execute();
-
-    // Get the result
     $result = $stmt->get_result();
 
+    // Fetch all rows as an associative array
+    $users = [];
+    if ($result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $users[] = $row;
+        }
+    }
+
+    // Clean up
+    $stmt->close();
+
+    return $users;
+}
+
+// Determine the selected role
+$selectedRole = isset($_GET['user_role']) ? $_GET['user_role'] : 'all';
+
+// Fetch users based on the selected role
+$users = fetchUsers($conn, $selectedRole);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -42,7 +64,7 @@
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
     <link href="../dashboard/css/sb-admin-2.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -109,9 +131,7 @@
     </style>
 </head>
 
-</head>
 <body id="page-top">
-    <!-- Page Wrapper -->
     <div id="wrapper">
         <!-- Sidebar -->
         <?php include("../includesAdmin/sidebar.php"); ?>
@@ -130,27 +150,27 @@
                     <form method="GET" action="">
                         <label for="userRoleFilter">Filter:</label>
                         <select name="user_role" id="userRoleFilter" onchange="this.form.submit()">
-                            <option value="all" <?php echo isset($_GET['user_role']) && $_GET['user_role'] == 'all' ? 'selected' : ''; ?>>All</option>
-                            <option value="customer" <?php echo isset($_GET['user_role']) && $_GET['user_role'] == 'customer' ? 'selected' : ''; ?>>Customer</option>
-                            <option value="distributor" <?php echo isset($_GET['user_role']) && $_GET['user_role'] == 'distributor' ? 'selected' : ''; ?>>Distributor</option>
+                            <option value="all" <?php echo $selectedRole == 'all' ? 'selected' : ''; ?>>All</option>
+                            <option value="customer" <?php echo $selectedRole == 'customer' ? 'selected' : ''; ?>>Customer</option>
+                            <option value="distributor" <?php echo $selectedRole == 'distributor' ? 'selected' : ''; ?>>Distributor</option>
                         </select>
                     </form>
 
                     <!-- Table Container -->
                     <div class="table-container">
                         <div class="table-header">
-                            <span class="table-cell">Name</span>
+                            <span class="table-cell">Username</span>
                             <span class="table-cell">Type</span>
                         </div>
 
-                        <?php while($row = $result->fetch_assoc()) { ?>
+                        <?php foreach ($users as $user) { ?>
                             <div class="table-row">
                                 <div class="table-cell">
                                     <div class="avatar"></div>
-                                    <?php echo htmlspecialchars($row['first_name'] . ' ' . $row['last_name']); ?>
+                                    <?php echo htmlspecialchars($user['username']); ?>
                                 </div>
                                 <div class="table-cell">
-                                    <?php echo htmlspecialchars($row['user_role']); ?>
+                                    <?php echo htmlspecialchars($user['user_role']); ?>
                                 </div>
                             </div>
                         <?php } ?>
@@ -159,17 +179,15 @@
             </div>
         </div>
     </div>
-    
-    <!-- Bootstrap core JavaScript-->
+
+    <!-- Scripts -->
     <script src="vendor/jquery/jquery.min.js"></script>
     <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <!-- Custom scripts for all pages-->
     <script src="js/sb-admin-2.min.js"></script>
 </body>
 </html>
 
 <?php
-// Close the statement and connection
-$stmt->close();
+// Close the database connection
 $conn->close();
 ?>

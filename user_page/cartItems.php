@@ -94,6 +94,124 @@ if (isset($_POST['update_product_quantity'])) {
             window.location.href = 'cart.php';
         </script>";
     }
+    if (isset($_POST['update_product_quantity'])) {
+    $update_value = intval($_POST['update_quantity']);
+    $update_id = intval($_POST['update_quantity_id']);
+
+    // Validate if the cart item belongs to the logged-in user
+    $check_query = $conn->prepare("SELECT * FROM `cart` WHERE cart_id = ? AND tbl_user_id = ?");
+    $check_query->bind_param("ii", $update_id, $tbl_user_id);
+    $check_query->execute();
+    $cart_result = $check_query->get_result();
+
+    if ($cart_result->num_rows > 0) {
+        $cart_item = $cart_result->fetch_assoc();
+        $product_id = $cart_item['product_id'];
+        $current_quantity = $cart_item['quantity'];
+
+        // Check the product's stock
+        $stock_query = $conn->prepare("SELECT stock FROM `products` WHERE id = ?");
+        $stock_query->bind_param("i", $product_id);
+        $stock_query->execute();
+        $stock_result = $stock_query->get_result();
+
+        if ($stock_result->num_rows > 0) {
+            $product = $stock_result->fetch_assoc();
+            $available_stock = $product['stock'];
+
+            // Check if the requested quantity exceeds the stock
+            if ($update_value > $available_stock) {
+                echo "
+                <script>
+                    alert('Insufficient stock. Only $available_stock items available.');
+                    window.location.href = 'cart.php';
+                </script>";
+                exit;
+            }
+
+            // Calculate the difference between the new and current quantity
+            $quantity_difference = $update_value - $current_quantity;
+
+            // Update the cart quantity
+            $update_quantity_query = $conn->prepare("UPDATE `cart` SET quantity = ? WHERE cart_id = ? AND tbl_user_id = ?");
+            $update_quantity_query->bind_param("iii", $update_value, $update_id, $tbl_user_id);
+            if ($update_quantity_query->execute()) {
+                // Update the stock of the product
+                $new_stock = $available_stock - $quantity_difference;
+                $update_stock_query = $conn->prepare("UPDATE `products` SET stock = ? WHERE id = ?");
+                $update_stock_query->bind_param("ii", $new_stock, $product_id);
+                $update_stock_query->execute();
+            }
+
+            echo "
+            <script>
+                alert('Cart updated successfully.');
+                window.location.href = 'cart.php';
+            </script>";
+        } else {
+            echo "
+            <script>
+                alert('Product not found.');
+                window.location.href = 'cart.php';
+            </script>";
+        }
+    } else {
+        echo "
+        <script>
+            alert('Unauthorized action.');
+            window.location.href = 'cart.php';
+        </script>";
+    }
+    
+}
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'remove') {
+    $wishlist_id = intval($_POST['wishlist_id']);
+
+    // Begin transaction
+    $conn->begin_transaction();
+
+    try {
+        // Retrieve product ID before deleting
+        $productQuery = "SELECT product_id FROM wishlist WHERE wish_id = ?";
+        $stmt = $conn->prepare($productQuery);
+        $stmt->bind_param("i", $wishlist_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            $product_id = intval($row['product_id']);
+
+            // Restore stock
+            $restoreStockQuery = "UPDATE products SET stock = stock + 1 WHERE id = ?";
+            $updateStmt = $conn->prepare($restoreStockQuery);
+            $updateStmt->bind_param("i", $product_id);
+            $updateStmt->execute();
+
+            // Remove from wishlist
+            $deleteQuery = "DELETE FROM wishlist WHERE wish_id = ?";
+            $deleteStmt = $conn->prepare($deleteQuery);
+            $deleteStmt->bind_param("i", $wishlist_id);
+            $deleteStmt->execute();
+
+            // Commit transaction
+            $conn->commit();
+
+            $_SESSION['success_message'] = "Item removed and stock restored.";
+        } else {
+            $_SESSION['error_message'] = "Item not found.";
+        }
+
+        $stmt->close();
+    } catch (Exception $e) {
+        $conn->rollback();
+        $_SESSION['error_message'] = "An error occurred: " . $e->getMessage();
+    }
+
+    header("Location: wishlist.php");
+    exit;
+}
+
 }
 ?>
 <!DOCTYPE html>
@@ -148,43 +266,6 @@ if (isset($_POST['update_product_quantity'])) {
             margin-top: 15px;
             text-decoration: none;
         }
-
-/* Center-align the quantity box in the column */
-.quantity_box {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 5px; /* Space between buttons and input */
-}
-
-/* Style the buttons */
-.quantity-btn {
-    background-color: #ff4d4d; /* Red color */
-    color: #fff; /* White text */
-    border: none;
-    border-radius: 5px;
-    padding: 5px 10px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s ease;
-}
-
-.quantity-btn:hover {
-    background-color: #d43a3a; /* Darker red on hover */
-}
-
-/* Style the input field */
-.quantity-input {
-    width: 50px;
-    text-align: center;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    padding: 5px;
-    font-size: 16px;
-}
-
-
-
     </style>
 </head>
 <body>
@@ -224,23 +305,21 @@ if (isset($_POST['update_product_quantity'])) {
                                      alt="" style="width: 100px; height: auto;">
                             </td>
                             <td><?php echo "₱" . htmlspecialchars($fetch_cart_products['price']); ?></td>
-
                             <td>
-                                <div class="quantity_box">
-                                    <button class="quantity-btn minus" data-cart-id="<?php echo $fetch_cart_products['cart_id']; ?>">-</button>
-                                    <input
-                                        type="number"
-                                        class="quantity-input"
-                                        value="<?php echo htmlspecialchars($fetch_cart_products['quantity']); ?>"
-                                        readonly
-                                        data-cart-id="<?php echo $fetch_cart_products['cart_id']; ?>"
-                                    />
-                                    <button class="quantity-btn plus" data-cart-id="<?php echo $fetch_cart_products['cart_id']; ?>">+</button>
-                                </div>
+                                <form action="" method="POST">
+                                    <input type="hidden" value="<?php echo htmlspecialchars($fetch_cart_products['cart_id']); ?>" name="update_quantity_id">
+                                    <div class="quantity_box">
+                                        <select name="update_quantity">
+                                            <?php for ($i = 1; $i <= 99; $i++): ?>
+                                                <option value="<?php echo $i; ?>" <?php echo $fetch_cart_products['quantity'] == $i ? 'selected' : ''; ?>>
+                                                    <?php echo $i; ?>
+                                                </option>
+                                            <?php endfor; ?>
+                                        </select>
+                                        <input type="submit" class="update_quantity" value="Update" name="update_product_quantity">
+                                    </div>
+                                </form>
                             </td>
-
-
-
                             <td><?php echo "₱" . htmlspecialchars($fetch_cart_products['price'] * $fetch_cart_products['quantity']); ?></td>
                             <td>
                                 <a href="delete_cart_item.php?id=<?php echo htmlspecialchars($fetch_cart_products['cart_id']); ?>"
@@ -283,54 +362,5 @@ if (isset($_POST['update_product_quantity'])) {
         </a>
     </section>
 </div>
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    const buttons = document.querySelectorAll(".quantity-btn");
-
-    buttons.forEach(button => {
-        button.addEventListener("click", (e) => {
-            const cartId = button.getAttribute("data-cart-id");
-            const quantityInput = document.querySelector(`.quantity-input[data-cart-id="${cartId}"]`);
-            let currentQuantity = parseInt(quantityInput.value);
-
-            // Adjust quantity based on button clicked
-            if (button.classList.contains("minus")) {
-                currentQuantity = Math.max(currentQuantity - 1, 1); // Minimum quantity = 1
-            } else if (button.classList.contains("plus")) {
-                currentQuantity = currentQuantity + 1;
-            }
-
-            // Update the input value
-            quantityInput.value = currentQuantity;
-
-            // Send AJAX request to update the quantity
-            updateQuantity(cartId, currentQuantity);
-        });
-    });
-
-    const updateQuantity = (cartId, quantity) => {
-        fetch("update_cart_quantity.php", {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: `cart_id=${cartId}&quantity=${quantity}`
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    console.log("Quantity updated successfully");
-                } else {
-                    console.error(`Error: ${data.message}`);
-                    alert("Failed to update quantity");
-                }
-            })
-            .catch(error => {
-                console.error("Error:", error);
-            });
-    };
-});
-
-</script>
-
-
 </body>
 </html>

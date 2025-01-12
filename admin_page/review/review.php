@@ -1,3 +1,42 @@
+<?php
+// Start session if not already started
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Include database connection
+include '../../conn/conn.php';
+
+function fetchReviews($conn) {
+    $sql = "SELECT
+               product_id,
+               username,
+               review_text,
+               created_at,
+               rating,
+               is_anonymous
+            FROM reviews
+            ORDER BY created_at DESC"; // Order by creation date, optional
+
+    $result = $conn->query($sql);
+
+    if (!$result) {
+        die("Query Error: " . $conn->error);
+    }
+
+    $reviews = [];
+    if ($result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $reviews[] = $row;
+        }
+    }
+    return $reviews;
+}
+
+$reviews = fetchReviews($conn);
+
+
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -20,6 +59,34 @@
     <!-- Custom styles for this template-->
     <link href="../dashboard/css/sb-admin-2.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    table, th, td {
+        border: 1px solid #ddd;
+    }
+
+    th, td {
+        padding: 10px;
+        text-align: left;
+    }
+
+    th {
+        background-color: #f4f4f4;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    tr:hover {
+        background-color: #f1f1f1;
+    }
+</style>
 
 </head>
 
@@ -52,9 +119,40 @@
 
                     <!-- Content Row -->
                     <div class="row">
+                    <div class="container">
+    <h2>Product Reviews</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Product ID</th>
+                <th>Username</th>
+                <th>Review Text</th>
+                <th>Created At</th>
+                <th>Rating</th>
+                <th>Anonymous</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php
+            if (!empty($reviews)) {
+                foreach ($reviews as $review) {
+                    echo "<tr>";
+                    echo "<td>" . htmlspecialchars($review['product_id']) . "</td>";
+                    echo "<td>" . htmlspecialchars($review['is_anonymous'] ? 'Anonymous' : $review['username']) . "</td>";
+                    echo "<td>" . htmlspecialchars($review['review_text']) . "</td>";
+                    echo "<td>" . htmlspecialchars($review['created_at']) . "</td>";
+                    echo "<td>" . htmlspecialchars($review['rating']) . "</td>";
+                    echo "<td>" . htmlspecialchars($review['is_anonymous'] ? 'Yes' : 'No') . "</td>";
+                    echo "</tr>";
+                }
+            } else {
+                echo "<tr><td colspan='6'>No reviews found</td></tr>";
+            }
+            ?>
+        </tbody>
+    </table>
+</div>
 
-                       
-                    
 
                 </div>
                 <!-- /.container-fluid -->

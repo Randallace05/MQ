@@ -57,7 +57,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $insert_cart_query->bind_param("iissi", $tbl_user_id, $product_id, $product_name, $product_image, $product_price);
 
             if ($insert_cart_query->execute()) {
-                $_SESSION['success_message'] = "Product added to your cart successfully.";
+                // Remove the product from the wishlist
+                $delete_wishlist_query = $conn->prepare("DELETE FROM `wishlist` WHERE tbl_user_id = ? AND product_id = ?");
+                $delete_wishlist_query->bind_param("ii", $tbl_user_id, $product_id);
+                $delete_wishlist_query->execute();
+
+                $update_stock_query = $conn->prepare("UPDATE `products` SET stock = stock - 1 WHERE id = ?");
+                $update_stock_query->bind_param("i", $product_id);
+                $update_stock_query->execute();
+
+                $_SESSION['success_message'] = "Product added to your cart and removed from your wishlist successfully.";
             } else {
                 $_SESSION['error_message'] = "Failed to add the product to your cart.";
             }
@@ -65,7 +74,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     } else {
         $_SESSION['error_message'] = "Product not found.";
     }
-
     // Redirect back to wishlist page
     header("Location: wishlist.php");
     exit;

@@ -289,21 +289,7 @@
         }
         $wishlist_stmt->close();
     }
-    // Insert a notification when the user places an order
-        if ($conn && $tbl_user_id) {
-            $message = "Your order has been placed.";
-            $stmt = $conn->prepare("INSERT INTO notifications (tbl_user_id, message) VALUES (?, ?)");
-            $stmt->bind_param("is", $tbl_user_id, $message);
-            $stmt->execute();
-            $stmt->close();
-        }
-        // Mark notifications as read
-        $stmt = $conn->prepare("UPDATE notifications SET is_read = 1 WHERE tbl_user_id = ? AND is_read = 0");
-        $stmt->bind_param("i", $tbl_user_id);
-        $stmt->execute();
-        $stmt->close();
-
-            // Fetch user role and display message icon conditionally
+         // Fetch user role and display message icon conditionally
         if ($conn && $tbl_user_id) {
             $user_role_stmt = $conn->prepare("SELECT user_role FROM tbl_user WHERE tbl_user_id = ?");
             $user_role_stmt->bind_param("i", $tbl_user_id);

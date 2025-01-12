@@ -148,6 +148,43 @@ if (isset($_POST['update_product_quantity'])) {
             margin-top: 15px;
             text-decoration: none;
         }
+
+/* Center-align the quantity box in the column */
+.quantity_box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px; /* Space between buttons and input */
+}
+
+/* Style the buttons */
+.quantity-btn {
+    background-color: #ff4d4d; /* Red color */
+    color: #fff; /* White text */
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.quantity-btn:hover {
+    background-color: #d43a3a; /* Darker red on hover */
+}
+
+/* Style the input field */
+.quantity-input {
+    width: 50px;
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 5px;
+    font-size: 16px;
+}
+
+
+
     </style>
 </head>
 <body>
@@ -187,21 +224,23 @@ if (isset($_POST['update_product_quantity'])) {
                                      alt="" style="width: 100px; height: auto;">
                             </td>
                             <td><?php echo "₱" . htmlspecialchars($fetch_cart_products['price']); ?></td>
+
                             <td>
-                                <form action="" method="POST">
-                                    <input type="hidden" value="<?php echo htmlspecialchars($fetch_cart_products['cart_id']); ?>" name="update_quantity_id">
-                                    <div class="quantity_box">
-                                        <select name="update_quantity">
-                                            <?php for ($i = 1; $i <= 99; $i++): ?>
-                                                <option value="<?php echo $i; ?>" <?php echo $fetch_cart_products['quantity'] == $i ? 'selected' : ''; ?>>
-                                                    <?php echo $i; ?>
-                                                </option>
-                                            <?php endfor; ?>
-                                        </select>
-                                        <input type="submit" class="update_quantity" value="Update" name="update_product_quantity">
-                                    </div>
-                                </form>
+                                <div class="quantity_box">
+                                    <button class="quantity-btn minus" data-cart-id="<?php echo $fetch_cart_products['cart_id']; ?>">-</button>
+                                    <input
+                                        type="number"
+                                        class="quantity-input"
+                                        value="<?php echo htmlspecialchars($fetch_cart_products['quantity']); ?>"
+                                        readonly
+                                        data-cart-id="<?php echo $fetch_cart_products['cart_id']; ?>"
+                                    />
+                                    <button class="quantity-btn plus" data-cart-id="<?php echo $fetch_cart_products['cart_id']; ?>">+</button>
+                                </div>
                             </td>
+
+
+
                             <td><?php echo "₱" . htmlspecialchars($fetch_cart_products['price'] * $fetch_cart_products['quantity']); ?></td>
                             <td>
                                 <a href="delete_cart_item.php?id=<?php echo htmlspecialchars($fetch_cart_products['cart_id']); ?>"
@@ -244,5 +283,54 @@ if (isset($_POST['update_product_quantity'])) {
         </a>
     </section>
 </div>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const buttons = document.querySelectorAll(".quantity-btn");
+
+    buttons.forEach(button => {
+        button.addEventListener("click", (e) => {
+            const cartId = button.getAttribute("data-cart-id");
+            const quantityInput = document.querySelector(`.quantity-input[data-cart-id="${cartId}"]`);
+            let currentQuantity = parseInt(quantityInput.value);
+
+            // Adjust quantity based on button clicked
+            if (button.classList.contains("minus")) {
+                currentQuantity = Math.max(currentQuantity - 1, 1); // Minimum quantity = 1
+            } else if (button.classList.contains("plus")) {
+                currentQuantity = currentQuantity + 1;
+            }
+
+            // Update the input value
+            quantityInput.value = currentQuantity;
+
+            // Send AJAX request to update the quantity
+            updateQuantity(cartId, currentQuantity);
+        });
+    });
+
+    const updateQuantity = (cartId, quantity) => {
+        fetch("update_cart_quantity.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: `cart_id=${cartId}&quantity=${quantity}`
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log("Quantity updated successfully");
+                } else {
+                    console.error(`Error: ${data.message}`);
+                    alert("Failed to update quantity");
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
+    };
+});
+
+</script>
+
+
 </body>
 </html>

@@ -17,7 +17,32 @@ require_once '../endpoint/session_config.php';
             <?php include("cartItems.php"); ?>
             <!-- Form Section -->
             <div class="main">
+<script>
+    document.querySelectorAll('.quantity_box select').forEach(select => {
+        select.addEventListener('change', function () {
+            const cartId = this.closest('form').querySelector('[name="update_quantity_id"]').value;
+            const quantity = this.value;
 
+            fetch('update_cart_quantity.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({ cart_id: cartId, quantity: quantity })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    });
+
+ 
+</script>
 
 
 

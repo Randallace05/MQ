@@ -3,38 +3,88 @@ session_start();
 
 // Ensure the user is logged in
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
-    header("Location: ../index.php"); // Redirect to login page
+    header('Location: ../index.php');
     exit;
 }
 
 // Include database connection
-include '../conn/conn.php'; // Replace with your actual database connection file
+include '../conn/conn.php';
 
-// Check if the action and wishlist ID are set
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['action']) && $_POST['action'] === 'remove' && isset($_POST['wishlist_id'])) {
-        $wishlist_id = intval($_POST['wishlist_id']); // Sanitize wishlist ID
+// Check if an action is submitted
+if (isset($_POST['action'])) {
+    $action = $_POST['action'];
 
-        // SQL to delete the item from the wishlist
-        $deleteSql = "DELETE FROM wishlist WHERE wish_id = ?";
-        $stmt = $conn->prepare($deleteSql);
-        $stmt->bind_param("i", $wishlist_id);
+    if ($action === 'add_to_cart') {
+        $product_id = intval($_POST['product_id']);
+        $tbl_user_id = intval($_SESSION['tbl_user_id']);
 
-        if ($stmt->execute()) {
-            // Success: Redirect back to wishlist page
-            $_SESSION['success_message'] = "Item successfully removed from your wishlist.";
-        } else {
-            // Failure: Redirect back with error message
-            $_SESSION['error_message'] = "Error removing item. Please try again.";
+        // Start a transaction to ensure atomicity
+        $conn->begin_transaction();
+
+        try {
+            // Check stock availability
+            $stockCheckSql = "SELECT stock FROM products WHERE id = ?";
+            $stockStmt = $conn->prepare($stockCheckSql);
+            $stockStmt->bind_param("i", $product_id);
+            $stockStmt->execute();
+            $stockResult = $stockStmt->get_result();
+
+            if ($stockResult->num_rows > 0) {
+                $product = $stockResult->fetch_assoc();
+                if ($product['stock'] > 0) {
+                    // Decrease stock by 1
+                    $updateStockSql = "UPDATE products SET stock = stock - 1 WHERE id = ?";
+                    $updateStockStmt = $conn->prepare($updateStockSql);
+                    $updateStockStmt->bind_param("i", $product_id);
+                    $updateStockStmt->execute();
+
+                    // Remove item from wishlist
+                    $deleteWishlistSql = "DELETE FROM wishlist WHERE tbl_user_id = ? AND product_id = ?";
+                    $deleteWishlistStmt = $conn->prepare($deleteWishlistSql);
+                    $deleteWishlistStmt->bind_param("ii", $tbl_user_id, $product_id);
+                    $deleteWishlistStmt->execute();
+
+                    // Add item to cart
+                    $addToCartSql = "INSERT INTO cart (tbl_user_id, product_id, quantity) VALUES (?, ?, 1)";
+                    $addToCartStmt = $conn->prepare($addToCartSql);
+                    $addToCartStmt->bind_param("ii", $tbl_user_id, $product_id);
+                    $addToCartStmt->execute();
+
+                    // Commit transaction
+                    $conn->commit();
+
+                    $_SESSION['success_message'] = "Item added to cart successfully!";
+                } else {
+                    throw new Exception("Product is out of stock.");
+                }
+            } else {
+                throw new Exception("Product not found.");
+            }
+        } catch (Exception $e) {
+            $conn->rollback();
+            $_SESSION['error_message'] = $e->getMessage();
         }
 
-        $stmt->close();
-        header("Location: wishlist.php"); // Redirect back to the wishlist page
+        header('Location: wishlist.php');
+        exit;
+    }
+
+    // Handle other actions (e.g., remove from wishlist)
+    if ($action === 'remove') {
+        $wishlist_id = intval($_POST['wishlist_id']);
+
+        $deleteSql = "DELETE FROM wishlist WHERE wish_id = ?";
+        $deleteStmt = $conn->prepare($deleteSql);
+        $deleteStmt->bind_param("i", $wishlist_id);
+
+        if ($deleteStmt->execute()) {
+            $_SESSION['success_message'] = "Item removed from wishlist.";
+        } else {
+            $_SESSION['error_message'] = "Failed to remove item from wishlist.";
+        }
+
+        header('Location: wishlist.php');
         exit;
     }
 }
-
-// If invalid access, redirect back
-header("Location: wishlist.php");
-exit;
 ?>

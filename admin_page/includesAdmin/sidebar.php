@@ -80,7 +80,7 @@
 
     <!-- Nav Item - Chat -->
     <li class="nav-item">
-        <a class="nav-link" href="../chat/users.php">
+        <a class="nav-link" href="../chat/chatLP.php">
             <i class="fa-solid fa-message"></i>
             <span>Chat</span></a>
     </li>

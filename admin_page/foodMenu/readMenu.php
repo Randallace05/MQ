@@ -1,11 +1,64 @@
 <?php
 include '../../conn/conn.php';
 
+// Fetch all products for mapping product names to IDs
 $sql = "SELECT * FROM products";
 $stmt = $conn->prepare($sql);
 $stmt->execute();
 $result = $stmt->get_result();
-$products = $result->fetch_all(MYSQLI_ASSOC); // Fetch all rows as an associative array
+$products = $result->fetch_all(MYSQLI_ASSOC);
+
+// Create a product map for easy lookup by name
+$product_map = [];
+foreach ($products as $product) {
+    $product_map[$product['name']] = $product;
+}
+
+// Fetch the transaction history data
+$sql = "SELECT * FROM transaction_history";
+$result = $conn->query($sql);
+
+$product_details = [];
+while ($row = $result->fetch_assoc()) {
+    // Split cart_items into individual items
+    $cart_items = explode(',', $row['cart_items']); // Assuming items are comma-separated
+
+    foreach ($cart_items as $item) {
+        // Extract product name and quantity using regex
+        if (preg_match('/^(.*?) \((\d+)x\)$/', trim($item), $matches)) {
+            $product_name = $matches[1];
+            $quantity = (int) $matches[2];
+
+            // Check if product exists in the product map
+            if (isset($product_map[$product_name])) {
+                $product = $product_map[$product_name];
+                $product_details[] = [
+                    'product_id' => $product['id'],
+                    'product_name' => $product_name,
+                    'price' => $product['price'],
+                    'quantity' => $quantity,
+                ];
+            }
+        }
+    }
+}
+
+// Aggregate quantities and calculate total price for each product
+$aggregated_details = [];
+foreach ($product_details as $detail) {
+    $product_id = $detail['product_id'];
+    if (!isset($aggregated_details[$product_id])) {
+        $aggregated_details[$product_id] = [
+            'product_id' => $detail['product_id'],
+            'product_name' => $detail['product_name'],
+            'quantity' => $detail['quantity'],
+            'total_price' => $detail['price'] * $detail['quantity'],
+        ];
+    } else {
+        $aggregated_details[$product_id]['quantity'] += $detail['quantity'];
+        $aggregated_details[$product_id]['total_price'] += $detail['price'] * $detail['quantity'];
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -163,37 +216,92 @@ $products = $result->fetch_all(MYSQLI_ASSOC); // Fetch all rows as an associativ
     <h2 class="text-center mb-4" style="color: #EA7C69;">Product Inventory</h2>
     <div class="table-responsive">
         <table class="table table-bordered">
-        <thead>
-    <tr>
-        <th>Product ID</th>
-        <th>Product Name</th>
-        <th>Price</th>
-        <th>Stock</th>
-        <th>Expiration Date</th>
-        <th>Image</th>
-    </tr>
-</thead>
-<tbody>
-    <?php foreach ($products as $product): ?>
-        <tr>
-            <td><?= $product['id']; ?></td>
-            <td><?= htmlspecialchars($product['name']); ?></td>
-            <td>&#8369; <?= number_format($product['price'], 2); ?></td>
-            <td><?= $product['stock']; ?></td>
-            <td><?= isset($product['expiration_date']) ? date('F Y', strtotime($product['expiration_date'])) : 'N/A'; ?></td>
-            <td>
-                <img src="uploads/<?= htmlspecialchars($product['image']); ?>"
-                     class="product-img" alt="Product Image">
-            </td>
-        </tr>
-    <?php endforeach; ?>
-</tbody>
+            <thead>
+                <tr>
+                    <th>Product ID</th>
+                    <th>Product Name</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>Expiration Date</th>
+                    <th>Image</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($products as $product): ?>
+                    <tr>
+                        <td><?= $product['id']; ?></td>
+                        <td><?= htmlspecialchars($product['name']); ?></td>
+                        <td>&#8369; <?= number_format($product['price'], 2); ?></td>
+                        <td><?= $product['stock']; ?></td>
+                        <td><?= isset($product['expiration_date']) ? date('F Y', strtotime($product['expiration_date'])) : 'N/A'; ?></td>
+                        <td>
+                            <img src="uploads/<?= htmlspecialchars($product['image']); ?>" class="product-img" alt="Product Image">
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
         </table>
     </div>
 </div>
+<div class="container mt-5">
+    <h2 class="text-center">Order History</h2>
+
+    <!-- Sorting Buttons -->
+    <div class="sort-buttons">
+        <button id="sortHigh" class="btn btn-primary">Sort: High to Low</button>
+        <button id="sortLow" class="btn btn-secondary">Sort: Low to High</button>
+    </div>
+
+   <!-- Order History Table -->
+   <table class="table table-bordered" id="orderHistoryTable">
+        <thead>
+            <tr>
+                <th>Product ID</th>
+                <th>Product Name</th>
+                <th>Quantity Ordered</th>
+                <th>Total Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($aggregated_details as $detail): ?>
+                <tr>
+                    <td><?= $detail['product_id']; ?></td>
+                    <td><?= htmlspecialchars($detail['product_name']); ?></td>
+                    <td class="quantity"><?= $detail['quantity']; ?></td>
+                    <td>&#8369; <?= number_format($detail['total_price'], 2); ?></td>
+                </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+</div>
+
 <!-- Bootstrap JS and dependencies -->
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+<script>
+    const sortHighButton = document.getElementById('sortHigh');
+    const sortLowButton = document.getElementById('sortLow');
+    const tableBody = document.querySelector('#orderHistoryTable tbody');
+
+    // Function to sort table rows
+    function sortTable(order) {
+        const rows = Array.from(tableBody.querySelectorAll('tr'));
+
+        // Sort rows based on quantity
+        rows.sort((a, b) => {
+            const quantityA = parseInt(a.querySelector('.quantity').textContent);
+            const quantityB = parseInt(b.querySelector('.quantity').textContent);
+            return order === 'high' ? quantityB - quantityA : quantityA - quantityB;
+        });
+
+        // Re-append sorted rows to the table body
+        rows.forEach(row => tableBody.appendChild(row));
+    }
+
+    // Event listeners for sorting buttons
+    sortHighButton.addEventListener('click', () => sortTable('high'));
+    sortLowButton.addEventListener('click', () => sortTable('low'));
+</script>
 
 </body>
 </html>

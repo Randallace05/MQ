@@ -1,5 +1,5 @@
 <?php
-include '../../conn/conn.php'; 
+include '../../conn/conn.php';
 
 $sql = "SELECT * FROM products";
 $stmt = $conn->prepare($sql);
@@ -22,7 +22,7 @@ $products = $result->fetch_all(MYSQLI_ASSOC); // Fetch all rows as an associativ
             box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
             background-color: #F5E6E9 !important;
         }
-        
+
         .product-img {
             width: 150px;
             height: 150px;
@@ -30,23 +30,23 @@ $products = $result->fetch_all(MYSQLI_ASSOC); // Fetch all rows as an associativ
             object-fit: cover;
             margin: 0 auto;
         }
-        
+
         .card-body {
             padding: 1.5rem;
             text-align: center;
         }
-        
+
         .card-icon {
             font-size: 3rem;
             cursor: pointer;
             text-align: center;
             margin-bottom: 1rem;
         }
-        
+
         .fa-color {
             color: #EA7C69;
         }
-        
+
         .card-title {
             font-family: "Barlow";
             color: #EA7C69 !important;
@@ -88,14 +88,14 @@ $products = $result->fetch_all(MYSQLI_ASSOC); // Fetch all rows as an associativ
                         <?php
                         $toggle_action = $product['is_disabled'] == 1 ? "Enable" : "Disable";
                         ?>
-                        
+
                         <!-- Updated button layout -->
                         <div class="mt-auto d-flex flex-column gap-2"> <!-- Added flex-column and gap-2 -->
-                            <button class="btn btn-primary w-100" data-bs-toggle="modal" 
+                            <button class="btn btn-primary w-100" data-bs-toggle="modal"
                                     data-bs-target="#editFormModal<?= $product['id']; ?>">
                                 Edit Dish
                             </button>
-                            <a href="disableMenu.php?id=<?= $product['id']; ?>" 
+                            <a href="disableMenu.php?id=<?= $product['id']; ?>"
                                class="btn btn-danger w-100">
                                 <?= $toggle_action; ?>
                             </a>
@@ -131,6 +131,11 @@ $products = $result->fetch_all(MYSQLI_ASSOC); // Fetch all rows as an associativ
                                     <input type="number" name="stock" class="form-control" value="<?= $product['stock']; ?>">
                                 </div>
                                 <div class="mb-3">
+                                    <label for="expiration_date" class="form-label">Expiration Date (Month/Year)</label>
+                                    <input type="month" name="expiration_date" class="form-control"
+                                        value="<?= isset($product['expiration_date']) ? date('Y-m', strtotime($product['expiration_date'])) : ''; ?>">
+                                </div>
+                                <div class="mb-3">
                                     <label for="image" class="form-label">Image</label>
                                     <input type="file" name="image" class="form-control">
                                     <small>Current Image: <img src="uploads/<?= $product['image']; ?>" class="product-img"></small>
@@ -138,11 +143,11 @@ $products = $result->fetch_all(MYSQLI_ASSOC); // Fetch all rows as an associativ
                                 <div class="mb-3">
                                     <label for="other_images" class="form-label">Other Images</label>
                                     <input type="file" name="other_images[]" multiple class="form-control">
-                                    <?php if (!empty($product['other_images'])): 
+                                    <?php if (!empty($product['other_images'])):
                                         $other_images = json_decode($product['other_images']);
                                         foreach ($other_images as $other_image): ?>
                                             <img src="uploads/<?= $other_image; ?>" class="product-img" width="50">
-                                        <?php endforeach; 
+                                        <?php endforeach;
                                     endif; ?>
                                 </div>
                                 <button type="submit" class="btn btn-primary">Update</button>
@@ -158,30 +163,31 @@ $products = $result->fetch_all(MYSQLI_ASSOC); // Fetch all rows as an associativ
     <h2 class="text-center mb-4" style="color: #EA7C69;">Product Inventory</h2>
     <div class="table-responsive">
         <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Product ID</th>
-                    <th>Product Name</th>
-                    <th>Price</th>
-                    <th>Stock</th>
-                    <th>Image</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($products as $product): ?>
-                    <tr>
-                        <td><?= $product['id']; ?></td>
-                        <td><?= htmlspecialchars($product['name']); ?></td>
-                        <td>&#8369; <?= number_format($product['price'], 2); ?></td>
-                        <td><?= $product['stock']; ?></td>
-                        <td>
-                            <img src="uploads/<?= htmlspecialchars($product['image']); ?>" 
-                                 class="product-img" alt="Product Image">
-                        </td>
-                        
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
+        <thead>
+    <tr>
+        <th>Product ID</th>
+        <th>Product Name</th>
+        <th>Price</th>
+        <th>Stock</th>
+        <th>Expiration Date</th>
+        <th>Image</th>
+    </tr>
+</thead>
+<tbody>
+    <?php foreach ($products as $product): ?>
+        <tr>
+            <td><?= $product['id']; ?></td>
+            <td><?= htmlspecialchars($product['name']); ?></td>
+            <td>&#8369; <?= number_format($product['price'], 2); ?></td>
+            <td><?= $product['stock']; ?></td>
+            <td><?= isset($product['expiration_date']) ? date('F Y', strtotime($product['expiration_date'])) : 'N/A'; ?></td>
+            <td>
+                <img src="uploads/<?= htmlspecialchars($product['image']); ?>"
+                     class="product-img" alt="Product Image">
+            </td>
+        </tr>
+    <?php endforeach; ?>
+</tbody>
         </table>
     </div>
 </div>

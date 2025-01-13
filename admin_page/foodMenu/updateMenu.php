@@ -8,11 +8,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $price = $_POST['price'];
     $description = $_POST['description'];
     $stock = $_POST['stock'];
+    $expiration_date = $_POST['expiration_date']; // Get the expiration date from the form
+
+    // Validate expiration_date
+    if (!empty($expiration_date)) {
+        $expiration_date .= '-01'; // Append the day (e.g., 'YYYY-MM' to 'YYYY-MM-01')
+    } else {
+        $expiration_date = null; // Set to NULL if the expiration date is empty
+    }
 
     // Update product query
-    $sql = "UPDATE products SET name = ?, price = ?, description = ?, stock = ? WHERE id = ?";
-    $stmt = $conn->prepare($sql); 
-    $stmt->bind_param('sdssi', $name, $price, $description, $stock, $id);
+    $sql = "UPDATE products SET name = ?, price = ?, description = ?, stock = ?, expiration_date = ? WHERE id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('sdsssi', $name, $price, $description, $stock, $expiration_date, $id);
 
     if ($stmt->execute()) {
         // JavaScript for the alert and redirect
@@ -31,7 +39,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 // Fetch the product data
 $sql = "SELECT * FROM products WHERE id = ?";
-$stmt = $conn->prepare($sql); 
+$stmt = $conn->prepare($sql);
 $stmt->bind_param('i', $id);
 $stmt->execute();
 $result = $stmt->get_result();

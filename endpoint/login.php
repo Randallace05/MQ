@@ -58,7 +58,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     header("Location: ../user_page/shop.php");
                     break;
                 case 'distributor':
-                    header("Location: ../user_page/shop.php");
+                    header("Location: ../admin_page/dashboard/index.php");
                     break;
                 default:
                     $_SESSION['login_error'] = "An error occurred. Please try again later.";

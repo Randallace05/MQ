@@ -3,7 +3,7 @@ session_start();
 if (isset($_SESSION['unique_id'])) {
     include_once "config.php";
     $outgoing_id = $_SESSION['unique_id'];
-    $incoming_id = mysqli_real_escape_string($conn, $_POST['incoming_id']);
+    $incoming_id = mysqli_real_escape_string($conn, $_POST['user_id']);
     $output = "";
 
     $sql = "SELECT * FROM messages
@@ -16,20 +16,23 @@ if (isset($_SESSION['unique_id'])) {
 
     if (mysqli_num_rows($query) > 0) {
         while ($row = mysqli_fetch_assoc($query)) {
+            // Check if 'timestamp' key exists and provide a fallback
+            $timestamp = isset($row['timestamp']) ? htmlspecialchars($row['timestamp']) : 'N/A';
+
             if ((int)$row['outgoing_msg_id'] === (int)$outgoing_id) { // Sent by the logged-in user
                 $output .= '
-                <div class="chat outgoing">
+                <div class="message sent">
                     <div class="details">
-                        <p>' . htmlspecialchars($row['msg']) . '</p>
+                        <div class="message-bubble">' . htmlspecialchars($row['msg']) . '</div>
+                        <div class="timestamp">' . $timestamp . '</div>
                     </div>
                 </div>';
             } else { // Received by the logged-in user
                 $output .= '
-                <div class="chat incoming">
-                    <img src="php/images/' . htmlspecialchars($row['img'] ?? 'default.png') . '" alt="User Image">
-                    <div class="details">
-                        <p>' . htmlspecialchars($row['msg']) . '</p>
-                    </div>
+                <div class="message received">
+                    <img src="php/images/' . htmlspecialchars(string: $row['img'] ?? 'default.png') . '" alt="distributor Image">
+                    <div class="message-bubble">' . htmlspecialchars($row['msg']) . '</div>
+                    <div class="timestamp">' . $timestamp . '</div>
                 </div>';
             }
         }
@@ -41,3 +44,4 @@ if (isset($_SESSION['unique_id'])) {
     header("location: ../login.php");
 }
 ?>
+

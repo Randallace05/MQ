@@ -50,7 +50,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0px 10px 0px 15px;
+  padding: 0px 15px 0px 20px;
   position: absolute;
   bottom: 0;
 }
@@ -113,6 +113,19 @@
 <div class="loader">
   <div class="truckWrapper">
     <div class="truckBody">
+      <div style="
+        position: absolute; 
+        top: 20px; 
+        left: 25px; 
+        font-size: 16px; 
+        font-weight: bold; 
+        color: #ffff; 
+        background-color: #282828; 
+        padding: 2px 5px; 
+        border-radius: 3px;">
+        MQ 
+      </div>
+      
       <svg
         xmlns="http://www.w3.org/2000/svg"
         fill="none"

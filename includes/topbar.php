@@ -570,7 +570,6 @@
         }
     };
 //                 darrly nakuha mo ba
-
     function fetchNotifications() {
         const notificationsCount = document.getElementById('notificationCount');
         const notificationsList = document.getElementById('notificationsList');

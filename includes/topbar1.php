@@ -250,6 +250,95 @@
             border-bottom: none;
         }
 
+        #chat-box {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            width: 300px;
+            height: 400px;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            background: #007bff;
+            color: white;
+            padding: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-header button {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .chat-messages {
+            flex-grow: 1;
+            padding: 10px;
+            overflow-y: auto;
+            background: #f9f9f9;
+        }
+
+        .message {
+            margin-bottom: 10px;
+            padding: 8px;
+            border-radius: 5px;
+            max-width: 80%;
+        }
+
+        .user-message {
+            background: #007bff;
+            color: white;
+            align-self: flex-end;
+        }
+
+        .admin-message {
+            background: #f1f1f1;
+            color: black;
+            align-self: flex-start;
+        }
+
+        .chat-input {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid #ccc;
+            background: #fff;
+        }
+
+        .chat-input input {
+            flex-grow: 1;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            outline: none;
+        }
+
+        .chat-input button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            margin-left: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .chat-input button:hover {
+            background: #0056b3;
+        }
     </style>
 </head>
 <body>
@@ -337,7 +426,7 @@
                     }
 
                     // Display the message icon
-                    echo '<a href="../includes/chat.php" class="message-icon">
+                    echo '<a href="#" class="message-icon" id="chat-icon">
                             <i class="fa-regular fa-message"></i>';
                     // Conditionally display the notification count badge
                     if ($notification_count > 0) {
@@ -385,9 +474,9 @@
             <div class="right-space"></div>
             <hr>
         </div>
-    </div>
+
         <!-- Chat Box -->
-        <div id="chat-box" style="display: none;">
+    <div id="chat-box" style="display: none;">
         <div class="chat-header">
             Chat with Admin
             <button id="close-chat">✖</button>
@@ -413,7 +502,7 @@
             <input type="text" name="message" class="input-field" placeholder="Type a message here..." autocomplete="off">
             <button><i class="fab fa-telegram-plane"></i></button>
         </form>
-    </div>
+    </div>          
 
 
 
@@ -684,7 +773,8 @@ function cancelOrder(transactionId, event) {
     });
     </script>
      <!-- script for the caht  -->
-     <script>
+    <!-- script for the caht  -->
+    <script>
     document.addEventListener('DOMContentLoaded', function () {
         const chatIcon = document.getElementById('chat-icon');
         const chatBox = document.getElementById('chat-box');
@@ -761,3 +851,5 @@ function cancelOrder(transactionId, event) {
 
 </body>
 </html>
+
+

@@ -7,7 +7,7 @@ if (isset($_GET['order_id'])) {
     $order_id = intval($_GET['order_id']);
 
     // Fetch order details from the database
-    $sql = "SELECT tbl_user.username, orders.*, checkout.cart_items
+    $sql = "SELECT tbl_user.tbl_user_id, tbl_user.username, orders.*, checkout.cart_items
             FROM tbl_user
             INNER JOIN orders ON tbl_user.tbl_user_id = orders.tbl_user_id
             LEFT JOIN checkout ON orders.id = checkout.orders_id
@@ -21,14 +21,14 @@ if (isset($_GET['order_id'])) {
     if ($result->num_rows > 0) {
         $order = $result->fetch_assoc();
 
-        // Insert order into transaction history
-        $insert_sql = "INSERT INTO transaction_history (order_id, username, order_date, total_amount, shipping_address, payment_method, cart_items)
+        // Insert order into transaction history (use tbl_user_id instead of username)
+        $insert_sql = "INSERT INTO transaction_history (order_id, tbl_user_id, order_date, total_amount, shipping_address, payment_method, cart_items)
                        VALUES (?, ?, ?, ?, ?, ?, ?)";
         $insert_stmt = $conn->prepare($insert_sql);
         $insert_stmt->bind_param(
-            "issdsss",
+            "iissdss",
             $order['id'],
-            $order['username'],
+            $order['tbl_user_id'], // Use tbl_user_id here
             $order['order_date'],
             $order['total_amount'],
             $order['shipping_address'],

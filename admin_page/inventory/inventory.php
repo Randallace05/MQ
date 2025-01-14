@@ -180,7 +180,7 @@ $conn->close(); // Close the database connection
                                 foreach ($inventory as $item) {
                                     echo "<tr>";
                                     echo "<td>" . htmlspecialchars($item['order_id']) . "</td>";
-                                    echo "<td>" . htmlspecialchars($item['username']) . "</td>";
+                                    echo "<td>" . htmlspecialchars($item['tbl_user_id']) . "</td>";
                                     echo "<td>" . htmlspecialchars($item['order_date']) . "</td>";
                                     echo "<td>" . htmlspecialchars($item['shipping_address']) . "</td>";
                                     echo "<td>₱ " . number_format($item['total_amount'], 2) . "</td>";
@@ -232,7 +232,7 @@ $conn->close(); // Close the database connection
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ order_id: orderId, status: status })
                 })
-                
+
                 .catch(error => {
                     console.error('Error:', error);
                 });

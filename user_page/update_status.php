@@ -10,20 +10,20 @@ if (isset($_SESSION['tbl_user_id']) && isset($_POST['transaction_id']) && isset(
 
     // Check if the connection is successful
     if ($conn) {
-        // Update the transaction status
+        // 1. Update the transaction status
         $updateQuery = "UPDATE transaction_history SET status = ?, notification_sent = 0 WHERE id = ? AND tbl_user_id = ?";
         $stmt = $conn->prepare($updateQuery);
         $stmt->bind_param("sii", $status, $transaction_id, $tbl_user_id);
 
         if ($stmt->execute()) {
-            // Insert a new notification after updating the status
-            $insertNotificationQuery = "INSERT INTO notifications (tbl_user_id, message) VALUES (?, ?)";
-            $message = "Your order status has been updated to: $status";
+            // 2. Insert a new notification after updating the status
+            $insertNotificationQuery = "INSERT INTO notifications (tbl_user_id, status, notification_sent)
+                                         VALUES (?, ?, 0)";  // 0 means the notification is new and hasn't been read yet
             $insertStmt = $conn->prepare($insertNotificationQuery);
-            $insertStmt->bind_param("is", $tbl_user_id, $message);
+            $insertStmt->bind_param("is", $tbl_user_id, $status);
 
             if ($insertStmt->execute()) {
-                echo json_encode(['success' => true]);
+                echo json_encode(['success' => true, 'message' => 'Transaction status updated and notification created']);
             } else {
                 echo json_encode(['success' => false, 'error' => 'Failed to insert notification']);
             }
@@ -35,7 +35,7 @@ if (isset($_SESSION['tbl_user_id']) && isset($_POST['transaction_id']) && isset(
     }
 
 } else {
-    echo json_encode(['success' => false, 'error' => 'Invalid request']);
+    echo json_encode(['success' => false, 'error' => 'Invalid request or session expired']);
 }
 
 $conn->close();

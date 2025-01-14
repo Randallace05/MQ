@@ -236,7 +236,7 @@
                 <input type="text" name="message" class="message-input input-field" placeholder="Type a message here..." autocomplete="off">
                 <button class="send-button"><i class="fab fa-telegram-plane"></i></button>
             </form>
-
+                <!-- darrly nakuha mo ba -->
 
         </div>
     </div>

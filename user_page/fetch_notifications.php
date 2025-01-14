@@ -10,8 +10,8 @@ if (isset($_SESSION['tbl_user_id'])) {
 
     // Check if the connection is successful
     if ($conn) {
-        // Query to fetch only the status column for the specific tbl_user_id where notification_sent = 0
-        $query = "SELECT status
+        // Query to fetch the statuses for the specific tbl_user_id where notification_sent = 0
+        $query = "SELECT id, status
                   FROM transaction_history
                   WHERE notification_sent = 0 AND tbl_user_id = ?";
 
@@ -32,21 +32,14 @@ if (isset($_SESSION['tbl_user_id'])) {
         if ($result->num_rows > 0) {
             // Fetch statuses from the result
             while ($row = $result->fetch_assoc()) {
-                $statuses[] = $row['status'];
-            }
-
-            // Optional: Update notification_sent status for this user after fetching
-            $updateQuery = "UPDATE transaction_history SET notification_sent = 1 WHERE notification_sent = 0 AND tbl_user_id = ?";
-            $updateStmt = $conn->prepare($updateQuery);
-            $updateStmt->bind_param("i", $tbl_user_id);
-
-            if (!$updateStmt->execute()) {
-                echo json_encode(["error" => $updateStmt->error]);
-                exit;
+                $statuses[] = [
+                    "id" => $row['id'], // Add the transaction ID for further actions
+                    "status" => $row['status']
+                ];
             }
         }
 
-        // Return the statuses as JSON
+        // Return the statuses as JSON without updating the notification_sent column
         echo json_encode($statuses);
 
     } else {

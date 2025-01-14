@@ -3,7 +3,13 @@
 include("../../conn/conn.php");
 
 function fetchInventory($conn) {
-    $sql = "SELECT * FROM transaction_history ORDER BY order_date DESC";
+    // Modify the query to join the transaction_history and users tables
+    $sql = "
+        SELECT th.order_id, th.tbl_user_id, th.order_date, th.shipping_address, th.total_amount, th.payment_method, th.cart_items, th.status, u.username
+        FROM transaction_history th
+        LEFT JOIN tbl_user u ON th.tbl_user_id = u.tbl_user_id
+        ORDER BY th.order_date DESC
+    ";
     $result = $conn->query($sql);
 
     if (!$result) {
@@ -23,6 +29,7 @@ $inventory = fetchInventory($conn);
 
 $conn->close(); // Close the database connection
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -180,7 +187,7 @@ $conn->close(); // Close the database connection
                                 foreach ($inventory as $item) {
                                     echo "<tr>";
                                     echo "<td>" . htmlspecialchars($item['order_id']) . "</td>";
-                                    echo "<td>" . htmlspecialchars($item['tbl_user_id']) . "</td>";
+                                    echo "<td>" . htmlspecialchars($item['username']) . "</td>";
                                     echo "<td>" . htmlspecialchars($item['order_date']) . "</td>";
                                     echo "<td>" . htmlspecialchars($item['shipping_address']) . "</td>";
                                     echo "<td>₱ " . number_format($item['total_amount'], 2) . "</td>";

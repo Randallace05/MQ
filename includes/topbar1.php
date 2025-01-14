@@ -359,15 +359,19 @@
                     <?php echo $row_count; ?></span>
             </a>
             <div class="notifications-dropdown">
-        <a href="#" class="notifications-icon" onclick="toggleNotifications(event)">
-            <i class="fa-regular fa-bell"></i>
-            <span class="icon-badge" id="notificationCount">0</span>
-        </a>
-        <div class="dropdown-content" id="notificationsList">
-            <div class="dropdown-header">Notifications</div>
-            <!-- Notifications will be loaded dynamically -->
-            <div class="dropdown-empty">No new notifications </div>
-        </div>
+                <a href="#" class="notifications-icon" onclick="toggleNotifications(event)">
+                    <i class="fa-regular fa-bell"></i>
+                    <span class="icon-badge" id="notificationCount">0</span>
+                </a>
+                <div class="dropdown-content" id="notificationsList">
+                    <div class="dropdown-header">
+                        Notifications
+                        <button id="clearNotifications" onclick="clearNotifications(event)">Clear All</button>
+                    </div>
+                    <!-- Notifications will be loaded dynamically -->
+                    <div class="dropdown-empty">No new notifications</div>
+                </div>
+            </div>
     </div>
             <div class="user-dropdown">
                 <a href="#" class="user-icon" onclick="toggleDropdown(event)">
@@ -441,7 +445,7 @@
     }
 
     // Close both dropdowns when clicking outside
-    window.onclick = function(event) {
+    window.onclick = function (event) {
         const userDropdown = document.querySelector('.user-dropdown .dropdown-content');
         const notificationsDropdown = document.querySelector('.notifications-dropdown .dropdown-content');
 
@@ -454,22 +458,26 @@
         }
     };
 
+    // Fetch notifications when the page loads
     function fetchNotifications() {
         const notificationsCount = document.getElementById('notificationCount');
         const notificationsList = document.getElementById('notificationsList');
 
         fetch('fetch_notifications.php')
             .then(response => response.json())
-            .then(statuses => {
+            .then(data => {
                 // Update the notification count badge
-                notificationsCount.textContent = statuses.length;
+                notificationsCount.textContent = data.length;
 
-                if (statuses.length > 0) {
+                if (data.length > 0) {
                     notificationsList.innerHTML = `
-                        <div class="dropdown-header">Notifications</div>
-                        ${statuses.map((status, index) => `
-                            <div class="notification-item" data-id="${index}">
-                                ${status}
+                        <div class="dropdown-header">
+                            Notifications
+                            <button id="clearNotifications" onclick="clearNotifications(event)">Clear All</button>
+                        </div>
+                        ${data.map(notification => `
+                            <div class="notification-item" data-id="${notification.id}">
+                                ${notification.status}
                             </div>
                         `).join('')}
                     `;
@@ -483,39 +491,94 @@
             .catch(error => console.error('Error fetching notifications:', error));
     }
 
+    // Clear notifications
+    function clearNotifications(event) {
+        event.stopPropagation();
+
+        fetch('clear_notifications.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Clear the notification list and update the count
+                document.getElementById('notificationsList').innerHTML = `
+                    <div class="dropdown-header">Notifications</div>
+                    <div class="dropdown-empty">No new notifications</div>
+                `;
+                document.getElementById('notificationCount').textContent = '0';
+            } else {
+                console.error('Error clearing notifications:', data.error);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
     // Event listener for clicks on the notifications list
-    document.getElementById('notificationsList').addEventListener('static', function (event) {
+    document.getElementById('notificationsList').addEventListener('click', function (event) {
         const target = event.target;
 
         // Check if the clicked element is a notification item
         if (target.classList.contains('notification-item')) {
             const notificationId = target.getAttribute('data-id'); // Get the ID of the clicked notification
 
-            // Handle the notification click
-            console.log(`Notification ${notificationId} clicked`);
+            // Send a request to mark the notification as read
+            fetch('mark_notification_read.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ notification_id: notificationId }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Remove the clicked notification
+                    target.remove();
 
-            // Example: Remove the clicked notification
-            target.remove();
+                    // Update the notification count dynamically
+                    const notificationsCount = document.getElementById('notificationCount');
+                    const newCount = parseInt(notificationsCount.textContent, 10) - 1;
+                    notificationsCount.textContent = newCount > 0 ? newCount : 0;
 
-            // Update the notification count dynamically
-            const notificationsCount = document.getElementById('notificationCount');
-            const newCount = parseInt(notificationsCount.textContent, 10) - 1;
-            notificationsCount.textContent = newCount > 0 ? newCount : 0;
-
-            // If all notifications are removed, show the "No new notifications" message
-            if (newCount === 0) {
-                document.getElementById('notificationsList').innerHTML = `
-                    <div class="dropdown-header">Notifications</div>
-                    <div class="dropdown-empty">No new notifications</div>
-                `;
-            }
+                    // If all notifications are removed, show the "No new notifications" message
+                    if (newCount === 0) {
+                        document.getElementById('notificationsList').innerHTML = `
+                            <div class="dropdown-header">Notifications</div>
+                            <div class="dropdown-empty">No new notifications</div>
+                        `;
+                    }
+                } else {
+                    console.error('Error marking notification as read:', data.error);
+                }
+            })
+            .catch(error => console.error('Error:', error));
         }
     });
 
     // Call the fetchNotifications function to load notifications on page load
     fetchNotifications();
-    
+
+    // Call this function when the status changes, for example:
+    function updateStatus(transactionId, newStatus) {
+        // Update the transaction status and notify the user
+        fetch('update_status.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ transaction_id: transactionId, status: newStatus })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log('Status updated');
+                // After status update, fetch the latest notifications
+                fetchNotifications();
+            } else {
+                console.error('Failed to update status:', data.error);
+            }
+        })
+        .catch(error => console.error('Error updating status:', error));
+    }
     </script>
-    
+
 </body>
 </html>

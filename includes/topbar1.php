@@ -454,62 +454,67 @@
         }
     };
 
-   function fetchNotifications() {
-    const notificationsCount = document.getElementById('notificationCount');
-    const notificationsList = document.getElementById('notificationsList');
+    function fetchNotifications() {
+        const notificationsCount = document.getElementById('notificationCount');
+        const notificationsList = document.getElementById('notificationsList');
 
-    fetch('fetch_notifications.php')
-        .then(response => response.json())
-        .then(statuses => {
-            notificationsCount.textContent = statuses.length;
+        fetch('fetch_notifications.php')
+            .then(response => response.json())
+            .then(statuses => {
+                // Update the notification count badge
+                notificationsCount.textContent = statuses.length;
 
-            if (statuses.length > 0) {
-                notificationsList.innerHTML = `
-                    <div class="dropdown-header">Notifications</div>
-                    ${statuses.map(status => `
-                        <div class="notification-item">
-                            ${status}
-                        </div>
-                    `).join('')}
-                `;
-            } else {
-                notificationsList.innerHTML = `
+                if (statuses.length > 0) {
+                    notificationsList.innerHTML = `
+                        <div class="dropdown-header">Notifications</div>
+                        ${statuses.map((status, index) => `
+                            <div class="notification-item" data-id="${index}">
+                                ${status}
+                            </div>
+                        `).join('')}
+                    `;
+                } else {
+                    notificationsList.innerHTML = `
+                        <div class="dropdown-header">Notifications</div>
+                        <div class="dropdown-empty">No new notifications</div>
+                    `;
+                }
+            })
+            .catch(error => console.error('Error fetching notifications:', error));
+    }
+
+    // Event listener for clicks on the notifications list
+    document.getElementById('notificationsList').addEventListener('click', function (event) {
+        const target = event.target;
+
+        // Check if the clicked element is a notification item
+        if (target.classList.contains('notification-item')) {
+            const notificationId = target.getAttribute('data-id'); // Get the ID of the clicked notification
+
+            // Handle the notification click
+            console.log(`Notification ${notificationId} clicked`);
+
+            // Example: Remove the clicked notification
+            target.remove();
+
+            // Update the notification count dynamically
+            const notificationsCount = document.getElementById('notificationCount');
+            const newCount = parseInt(notificationsCount.textContent, 10) - 1;
+            notificationsCount.textContent = newCount > 0 ? newCount : 0;
+
+            // If all notifications are removed, show the "No new notifications" message
+            if (newCount === 0) {
+                document.getElementById('notificationsList').innerHTML = `
                     <div class="dropdown-header">Notifications</div>
                     <div class="dropdown-empty">No new notifications</div>
                 `;
             }
-        })
-        .catch(error => console.error('Error fetching notifications:', error));
-}
+        }
+    });
 
-function fetchNotifications() {
-    const notificationsCount = document.getElementById('notificationCount');
-    const notificationsList = document.getElementById('notificationsList');
-
-    fetch('fetch_notifications.php')
-        .then(response => response.json())
-        .then(statuses => {
-            notificationsCount.textContent = statuses.length;
-
-            if (statuses.length > 0) {
-                notificationsList.innerHTML = `
-                    <div class="dropdown-header">Notifications</div>
-                    ${statuses.map(status => `
-                        <div class="notification-item">
-                            ${status}
-                        </div>
-                    `).join('')}
-                `;
-            } else {
-                notificationsList.innerHTML = `
-                    <div class="dropdown-header">Notifications</div>
-                    <div class="dropdown-empty">No new notifications</div>
-                `;
-            }
-        })
-        .catch(error => console.error('Error fetching notifications:', error));
-}
-
+    // Call the fetchNotifications function to load notifications on page load
+    fetchNotifications();
+    
     </script>
     
 </body>

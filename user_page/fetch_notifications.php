@@ -1,23 +1,34 @@
 <?php
 include("../conn/conn.php");
 
-// Retrieve user ID from session
-$tbl_user_id = $_SESSION['tbl_user_id'] ?? null;
+// Check if the connection to the database is established
+if ($conn) {
+    // Query to fetch only the status column
+    $query = "SELECT status FROM transaction_history WHERE notification_sent = 0";
+    $result = $conn->query($query);
 
-if ($conn && $tbl_user_id) {
-    $stmt = $conn->prepare("SELECT message FROM notifications WHERE tbl_user_id = ? AND is_read = 0");
-    $stmt->bind_param("i", $tbl_user_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    // Prepare an array to hold the statuses
+    $statuses = [];
 
-    $notifications = [];
-    while ($row = $result->fetch_assoc()) {
-        $notifications[] = $row;
+    if ($result->num_rows > 0) {
+        // Fetch statuses from the result
+        while ($row = $result->fetch_assoc()) {
+            $statuses[] = $row['status'];
+        }
     }
 
-    $stmt->close();
-    echo json_encode($notifications);
+    // Mark the notifications as sent (optional)
+    $conn->query("UPDATE transaction_history SET notification_sent = 1 WHERE notification_sent = 0");
+
+    // Return the statuses as JSON
+    echo json_encode($statuses);
 } else {
+    // Return an empty array if there is a connection issue
     echo json_encode([]);
 }
+
+$conn->close();
 ?>
+<script>
+    
+</script>

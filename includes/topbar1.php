@@ -454,34 +454,62 @@
         }
     };
 
-    function fetchNotifications() {
-        const notificationsCount = document.getElementById('notificationCount');
-        const notificationsList = document.getElementById('notificationsList');
+   function fetchNotifications() {
+    const notificationsCount = document.getElementById('notificationCount');
+    const notificationsList = document.getElementById('notificationsList');
 
-        // Example of fetching notifications from a server
-        fetch('fetch_notifications.php')
-            .then(response => response.json())
-            .then(notifications => {
-                notificationsCount.textContent = notifications.length;
+    fetch('fetch_notifications.php')
+        .then(response => response.json())
+        .then(statuses => {
+            notificationsCount.textContent = statuses.length;
 
-                if (notifications.length > 0) {
-                    notificationsList.innerHTML = `
-                        <div class="dropdown-header">Notifications</div>
-                        ${notifications.map(notification => `
-                            <div class="notification-item">
-                                ${notification.message}
-                            </div>
-                        `).join('')}
-                    `;
-                } else {
-                    notificationsList.innerHTML = `
-                        <div class="dropdown-header">Notifications</div>
-                        <div class="dropdown-empty">No new notifications</div>
-                    `;
-                }
-            })
-            .catch(error => console.error('Error fetching notifications:', error));
-    }
+            if (statuses.length > 0) {
+                notificationsList.innerHTML = `
+                    <div class="dropdown-header">Notifications</div>
+                    ${statuses.map(status => `
+                        <div class="notification-item">
+                            ${status}
+                        </div>
+                    `).join('')}
+                `;
+            } else {
+                notificationsList.innerHTML = `
+                    <div class="dropdown-header">Notifications</div>
+                    <div class="dropdown-empty">No new notifications</div>
+                `;
+            }
+        })
+        .catch(error => console.error('Error fetching notifications:', error));
+}
+
+function fetchNotifications() {
+    const notificationsCount = document.getElementById('notificationCount');
+    const notificationsList = document.getElementById('notificationsList');
+
+    fetch('fetch_notifications.php')
+        .then(response => response.json())
+        .then(statuses => {
+            notificationsCount.textContent = statuses.length;
+
+            if (statuses.length > 0) {
+                notificationsList.innerHTML = `
+                    <div class="dropdown-header">Notifications</div>
+                    ${statuses.map(status => `
+                        <div class="notification-item">
+                            ${status}
+                        </div>
+                    `).join('')}
+                `;
+            } else {
+                notificationsList.innerHTML = `
+                    <div class="dropdown-header">Notifications</div>
+                    <div class="dropdown-empty">No new notifications</div>
+                `;
+            }
+        })
+        .catch(error => console.error('Error fetching notifications:', error));
+}
+
     </script>
     
 </body>

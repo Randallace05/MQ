@@ -50,7 +50,8 @@
       </form>
     </section>
   </div>
-
+<!--                 darrly nakuha mo ba
+ -->
   <script src="javascript/chat.js"></script>
 
 </body>

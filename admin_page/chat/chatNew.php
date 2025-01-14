@@ -232,10 +232,10 @@
                 <div class="default-message">No distributor selected. Click on a user to start chatting.</div>
             </div>
             <form action="php/insert-chat.php" method="POST" class="typing-area">
-    <input type="hidden" name="incoming_id" class="incoming_id" value="">
-    <input type="text" name="message" class="message-input input-field" placeholder="Type a message here..." autocomplete="off">
-    <button class="send-button"><i class="fab fa-telegram-plane"></i></button>
-</form>
+                <input type="hidden" name="incoming_id" class="incoming_id" value="">
+                <input type="text" name="message" class="message-input input-field" placeholder="Type a message here..." autocomplete="off">
+                <button class="send-button"><i class="fab fa-telegram-plane"></i></button>
+            </form>
 
 
         </div>

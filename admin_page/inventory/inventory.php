@@ -272,6 +272,34 @@ $conn->close(); // Close the database connection
             }
         }
     });
+
+    document.addEventListener('DOMContentLoaded', () => {
+    const dropdowns = document.querySelectorAll('.status-dropdown');
+    dropdowns.forEach(dropdown => {
+        dropdown.addEventListener('change', (e) => {
+            const orderId = e.target.getAttribute('data-order-id');
+            const status = e.target.value;
+
+            fetch('update_status.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ order_id: orderId, status: status })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Status updated successfully');
+                } else {
+                    console.error('Error updating status:', data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    });
+});
+
     </script>
 </body>
 

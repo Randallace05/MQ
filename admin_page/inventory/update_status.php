@@ -1,24 +1,24 @@
 <?php
-// Include the database connection
+// Include database connection
 include("../../conn/conn.php");
 
-// Decode the JSON payload
+// Get POST data
 $data = json_decode(file_get_contents("php://input"), true);
 
-$order_id = $data['order_id'];
-$status = $data['status'];
+if (isset($data['order_id']) && isset($data['status'])) {
+    $order_id = $conn->real_escape_string($data['order_id']);
+    $status = $conn->real_escape_string($data['status']);
 
-// Update the order status in the database and reset notification_sent
-$sql = "UPDATE transaction_history SET status = ?, notification_sent = 1 WHERE order_id = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("si", $status, $order_id);
-
-if ($stmt->execute()) {
-    echo json_encode(["success" => true]);
+    // Update the status in the database
+    $sql = "UPDATE transaction_history SET status='$status' WHERE order_id='$order_id'";
+    if ($conn->query($sql) === TRUE) {
+        echo json_encode(["success" => true]);
+    } else {
+        echo json_encode(["success" => false, "error" => $conn->error]);
+    }
 } else {
-    echo json_encode(["success" => false, "error" => $conn->error]);
+    echo json_encode(["success" => false, "error" => "Invalid data"]);
 }
 
-$stmt->close();
 $conn->close();
 ?>

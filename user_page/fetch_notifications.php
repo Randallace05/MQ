@@ -4,7 +4,7 @@ include("../conn/conn.php");
 // Check if the connection to the database is established
 if ($conn) {
     // Query to fetch only the status column
-    $query = "SELECT status FROM transaction_history WHERE notification_sent = 0";
+    $query = "SELECT status FROM transaction_history WHERE notification_sent = 1";
     $result = $conn->query($query);
 
     // Prepare an array to hold the statuses

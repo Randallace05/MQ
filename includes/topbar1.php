@@ -372,7 +372,6 @@
                     <div class="dropdown-empty">No new notifications</div>
                 </div>
             </div>
-    </div>
             <div class="user-dropdown">
                 <a href="#" class="user-icon" onclick="toggleDropdown(event)">
                     <i class="fa-regular fa-user"></i>
@@ -386,6 +385,34 @@
             <div class="right-space"></div>
             <hr>
         </div>
+    </div>
+        <!-- Chat Box -->
+        <div id="chat-box" style="display: none;">
+        <div class="chat-header">
+            Chat with Admin
+            <button id="close-chat">✖</button>
+        </div>
+        <div class="chat-messages"></div>
+        <form action="../admin_page/chat/php/insert-chat.php" class="typing-area">
+        <?php
+            // Include your database connection file
+            include("../conn/conn.php");
+
+            // Query to fetch the admin's unique ID
+            $admin_unique_id = null;
+            $query = "SELECT unique_id FROM tbl_user WHERE user_role = 'admin' LIMIT 1";
+            $result = mysqli_query($conn, $query);
+
+            if ($result && mysqli_num_rows($result) > 0) {
+                $row = mysqli_fetch_assoc($result);
+                $admin_unique_id = $row['unique_id'];
+            }
+        ?>
+
+            <input type="text" class="incoming_id" name="incoming_id" value="<?php echo $admin_unique_id; ?>" hidden>
+            <input type="text" name="message" class="input-field" placeholder="Type a message here..." autocomplete="off">
+            <button><i class="fab fa-telegram-plane"></i></button>
+        </form>
     </div>
 
 
@@ -460,36 +487,37 @@
 
     // Fetch notifications when the page loads
     function fetchNotifications() {
-        const notificationsCount = document.getElementById('notificationCount');
-        const notificationsList = document.getElementById('notificationsList');
+    const notificationsCount = document.getElementById('notificationCount');
+    const notificationsList = document.getElementById('notificationsList');
 
-        fetch('fetch_notifications.php')
-            .then(response => response.json())
-            .then(data => {
-                // Update the notification count badge
-                notificationsCount.textContent = data.length;
+    fetch('fetch_notifications.php')
+        .then(response => response.json())
+        .then(data => {
+            // Update the notification count badge
+            notificationsCount.textContent = data.length;
 
-                if (data.length > 0) {
-                    notificationsList.innerHTML = `
-                        <div class="dropdown-header">
-                            Notifications
-                            <button id="clearNotifications" onclick="clearNotifications(event)">Clear All</button>
+            if (data.length > 0) {
+                notificationsList.innerHTML = `
+                    <div class="dropdown-header">
+                        Notifications
+                        <button id="clearNotifications" onclick="clearNotifications(event)">Clear All</button>
+                    </div>
+                    ${data.map(notification => `
+                        <div class="notification-item" data-id="${notification.id}">
+                            ${notification.status}
                         </div>
-                        ${data.map(notification => `
-                            <div class="notification-item" data-id="${notification.id}">
-                                ${notification.status}
-                            </div>
-                        `).join('')}
-                    `;
-                } else {
-                    notificationsList.innerHTML = `
-                        <div class="dropdown-header">Notifications</div>
-                        <div class="dropdown-empty">No new notifications</div>
-                    `;
-                }
-            })
-            .catch(error => console.error('Error fetching notifications:', error));
-    }
+                    `).join('')}
+                `;
+            } else {
+                notificationsList.innerHTML = `
+                    <div class="dropdown-header">Notifications</div>
+                    <div class="dropdown-empty">No new notifications</div>
+                `;
+            }
+        })
+        .catch(error => console.error('Error fetching notifications:', error));
+}
+
 
     // Clear notifications
     function clearNotifications(event) {
@@ -559,26 +587,152 @@
     fetchNotifications();
 
     // Call this function when the status changes, for example:
-    function updateStatus(transactionId, newStatus) {
-        // Update the transaction status and notify the user
-        fetch('update_status.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ transaction_id: transactionId, status: newStatus })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                console.log('Status updated');
-                // After status update, fetch the latest notifications
-                fetchNotifications();
-            } else {
-                console.error('Failed to update status:', data.error);
+        function updateStatus(transactionId, newStatus) {
+    fetch('update_status.php', {
+        method: 'POST',
+        body: JSON.stringify({
+            transaction_id: transactionId,
+            status: newStatus
+        }),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log("Transaction status updated and notification created.");
+            // You may want to refresh the notification list here
+            fetchNotifications(); // This will fetch the latest notifications
+        } else {
+            console.error("Error:", data.error);
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const chatIcon = document.getElementById('chat-icon');
+        const chatBox = document.getElementById('chat-box');
+        const closeChatButton = document.getElementById('close-chat');
+        const sendMessageButton = document.getElementById('send-message');
+        const chatInput = document.getElementById('chat-message');
+        const chatMessages = document.querySelector('.chat-messages');
+
+        chatIcon.addEventListener('click', function (e) {
+            e.preventDefault();
+            chatBox.style.display = 'flex';
+        });
+
+        closeChatButton.addEventListener('click', function () {
+            chatBox.style.display = 'none';
+        });
+
+        sendMessageButton.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                sendMessage();
             }
-        })
-        .catch(error => console.error('Error updating status:', error));
-    }
+        });
+
+        function sendMessage() {
+            const message = chatInput.value.trim();
+            if (message) {
+                const messageElement = document.createElement('div');
+                messageElement.className = 'message user-message';
+                messageElement.textContent = message;
+                chatMessages.appendChild(messageElement);
+                chatInput.value = '';
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                // Simulate admin response
+                setTimeout(() => {
+                    const responseElement = document.createElement('div');
+                    responseElement.className = 'message admin-message';
+                    responseElement.textContent = "Thank you for your message. We'll respond shortly.";
+                    chatMessages.appendChild(responseElement);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }, 1000);
+            }
+        }
+    });
     </script>
+     <!-- script for the caht  -->
+     <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const chatIcon = document.getElementById('chat-icon');
+        const chatBox = document.getElementById('chat-box');
+        const closeChatButton = document.getElementById('close-chat');
+        const form = document.querySelector(".typing-area");
+        const incoming_id = form.querySelector(".incoming_id").value;
+        const inputField = form.querySelector(".input-field");
+        const sendBtn = form.querySelector("button");
+        const chatMessages = document.querySelector(".chat-messages");
+
+        chatIcon.addEventListener('click', function (e) {
+            e.preventDefault();
+            chatBox.style.display = 'flex';
+            loadChat();
+        });
+
+        closeChatButton.addEventListener('click', function () {
+            chatBox.style.display = 'none';
+        });
+
+        form.onsubmit = (e) => {
+            e.preventDefault();
+        }
+
+        inputField.focus();
+        inputField.onkeyup = () => {
+            if(inputField.value != ""){
+                sendBtn.classList.add("active");
+            } else {
+                sendBtn.classList.remove("active");
+            }
+        }
+
+        sendBtn.onclick = () => {
+            let xhr = new XMLHttpRequest();
+            xhr.open("POST", "../admin_page/chat/php/insert-chat.php", true);
+            xhr.onload = () => {
+                if(xhr.readyState === XMLHttpRequest.DONE){
+                    if(xhr.status === 200){
+                        inputField.value = "";
+                        scrollToBottom();
+                    }
+                }
+            }
+            let formData = new FormData(form);
+            xhr.send(formData);
+        }
+
+        function loadChat() {
+            let xhr = new XMLHttpRequest();
+            xhr.open("POST", "../admin_page/chat/php/get-chat.php", true);
+            xhr.onload = () => {
+                if(xhr.readyState === XMLHttpRequest.DONE){
+                    if(xhr.status === 200){
+                        chatMessages.innerHTML = xhr.response;
+                        scrollToBottom();
+                    }
+                }
+            }
+            xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+
+            // Include the user_id field in the request payload
+            xhr.send("user_id=" + incoming_id);
+        }
+
+        setInterval(loadChat, 500);
+
+        function scrollToBottom(){
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+    });
+</script>
+
 
 </body>
 </html>

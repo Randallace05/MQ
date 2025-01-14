@@ -366,7 +366,7 @@
         <div class="dropdown-content" id="notificationsList">
             <div class="dropdown-header">Notifications</div>
             <!-- Notifications will be loaded dynamically -->
-            <div class="dropdown-empty">No new notifications</div>
+            <div class="dropdown-empty">No new notifications </div>
         </div>
     </div>
             <div class="user-dropdown">
@@ -484,7 +484,7 @@
     }
 
     // Event listener for clicks on the notifications list
-    document.getElementById('notificationsList').addEventListener('click', function (event) {
+    document.getElementById('notificationsList').addEventListener('static', function (event) {
         const target = event.target;
 
         // Check if the clicked element is a notification item

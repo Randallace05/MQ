@@ -485,7 +485,7 @@
         }
     };
 
-    // Fetch notifications when the page loads
+
     function fetchNotifications() {
     const notificationsCount = document.getElementById('notificationCount');
     const notificationsList = document.getElementById('notificationsList');
@@ -493,7 +493,6 @@
     fetch('fetch_notifications.php')
         .then(response => response.json())
         .then(data => {
-            // Update the notification count badge
             notificationsCount.textContent = data.length;
 
             if (data.length > 0) {
@@ -505,6 +504,8 @@
                     ${data.map(notification => `
                         <div class="notification-item" data-id="${notification.id}">
                             ${notification.status}
+                            ${notification.status === 'Order Placed' ?
+                                `<button onclick="cancelOrder(${notification.id}, event)">Cancel Order</button>` : ''}
                         </div>
                     `).join('')}
                 `;
@@ -517,6 +518,30 @@
         })
         .catch(error => console.error('Error fetching notifications:', error));
 }
+
+function cancelOrder(transactionId, event) {
+    event.stopPropagation(); // Prevent the event from propagating
+
+    console.log("Cancel Order clicked for transaction ID:", transactionId); // Check if transaction ID is correct
+
+    fetch('cancel_order.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ transaction_id: transactionId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log("Order has been successfully cancelled.");
+            fetchNotifications(); // Refresh notifications after cancellation
+        } else {
+            console.error("Error cancelling order:", data.error);
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+
 
 
     // Clear notifications

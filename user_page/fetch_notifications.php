@@ -18,6 +18,8 @@ if (isset($_SESSION['tbl_user_id'])) {
 
             // Loop through the transactions and fetch the status updates
             while ($row = $result->fetch_assoc()) {
+                // Add a cancel_order field if the status is "Order Placed"
+                $row['cancel_order'] = ($row['status'] === 'Order Placed') ? true : false;
                 $transactions[] = $row;
             }
 

@@ -569,6 +569,7 @@
             notificationsDropdown.style.display = 'none';
         }
     };
+//                 darrly nakuha mo ba
 
     function fetchNotifications() {
         const notificationsCount = document.getElementById('notificationCount');

@@ -502,7 +502,7 @@
             <input type="text" name="message" class="input-field" placeholder="Type a message here..." autocomplete="off">
             <button><i class="fab fa-telegram-plane"></i></button>
         </form>
-    </div>          
+    </div>
 
 
 
@@ -582,19 +582,16 @@
     fetch('fetch_notifications.php')
         .then(response => response.json())
         .then(data => {
+            // Update notification count
             notificationsCount.textContent = data.length;
 
             if (data.length > 0) {
                 notificationsList.innerHTML = `
-                    <div class="dropdown-header">
-                        Notifications
-                        <button id="clearNotifications" onclick="clearNotifications(event)">Clear All</button>
-                    </div>
+                    <div class="dropdown-header">Notifications</div>
                     ${data.map(notification => `
                         <div class="notification-item" data-id="${notification.id}">
-                            ${notification.status}
-                            ${notification.status === 'Order Placed' ?
-                                `<button onclick="cancelOrder(${notification.id}, event)">Cancel Order</button>` : ''}
+                            Status: ${notification.status}<br>
+                            Items: ${notification.cart_items}
                         </div>
                     `).join('')}
                 `;
@@ -607,6 +604,7 @@
         })
         .catch(error => console.error('Error fetching notifications:', error));
 }
+
 
 function cancelOrder(transactionId, event) {
     event.stopPropagation(); // Prevent the event from propagating
@@ -633,18 +631,17 @@ function cancelOrder(transactionId, event) {
 
 
 
-    // Clear notifications
-    function clearNotifications(event) {
-        event.stopPropagation();
+function clearNotifications(event) {
+    event.stopPropagation();
 
-        fetch('clear_notifications.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-        })
+    fetch('clear_notifications.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+    })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // Clear the notification list and update the count
+                // Clear notifications list
                 document.getElementById('notificationsList').innerHTML = `
                     <div class="dropdown-header">Notifications</div>
                     <div class="dropdown-empty">No new notifications</div>
@@ -655,8 +652,7 @@ function cancelOrder(transactionId, event) {
             }
         })
         .catch(error => console.error('Error:', error));
-    }
-
+}
     // Event listener for clicks on the notifications list
     document.getElementById('notificationsList').addEventListener('click', function (event) {
         const target = event.target;
@@ -700,30 +696,56 @@ function cancelOrder(transactionId, event) {
     // Call the fetchNotifications function to load notifications on page load
     fetchNotifications();
 
-    // Call this function when the status changes, for example:
-        function updateStatus(transactionId, newStatus) {
+    function updateStatus(transactionId, newStatus) {
     fetch('update_status.php', {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             transaction_id: transactionId,
-            status: newStatus
+            status: newStatus,
         }),
-        headers: {
-            'Content-Type': 'application/json'
-        }
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            console.log("Transaction status updated and notification created.");
-            // You may want to refresh the notification list here
-            fetchNotifications(); // This will fetch the latest notifications
-        } else {
-            console.error("Error:", data.error);
-        }
-    })
-    .catch(error => console.error('Error:', error));
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log('Status updated and notification reset.');
+                // Refresh notifications
+                fetchNotifications();
+            } else {
+                console.error('Error:', data.error);
+            }
+        })
+        .catch(error => console.error('Error:', error));
 }
+document.addEventListener('DOMContentLoaded', () => {
+    const dropdowns = document.querySelectorAll('.status-dropdown');
+
+    dropdowns.forEach(dropdown => {
+        dropdown.addEventListener('change', (e) => {
+            const orderId = e.target.getAttribute('data-order-id');
+            const status = e.target.value;
+
+            fetch('update_status.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ order_id: orderId, status: status })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Status updated successfully!');
+                    } else {
+                        alert('Error updating status: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An unexpected error occurred.');
+                });
+        });
+    });
+});
+
 
 
     document.addEventListener('DOMContentLoaded', function () {

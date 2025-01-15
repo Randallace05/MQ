@@ -16,10 +16,10 @@ if (session_status() === PHP_SESSION_NONE) {
 function fetchUsers($conn, $selectedRole = 'all') {
     // Adjust SQL query based on selected role
     if ($selectedRole == 'all') {
-        $sql = "SELECT username, user_role FROM tbl_user WHERE user_role != 'admin'";
+        $sql = "SELECT username, user_role, is_active FROM tbl_user WHERE user_role != 'admin'";
         $stmt = $conn->prepare($sql);
     } else {
-        $sql = "SELECT username, user_role FROM tbl_user WHERE user_role = ? AND user_role != 'admin'";
+        $sql = "SELECT username, user_role, is_active FROM tbl_user WHERE user_role = ? AND user_role != 'admin'";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param('s', $selectedRole);
     }
@@ -162,6 +162,8 @@ $users = fetchUsers($conn, $selectedRole);
                         <div class="table-header">
                             <span class="table-cell">Username</span>
                             <span class="table-cell">Type</span>
+                            <span class="table-cell">Action</span>
+
                         </div>
 
                         <?php foreach ($users as $user) { ?>
@@ -172,6 +174,12 @@ $users = fetchUsers($conn, $selectedRole);
                                 </div>
                                 <div class="table-cell">
                                     <?php echo htmlspecialchars($user['user_role']); ?>
+                                </div>
+                                <div class="table-cell">
+                                    <button class="btn btn-sm <?php echo $user['is_active'] ? 'btn-danger' : 'btn-success'; ?>" 
+                                            onclick="toggleUserStatus('<?php echo $user['username']; ?>', <?php echo $user['is_active'] ? 'false' : 'true'; ?>)">
+                                        <?php echo $user['is_active'] ? 'Disable' : 'Enable'; ?>
+                                    </button>
                                 </div>
                             </div>
                         <?php } ?>
@@ -185,7 +193,29 @@ $users = fetchUsers($conn, $selectedRole);
     <script src="vendor/jquery/jquery.min.js"></script>
     <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="js/sb-admin-2.min.js"></script>
+    <script>
+        function toggleUserStatus(username, newStatus) {
+            fetch('toggle_user_status.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `username=${encodeURIComponent(username)}&status=${newStatus}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Failed to update user status');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while updating user status');
+            });
+        }
+    </script>
 </body>
 </html>
-
 

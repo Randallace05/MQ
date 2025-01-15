@@ -12,7 +12,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit;
     }
 
-    $query = "SELECT tbl_user_id, unique_id, password, username, user_role FROM tbl_user WHERE username = ?";
+    $query = "SELECT tbl_user_id, unique_id, password, username, user_role, is_active FROM tbl_user WHERE username = ?";
     $stmt = $conn->prepare($query);
     if ($stmt === false) {
         $_SESSION['login_error'] = "An error occurred. Please try again later.";
@@ -26,6 +26,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($result->num_rows > 0) {
         $user = $result->fetch_assoc();
+        if ($user['is_active'] == 0) {
+            $_SESSION['login_error'] = "Your account has been disabled. Please contact the administrator.";
+            header("Location: ../index.php");
+            exit;
+        }
         if (password_verify($password, $user['password'])) {
             $status = "Active now";
             $sql2 = "UPDATE tbl_user SET status = ? WHERE tbl_user_id = ?";
@@ -82,3 +87,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 $conn->close();
 ?>
+

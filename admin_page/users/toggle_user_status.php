@@ -3,7 +3,7 @@ include '../../conn/conn.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = $_POST['username'];
-    $newStatus = $_POST['status'] === 'true' ? 1 : 0;
+    $newStatus = $_POST['status'];
 
     $sql = "UPDATE tbl_user SET is_active = ? WHERE username = ?";
     $stmt = $conn->prepare($sql);

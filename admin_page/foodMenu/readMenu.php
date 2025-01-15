@@ -134,7 +134,7 @@ foreach ($product_details as $detail) {
         <?php foreach ($products as $product): ?>
             <div class="col-md-4">
                 <div class="card h-100">
-                    <div class="card-body d-flex flex-column">
+                    <div class="card-body  flex-column">
                         <img src="uploads/<?= $product['image']; ?>" class="product-img mb-3">
                         <h5 class="card-title"><?= $product['name']; ?></h5>
                         <h5 class="card-title">&#8369; <?= $product['price']; ?></h5>

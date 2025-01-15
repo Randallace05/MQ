@@ -54,18 +54,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .card {
-            width: 200px;
-            height: 300px !important; 
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 0 auto; /* Center the card horizontally */
+   
             background-color: #F5E6E9!important; /* Override the background color */
         }
         .card-icon {
             font-size: 3rem;
             cursor: pointer;
-            text-align: center;
+     
             color: #007bff;
             margin-top: 80px;
         }

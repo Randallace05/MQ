@@ -177,7 +177,7 @@ $users = fetchUsers($conn, $selectedRole);
                                 </div>
                                 <div class="table-cell">
                                     <button class="btn btn-sm <?php echo $user['is_active'] ? 'btn-danger' : 'btn-success'; ?>" 
-                                            onclick="toggleUserStatus('<?php echo $user['username']; ?>', <?php echo $user['is_active'] ? 'false' : 'true'; ?>)">
+                                            onclick="toggleUserStatus('<?php echo $user['username']; ?>', <?php echo $user['is_active'] ? '0' : '1'; ?>)">
                                         <?php echo $user['is_active'] ? 'Disable' : 'Enable'; ?>
                                     </button>
                                 </div>

@@ -133,6 +133,24 @@ require_once '../endpoint/session_config.php';
             text-align: center;
             padding: 10px 0;
         }
+        .chili-rating .total-ratings {
+            font-size: 0.8em;
+            color: #666;
+            margin-left: 5px;
+        }
+
+        .chili-rating .average-rating {
+            font-weight: bold;
+            margin-left: 5px;
+        }
+
+        .chili-rating .chili {
+            opacity: 0.3;
+        }
+
+        .chili-rating .chili.filled {
+            opacity: 1;
+        }
 
         @media (max-width: 1200px) {
             .product-grid {
@@ -264,7 +282,13 @@ require_once '../endpoint/session_config.php';
             <?php
             include '../conn/conn.php';
 
-            $sql = "SELECT id, name, price, image FROM products WHERE is_disabled = 0";
+            $sql = "SELECT p.id, p.name, p.price, p.image, 
+               COUNT(r.rating) as total_ratings,
+               AVG(r.rating) as average_rating
+        FROM products p 
+        LEFT JOIN reviews r ON p.id = r.product_id 
+        WHERE p.is_disabled = 0 
+        GROUP BY p.id";
             $result = $conn->query($sql);
 
             if ($result && $result->num_rows > 0) {
@@ -285,9 +309,24 @@ require_once '../endpoint/session_config.php';
                                 <p class="text-center mb-2">₱<?php echo number_format($product['price'], 2); ?></p>
                             </div>
                             <div class="chili-rating" data-product-id="<?php echo $product['id']; ?>">
-                                <?php for($i = 1; $i <= 5; $i++): ?>
-                                    <span class="chili" data-value="<?php echo $i; ?>">🌶️</span>
+                                <?php 
+                                $average_rating = round($product['average_rating'], 1);
+                                for($i = 1; $i <= 5; $i++): 
+                                ?>
+                                    <span class="chili filled" data-value="<?php echo $i; ?>">
+                                        <?php 
+                                        if ($i <= floor($average_rating)) {
+                                            echo '🌶️';
+                                        } elseif ($i == ceil($average_rating) && $average_rating != floor($average_rating)) {
+                                            echo '🌶️';
+                                        } else {
+                                            echo '🌶️';
+                                        }
+                                        ?>
+                                    </span>
                                 <?php endfor; ?>
+                                <span class="average-rating"><?php echo number_format($average_rating, 1); ?></span>
+                                <span class="total-ratings">(<?php echo $product['total_ratings']; ?>)</span>
                             </div>
                         </div>
                     </div>
@@ -302,7 +341,13 @@ require_once '../endpoint/session_config.php';
         </h2>
         <div class="product-grid">
             <?php
-            $sql = "SELECT id, name, price, image FROM products WHERE is_disabled = 0";
+            $sql = "SELECT p.id, p.name, p.price, p.image, 
+               COUNT(r.rating) as total_ratings,
+               AVG(r.rating) as average_rating
+                FROM products p 
+                LEFT JOIN reviews r ON p.id = r.product_id 
+                WHERE p.is_disabled = 0 
+                GROUP BY p.id";
             $result = $conn->query($sql);
 
             if ($result && $result->num_rows > 0) {
@@ -323,9 +368,24 @@ require_once '../endpoint/session_config.php';
                                 <p class="text-center mb-2">₱<?php echo number_format($product['price'], 2); ?></p>
                             </div>
                             <div class="chili-rating" data-product-id="<?php echo $product['id']; ?>">
-                                <?php for($i = 1; $i <= 5; $i++): ?>
-                                    <span class="chili" data-value="<?php echo $i; ?>">🌶️</span>
+                                <?php 
+                                $average_rating = round($product['average_rating'], 1);
+                                for($i = 1; $i <= 5; $i++): 
+                                ?>
+                                    <span class="chili filled" data-value="<?php echo $i; ?>">
+                                        <?php 
+                                        if ($i <= floor($average_rating)) {
+                                            echo '🌶️';
+                                        } elseif ($i == ceil($average_rating) && $average_rating != floor($average_rating)) {
+                                            echo '🌶️';
+                                        } else {
+                                            echo '🌶️';
+                                        }
+                                        ?>
+                                    </span>
                                 <?php endfor; ?>
+                                <span class="average-rating"><?php echo number_format($average_rating, 1); ?></span>
+                                <span class="total-ratings">(<?php echo $product['total_ratings']; ?>)</span>
                             </div>
                         </div>
                     </div>
@@ -376,45 +436,17 @@ require_once '../endpoint/session_config.php';
         // Initialize chili ratings
         document.querySelectorAll('.chili-rating').forEach(container => {
             const chilies = container.querySelectorAll('.chili');
-            let selectedRating = 0;
+            const averageRating = parseFloat(container.querySelector('.average-rating').textContent);
 
-            chilies.forEach(chili => {
-                chili.addEventListener('mouseover', () => {
-                    if (selectedRating === 0) {
-                        resetChilies(container);
-                        highlightChilies(container, chili.dataset.value);
-                    }
-                });
-
-                chili.addEventListener('click', () => {
-                    selectedRating = chili.dataset.value;
-                    highlightChilies(container, selectedRating);
-                });
-
-                chili.addEventListener('mouseout', () => {
-                    if (selectedRating === 0) {
-                        resetChilies(container);
-                    }
-                });
-            });
-        });
-
-        function highlightChilies(container, rating) {
-            const chilies = container.querySelectorAll('.chili');
             chilies.forEach((chili, index) => {
-                if (index < rating) {
-                    chili.classList.add('selected');
-                } else {
-                    chili.classList.remove('selected');
+                if (index < Math.floor(averageRating)) {
+                    chili.classList.add('filled');
+                } else if (index < averageRating) {
+                    chili.classList.add('filled');
+                    chili.style.opacity = '0.5';
                 }
             });
-        }
-
-        function resetChilies(container) {
-            container.querySelectorAll('.chili').forEach(chili => {
-                chili.classList.remove('selected');
-            });
-        }
+        });
 
         document.addEventListener('DOMContentLoaded', function () {
             const dots = document.querySelectorAll('.dot');
@@ -447,4 +479,5 @@ require_once '../endpoint/session_config.php';
 
 </body>
 </html>
+
 

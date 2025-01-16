@@ -26,7 +26,7 @@ if (isset($_GET['order_id'])) {
                        VALUES (?, ?, ?, ?, ?, ?, ?)";
         $insert_stmt = $conn->prepare($insert_sql);
         $insert_stmt->bind_param(
-            "iissdss",
+            "iisdsss",
             $order['id'],
             $order['tbl_user_id'], // Use tbl_user_id here
             $order['order_date'],

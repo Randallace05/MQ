@@ -10,16 +10,24 @@ if (!$conn) {
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
     die("Invalid product ID.");
 }
-
 $product_id = intval($_GET['id']); // Ensure numeric value
 
 // Fetch current product details
-$query = "SELECT name, price, image, description, stock FROM products WHERE id = ?";
+$query = "SELECT name, price, image, other_images, description, stock FROM products WHERE id = ?";
 $stmt = $conn->prepare($query);
 $stmt->bind_param("i", $product_id);
 $stmt->execute();
 $product_result = $stmt->get_result();
 $product = $product_result->fetch_assoc();
+
+// Decode the JSON-encoded `other_images` field
+$other_images = json_decode($product['other_images'], true); // Use `true` for associative array
+if (is_array($other_images)) {
+   
+} else {
+    echo "No additional images available.";
+}
+
 
 if (!$product) {
     die("Product not found.");
@@ -516,21 +524,19 @@ $average_rating = $review_count > 0 ? round($total_rating / $review_count, 1) : 
                     <div class="thumbnail-container">
                         <?php
                         // Assuming you have multiple images stored as image1, image2, etc.
-                        //papaltan pa to
-                        for($i = 1; $i <= 4; $i++):
-                        ?>
-                            <img src="../admin_page/foodMenu/uploads/<?php echo htmlspecialchars($product['image']); ?>"
-                                 class="thumbnail"
-                                 onclick="updateMainImage(this.src)"
-                                 alt="Product thumbnail <?php echo $i; ?>">
-                        <?php endfor; ?>
-                    </div>
-                    <img id="mainImage"
-                         src="../admin_page/foodMenu/uploads/<?php echo htmlspecialchars($product['image']); ?>"
-                         class="img-fluid main-image"
-                         alt="<?php echo htmlspecialchars($product['name']); ?>">
-                </div>
-            </div>
+                         foreach ($other_images as $i => $image): ?>
+                            <img src="../admin_page/foodMenu/uploads/<?php echo htmlspecialchars($image); ?>"
+                                class="thumbnail"
+                                onclick="updateMainImage(this.src)"
+                                alt="Product thumbnail <?php echo $i + 1; ?>">
+                        <?php endforeach; ?>
+                                        </div>
+                                        <img id="mainImage"
+                                            src="../admin_page/foodMenu/uploads/<?php echo htmlspecialchars($product['image']); ?>"
+                                            class="img-fluid main-image"
+                                            alt="<?php echo htmlspecialchars($product['name']); ?>">
+                                    </div>
+                                </div>
 
             <div class="col-md-6">
                 <h1 class="product-title"><?php echo htmlspecialchars($product['name']); ?></h1>

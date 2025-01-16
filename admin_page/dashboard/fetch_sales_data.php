@@ -3,7 +3,7 @@ header('Content-Type: application/json');
 
 // Database connection variables
 $host = 'localhost';
-$dbname = 'login_email_verificationz';
+$dbname = 'login_email_verification';
 $username = 'root';
 $password = '';
 
@@ -13,10 +13,10 @@ try {
 
     // Query to fetch sales data grouped by month from the `transaction_history` table
     $query = "
-        SELECT DATE_FORMAT(order_date, '%Y-%m') AS order_date, 
-               SUM(total_amount) AS total 
-        FROM transaction_history 
-        WHERE YEAR(order_date) = 2025 
+        SELECT DATE_FORMAT(order_date, '%Y-%m') AS order_date,
+               SUM(total_amount) AS total
+        FROM transaction_history
+        WHERE YEAR(order_date) = 2025
         GROUP BY DATE_FORMAT(order_date, '%Y-%m')
     ";
     $stmt = $pdo->prepare($query);

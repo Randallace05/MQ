@@ -19,7 +19,37 @@
     .bg-color {
         background-color: #d24444 !important; /* Override the background color */
         background-image: none !important;
-    }
+    }.sidebar {
+            position: sticky;
+            top: 0; /* The sidebar will stick to the top of the viewport */
+            height: 100vh; /* Make it full height */
+            overflow-y: hidden; /* Remove scrollbar */
+            overflow-x: hidden;
+            padding-right: 20px; /* Ensure content stays inside */
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar li {
+            margin: 0;
+            padding: 10px 15px;
+        }
+
+        .sidebar a {
+            text-decoration: none;
+            color: white;
+            display: block;
+        }
+
+        .sidebar a:hover {
+            background-color: #c33a3a; /* Slightly darker shade on hover */
+        }
+        
+    
 </style>
 <body>
     <!-- Sidebar -->

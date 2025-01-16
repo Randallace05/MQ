@@ -406,4 +406,78 @@ require_once '../endpoint/session_config.php';
 
             fetch('update_wishlist.php', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json'
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    product_id: productId,
+                    action: action
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    button.classList.toggle('active');
+                    const icon = button.querySelector('i');
+                    icon.classList.toggle('bi-heart');
+                    icon.classList.toggle('bi-heart-fill');
+
+                    // Update the wishlist badge count in real time
+                    document.querySelector('.icon-badge').textContent = data.wishlist_count;
+                } else {
+                    alert(data.message || 'Something went wrong.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while updating your wishlist.');
+            });
+        }
+
+
+        // Initialize chili ratings
+        document.querySelectorAll('.chili-rating').forEach(container => {
+            const chilies = container.querySelectorAll('.chili');
+            const averageRating = parseFloat(container.querySelector('.average-rating').textContent);
+
+            chilies.forEach((chili, index) => {
+                if (index < Math.floor(averageRating)) {
+                    chili.classList.add('filled');
+                } else if (index < averageRating) {
+                    chili.classList.add('filled');
+                    chili.style.opacity = '0.5';
+                }
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const dots = document.querySelectorAll('.dot');
+            const slides = document.querySelectorAll('.carousel-item');
+
+            let currentIndex = 0;
+
+            function updateCarousel(index) {
+                slides.forEach((slide, i) => {
+                    slide.classList.toggle('active', i === index);
+                });
+                dots.forEach((dot, i) => {
+                    dot.style.backgroundColor = i === index ? '#717171' : '#bbb';
+                });
+                currentIndex = index;
+            }
+
+            dots.forEach((dot, i) => {
+                dot.addEventListener('click', () => {
+                    updateCarousel(i);
+                });
+            });
+
+            // Initialize the carousel
+            if (dots.length > 0) {
+                updateCarousel(0);
+            }
+        });
+    </script>
+
+</body>
+</html>
+
+

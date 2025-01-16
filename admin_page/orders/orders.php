@@ -3,27 +3,28 @@
 include("../../conn/conn.php");
 
 function fetchOrders($conn) {
-    // Adjust the SQL query to fetch data correctly
+    // Adjust the SQL query to fetch data correctly, including gcash_proof
     $sql = "SELECT
                 tbl_user.username,
-                orders.id AS order_id, -- Ensure 'id' exists in the orders table
+                orders.id AS order_id,
                 orders.order_date,
                 orders.total_amount,
                 orders.shipping_address,
                 orders.payment_method,
-                checkout.cart_items
+                checkout.cart_items,
+                checkout.gcash_proof -- Ensure this column exists in the checkout table
             FROM
                 tbl_user
             INNER JOIN orders
                 ON tbl_user.tbl_user_id = orders.tbl_user_id
             LEFT JOIN checkout
-                ON orders.id = checkout.orders_id -- Ensure 'orders_id' exists in the checkout table
+                ON orders.id = checkout.orders_id
             ORDER BY orders.order_date DESC";
 
     $result = $conn->query($sql);
 
     if (!$result) {
-        die("Query Error: " . $conn->error); // Show the error
+        die("Query Error: " . $conn->error);
     }
 
     $orders = [];
@@ -39,8 +40,6 @@ $orders = fetchOrders($conn);
 
 $conn->close(); // Close the database connection
 ?>
-
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -122,6 +121,11 @@ $conn->close(); // Close the database connection
         .btn-danger {
             background-color: #dc3545;
         }
+
+        .proof-img {
+            max-width: 100px;
+            max-height: 100px;
+        }
     </style>
 </head>
 
@@ -164,6 +168,7 @@ $conn->close(); // Close the database connection
                                     <th>Shipping Address</th>
                                     <th>Total Amount</th>
                                     <th>Payment Method</th>
+                                    <th>GCash Proof</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -180,13 +185,22 @@ $conn->close(); // Close the database connection
                                         echo "<td>₱ " . number_format($order['total_amount'], 2) . "</td>";
                                         echo "<td>" . htmlspecialchars($order['payment_method']) . "</td>";
                                         echo "<td>";
+                                        if (!empty($order['gcash_proof'])) {
+                                            echo "<a href='../bill/uploads" . htmlspecialchars($order['gcash_proof']) . "' target='_blank'>";
+                                            echo "<img src='../bill/uploads" . htmlspecialchars($order['gcash_proof']) . "' alt='GCash Proof' class='proof-img'>";
+                                            echo "</a>";
+                                        } else {
+                                            echo "COD";
+                                        }
+                                        echo "</td>";
+                                        echo "<td>";
                                         echo "<a href='arrange_order.php?order_id=" . urlencode($order['order_id']) . "' class='btn btn-primary'>Arrange Order</a> ";
                                         echo "<a href='delete_order.php?order_id=" . urlencode($order['order_id']) . "' class='btn btn-danger'>Cancel</a>";
                                         echo "</td>";
                                         echo "</tr>";
                                     }
                                 } else {
-                                    echo "<tr><td colspan='8'>No orders found</td></tr>";
+                                    echo "<tr><td colspan='9'>No orders found</td></tr>";
                                 }
                                 ?>
                             </tbody>

@@ -133,6 +133,24 @@ require_once '../endpoint/session_config.php';
             text-align: center;
             padding: 10px 0;
         }
+        .chili-rating .total-ratings {
+            font-size: 0.8em;
+            color: #666;
+            margin-left: 5px;
+        }
+
+        .chili-rating .average-rating {
+            font-weight: bold;
+            margin-left: 5px;
+        }
+
+        .chili-rating .chili {
+            opacity: 0.3;
+        }
+
+        .chili-rating .chili.filled {
+            opacity: 1;
+        }
 
         @media (max-width: 1200px) {
             .product-grid {
@@ -264,7 +282,13 @@ require_once '../endpoint/session_config.php';
             <?php
             include '../conn/conn.php';
 
-            $sql = "SELECT id, name, price, image FROM products WHERE is_disabled = 0";
+            $sql = "SELECT p.id, p.name, p.price, p.image, 
+               COUNT(r.rating) as total_ratings,
+               AVG(r.rating) as average_rating
+        FROM products p 
+        LEFT JOIN reviews r ON p.id = r.product_id 
+        WHERE p.is_disabled = 0 
+        GROUP BY p.id";
             $result = $conn->query($sql);
 
             if ($result && $result->num_rows > 0) {
@@ -285,9 +309,24 @@ require_once '../endpoint/session_config.php';
                                 <p class="text-center mb-2">₱<?php echo number_format($product['price'], 2); ?></p>
                             </div>
                             <div class="chili-rating" data-product-id="<?php echo $product['id']; ?>">
-                                <?php for($i = 1; $i <= 5; $i++): ?>
-                                    <span class="chili" data-value="<?php echo $i; ?>">🌶️</span>
+                                <?php 
+                                $average_rating = round($product['average_rating'], 1);
+                                for($i = 1; $i <= 5; $i++): 
+                                ?>
+                                    <span class="chili filled" data-value="<?php echo $i; ?>">
+                                        <?php 
+                                        if ($i <= floor($average_rating)) {
+                                            echo '🌶️';
+                                        } elseif ($i == ceil($average_rating) && $average_rating != floor($average_rating)) {
+                                            echo '🌶️';
+                                        } else {
+                                            echo '🌶️';
+                                        }
+                                        ?>
+                                    </span>
                                 <?php endfor; ?>
+                                <span class="average-rating"><?php echo number_format($average_rating, 1); ?></span>
+                                <span class="total-ratings">(<?php echo $product['total_ratings']; ?>)</span>
                             </div>
                         </div>
                     </div>
@@ -302,7 +341,13 @@ require_once '../endpoint/session_config.php';
         </h2>
         <div class="product-grid">
             <?php
-            $sql = "SELECT id, name, price, image FROM products WHERE is_disabled = 0";
+            $sql = "SELECT p.id, p.name, p.price, p.image, 
+               COUNT(r.rating) as total_ratings,
+               AVG(r.rating) as average_rating
+                FROM products p 
+                LEFT JOIN reviews r ON p.id = r.product_id 
+                WHERE p.is_disabled = 0 
+                GROUP BY p.id";
             $result = $conn->query($sql);
 
             if ($result && $result->num_rows > 0) {
@@ -323,9 +368,24 @@ require_once '../endpoint/session_config.php';
                                 <p class="text-center mb-2">₱<?php echo number_format($product['price'], 2); ?></p>
                             </div>
                             <div class="chili-rating" data-product-id="<?php echo $product['id']; ?>">
-                                <?php for($i = 1; $i <= 5; $i++): ?>
-                                    <span class="chili" data-value="<?php echo $i; ?>">🌶️</span>
+                                <?php 
+                                $average_rating = round($product['average_rating'], 1);
+                                for($i = 1; $i <= 5; $i++): 
+                                ?>
+                                    <span class="chili filled" data-value="<?php echo $i; ?>">
+                                        <?php 
+                                        if ($i <= floor($average_rating)) {
+                                            echo '🌶️';
+                                        } elseif ($i == ceil($average_rating) && $average_rating != floor($average_rating)) {
+                                            echo '🌶️';
+                                        } else {
+                                            echo '🌶️';
+                                        }
+                                        ?>
+                                    </span>
                                 <?php endfor; ?>
+                                <span class="average-rating"><?php echo number_format($average_rating, 1); ?></span>
+                                <span class="total-ratings">(<?php echo $product['total_ratings']; ?>)</span>
                             </div>
                         </div>
                     </div>
@@ -346,105 +406,4 @@ require_once '../endpoint/session_config.php';
 
             fetch('update_wishlist.php', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    product_id: productId,
-                    action: action
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    button.classList.toggle('active');
-                    const icon = button.querySelector('i');
-                    icon.classList.toggle('bi-heart');
-                    icon.classList.toggle('bi-heart-fill');
-
-                    // Update the wishlist badge count in real time
-                    document.querySelector('.icon-badge').textContent = data.wishlist_count;
-                } else {
-                    alert(data.message || 'Something went wrong.');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred while updating your wishlist.');
-            });
-        }
-
-
-        // Initialize chili ratings
-        document.querySelectorAll('.chili-rating').forEach(container => {
-            const chilies = container.querySelectorAll('.chili');
-            let selectedRating = 0;
-
-            chilies.forEach(chili => {
-                chili.addEventListener('mouseover', () => {
-                    if (selectedRating === 0) {
-                        resetChilies(container);
-                        highlightChilies(container, chili.dataset.value);
-                    }
-                });
-
-                chili.addEventListener('click', () => {
-                    selectedRating = chili.dataset.value;
-                    highlightChilies(container, selectedRating);
-                });
-
-                chili.addEventListener('mouseout', () => {
-                    if (selectedRating === 0) {
-                        resetChilies(container);
-                    }
-                });
-            });
-        });
-
-        function highlightChilies(container, rating) {
-            const chilies = container.querySelectorAll('.chili');
-            chilies.forEach((chili, index) => {
-                if (index < rating) {
-                    chili.classList.add('selected');
-                } else {
-                    chili.classList.remove('selected');
-                }
-            });
-        }
-
-        function resetChilies(container) {
-            container.querySelectorAll('.chili').forEach(chili => {
-                chili.classList.remove('selected');
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', function () {
-            const dots = document.querySelectorAll('.dot');
-            const slides = document.querySelectorAll('.carousel-item');
-
-            let currentIndex = 0;
-
-            function updateCarousel(index) {
-                slides.forEach((slide, i) => {
-                    slide.classList.toggle('active', i === index);
-                });
-                dots.forEach((dot, i) => {
-                    dot.style.backgroundColor = i === index ? '#717171' : '#bbb';
-                });
-                currentIndex = index;
-            }
-
-            dots.forEach((dot, i) => {
-                dot.addEventListener('click', () => {
-                    updateCarousel(i);
-                });
-            });
-
-            // Initialize the carousel
-            if (dots.length > 0) {
-                updateCarousel(0);
-            }
-        });
-    </script>
-
-</body>
-</html>
-
+                headers: { 'Content-Type': 'application/json'

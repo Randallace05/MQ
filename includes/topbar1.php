@@ -436,7 +436,7 @@
                 }
                 ?>
 
-            <a href="../user_page/wishlist.php">
+            <a href="../user_page/wishlistZ.php">
                 <i class="fa-regular fa-heart"></i>
                 <span class="icon-badge">
                     <?php echo $wishlist_count; ?></span>

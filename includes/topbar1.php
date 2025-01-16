@@ -447,27 +447,14 @@
 
                     <?php echo $row_count; ?></span>
             </a>
-            <div class="notifications-dropdown">
-                <a href="#" class="notifications-icon" onclick="toggleNotifications(event)">
-                    <i class="fa-regular fa-bell"></i>
-                    <span class="icon-badge" id="notificationCount">0</span>
-                </a>
-                <div class="dropdown-content" id="notificationsList">
-                    <div class="dropdown-header">
-                        Notifications
-                        <button id="clearNotifications" onclick="clearNotifications(event)">Clear All</button>
-                    </div>
-                    <!-- Notifications will be loaded dynamically -->
-                    <div class="dropdown-empty">No new notifications</div>
-                </div>
-            </div>
             <div class="user-dropdown">
                 <a href="#" class="user-icon" onclick="toggleDropdown(event)">
                     <i class="fa-regular fa-user"></i>
+
                 </a>
                 <div class="dropdown-content">
                     <a href="../user_page/profile_page.php">Profile</a>
-                    <a href="../user_page/settings.php">Settings</a>
+                    <a href="../user_page/transaction_history.php">Orders</a>
                     <a href="../user_page/logout.php">Logout</a>
                 </div>
             </div>
@@ -539,213 +526,12 @@
         function toggleDropdown(event) {
         event.stopPropagation();
         const userDropdown = document.querySelector('.user-dropdown .dropdown-content');
-        const notificationsDropdown = document.querySelector('.notifications-dropdown .dropdown-content');
+        const notificationsDropdown = document.querySelector('.dropdown-content');
 
-        // Close notifications dropdown if open
-        notificationsDropdown.style.display = 'none';
 
         // Toggle user dropdown
         userDropdown.style.display = userDropdown.style.display === 'block' ? 'none' : 'block';
     }
-
-    function toggleNotifications(event) {
-        event.stopPropagation();
-        const notificationsDropdown = document.querySelector('.notifications-dropdown .dropdown-content');
-        const userDropdown = document.querySelector('.user-dropdown .dropdown-content');
-
-        // Close user dropdown if open
-        userDropdown.style.display = 'none';
-
-        // Toggle notifications dropdown
-        notificationsDropdown.style.display = notificationsDropdown.style.display === 'block' ? 'none' : 'block';
-    }
-
-    // Close both dropdowns when clicking outside
-    window.onclick = function (event) {
-        const userDropdown = document.querySelector('.user-dropdown .dropdown-content');
-        const notificationsDropdown = document.querySelector('.notifications-dropdown .dropdown-content');
-
-        if (!event.target.closest('.user-dropdown')) {
-            userDropdown.style.display = 'none';
-        }
-
-        if (!event.target.closest('.notifications-dropdown')) {
-            notificationsDropdown.style.display = 'none';
-        }
-    };
-
-
-    function fetchNotifications() {
-    const notificationsCount = document.getElementById('notificationCount');
-    const notificationsList = document.getElementById('notificationsList');
-
-    fetch('fetch_notifications.php')
-        .then(response => response.json())
-        .then(data => {
-            // Update notification count
-            notificationsCount.textContent = data.length;
-
-            if (data.length > 0) {
-                notificationsList.innerHTML = `
-                    <div class="dropdown-header">Notifications</div>
-                    ${data.map(notification => `
-                        <div class="notification-item" data-id="${notification.id}">
-                            Status: ${notification.status}<br>
-                            Items: ${notification.cart_items}
-                        </div>
-                    `).join('')}
-                `;
-            } else {
-                notificationsList.innerHTML = `
-                    <div class="dropdown-header">Notifications</div>
-                    <div class="dropdown-empty">No new notifications</div>
-                `;
-            }
-        })
-        .catch(error => console.error('Error fetching notifications:', error));
-}
-
-
-function cancelOrder(transactionId, event) {
-    event.stopPropagation(); // Prevent the event from propagating
-
-    console.log("Cancel Order clicked for transaction ID:", transactionId); // Check if transaction ID is correct
-
-    fetch('cancel_order.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ transaction_id: transactionId })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            console.log("Order has been successfully cancelled.");
-            fetchNotifications(); // Refresh notifications after cancellation
-        } else {
-            console.error("Error cancelling order:", data.error);
-        }
-    })
-    .catch(error => console.error('Error:', error));
-}
-
-
-
-
-function clearNotifications(event) {
-    event.stopPropagation();
-
-    fetch('clear_notifications.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-    })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Clear notifications list
-                document.getElementById('notificationsList').innerHTML = `
-                    <div class="dropdown-header">Notifications</div>
-                    <div class="dropdown-empty">No new notifications</div>
-                `;
-                document.getElementById('notificationCount').textContent = '0';
-            } else {
-                console.error('Error clearing notifications:', data.error);
-            }
-        })
-        .catch(error => console.error('Error:', error));
-}
-    // Event listener for clicks on the notifications list
-    document.getElementById('notificationsList').addEventListener('click', function (event) {
-        const target = event.target;
-
-        // Check if the clicked element is a notification item
-        if (target.classList.contains('notification-item')) {
-            const notificationId = target.getAttribute('data-id'); // Get the ID of the clicked notification
-
-            // Send a request to mark the notification as read
-            fetch('mark_notification_read.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ notification_id: notificationId }),
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Remove the clicked notification
-                    target.remove();
-
-                    // Update the notification count dynamically
-                    const notificationsCount = document.getElementById('notificationCount');
-                    const newCount = parseInt(notificationsCount.textContent, 10) - 1;
-                    notificationsCount.textContent = newCount > 0 ? newCount : 0;
-
-                    // If all notifications are removed, show the "No new notifications" message
-                    if (newCount === 0) {
-                        document.getElementById('notificationsList').innerHTML = `
-                            <div class="dropdown-header">Notifications</div>
-                            <div class="dropdown-empty">No new notifications</div>
-                        `;
-                    }
-                } else {
-                    console.error('Error marking notification as read:', data.error);
-                }
-            })
-            .catch(error => console.error('Error:', error));
-        }
-    });
-
-    // Call the fetchNotifications function to load notifications on page load
-    fetchNotifications();
-
-    function updateStatus(transactionId, newStatus) {
-    fetch('update_status.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            transaction_id: transactionId,
-            status: newStatus,
-        }),
-    })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                console.log('Status updated and notification reset.');
-                // Refresh notifications
-                fetchNotifications();
-            } else {
-                console.error('Error:', data.error);
-            }
-        })
-        .catch(error => console.error('Error:', error));
-}
-document.addEventListener('DOMContentLoaded', () => {
-    const dropdowns = document.querySelectorAll('.status-dropdown');
-
-    dropdowns.forEach(dropdown => {
-        dropdown.addEventListener('change', (e) => {
-            const orderId = e.target.getAttribute('data-order-id');
-            const status = e.target.value;
-
-            fetch('update_status.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ order_id: orderId, status: status })
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Status updated successfully!');
-                    } else {
-                        alert('Error updating status: ' + data.error);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An unexpected error occurred.');
-                });
-        });
-    });
-});
-
 
 
     document.addEventListener('DOMContentLoaded', function () {

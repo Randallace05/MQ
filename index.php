@@ -168,8 +168,27 @@
     <?php include("includes/footer.php"); ?>
 <!-- End Footer Section -->
 
-<script src="admin_page/chat/javascript/login.js"></script>
+<!-- Error Modal -->
+<div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="errorModalLabel">Error</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="errorModalBody">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     const loginForm = document.getElementById('loginForm');
     const registrationForm = document.getElementById('registrationForm');
@@ -196,4 +215,44 @@
             verification.style.display = 'none';
         }
     }
+
+    // New login form submission handler
+    document.getElementById('loginFormSubmit').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        
+        fetch('endpoint/login.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                // Show error in modal
+                document.getElementById('errorModalBody').textContent = data.error;
+                $('#errorModal').modal('show');
+            } else if (data.success) {
+                // Redirect based on user role
+                switch (data.role) {
+                    case 'admin':
+                        window.location.href = 'admin_page/dashboard/index.php';
+                        break;
+                    case 'customer':
+                    case 'distributor':
+                        window.location.href = 'user_page/shop.php';
+                        break;
+                    default:
+                        document.getElementById('errorModalBody').textContent = 'An error occurred. Please try again later.';
+                        $('#errorModal').modal('show');
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('errorModalBody').textContent = 'An error occurred. Please try again later.';
+            $('#errorModal').modal('show');
+        });
+    });
 </script>
+

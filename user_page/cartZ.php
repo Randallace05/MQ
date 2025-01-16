@@ -30,7 +30,7 @@ $result = $select_cart_products->get_result();
    
 
     .cart-container {
-      width: 100%;
+      width: 900px;
       background: white;
       padding: 20px;
       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);

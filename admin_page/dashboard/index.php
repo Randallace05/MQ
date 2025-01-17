@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <?php include("../includesAdmin/header.php"); ?>
 </head>
 <body id="page-top">
@@ -27,10 +28,23 @@
                         <!-- Page Heading -->
                         <div class="d-sm-flex align-items-center justify-content-between mb-4">
                             <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
-                            <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-                                <i class="fas fa-download fa-sm text-white-50"></i> Generate Report
-                            </a>
+                            <div class="dropdown">
+                                <button 
+                                    class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm dropdown-toggle" 
+                                    type="button" 
+                                    id="dropdownMenuButton" 
+                                    data-bs-toggle="dropdown" 
+                                    aria-expanded="false">
+                                    <i class="fas fa-download fa-sm text-white-50"></i> Generate Report
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                    <li><a class="dropdown-item" href="#" id="generateDailyReport">Generate Daily Report</a></li>
+                                    <li><a class="dropdown-item" href="#" id="generateMonthlyReport">Generate Monthly Report</a></li>
+                                    <li><a class="dropdown-item" href="#" id="generateYearlyReport">Generate Yearly Report</a></li>
+                                </ul>
+                            </div>
                         </div>
+
 
                         <!-- Content Row -->
                         <div class="row">
@@ -79,6 +93,7 @@
     </div>
 
     <!-- script -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- end of script -->
 </body>
 </html>

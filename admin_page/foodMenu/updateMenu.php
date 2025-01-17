@@ -11,11 +11,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $expiration_date = $_POST['expiration_date']; // Get the expiration date from the form
 
     // Validate expiration_date
-    if (!empty($expiration_date)) {
-        $expiration_date .= '-01'; // Append the day (e.g., 'YYYY-MM' to 'YYYY-MM-01')
-    } else {
-        $expiration_date = null; // Set to NULL if the expiration date is empty
-    }
 
     // Update product query
     $sql = "UPDATE products SET name = ?, price = ?, description = ?, stock = ?, expiration_date = ? WHERE id = ?";

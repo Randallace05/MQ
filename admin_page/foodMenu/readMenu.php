@@ -184,11 +184,6 @@ foreach ($product_details as $detail) {
                                     <input type="number" name="stock" class="form-control" value="<?= $product['stock']; ?>">
                                 </div>
                                 <div class="mb-3">
-                                    <label for="expiration_date" class="form-label">Expiration Date (Month/Year)</label>
-                                    <input type="month" name="expiration_date" class="form-control"
-                                        value="<?= isset($product['expiration_date']) ? date('Y-m', strtotime($product['expiration_date'])) : ''; ?>">
-                                </div>
-                                <div class="mb-3">
                                     <label for="image" class="form-label">Image</label>
                                     <input type="file" name="image" class="form-control">
                                     <small>Current Image: <img src="uploads/<?= $product['image']; ?>" class="product-img"></small>

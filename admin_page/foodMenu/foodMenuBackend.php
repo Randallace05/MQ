@@ -1,12 +1,13 @@
 <?php
-include '../../conn/conn.php'; 
+include '../../conn/conn.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $name = $_POST['name'];
     $price = $_POST['price'];
     $description = $_POST['description'];
     $stock = $_POST['stock'];
-    
+    $expiration_date = $_POST['expiration_date']; // New field
+
     // Upload main image
     $image = $_FILES['image']['name'];
     if ($image) {
@@ -25,22 +26,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
     $other_images_json = json_encode($other_images);
-    
+
+    if (!empty($expiration_date)) {
+        $expiration_date .= '-01'; // Append the day (e.g., 'YYYY-MM' to 'YYYY-MM-01')
+    } else {
+        $expiration_date = null; // Set to NULL if the expiration date is empty
+    }
+
     // SQL query with MySQLi
-    $sql = "INSERT INTO products (name, price, image, description, other_images, stock) 
-            VALUES (?, ?, ?, ?, ?, ?)";
-    
+    $sql = "INSERT INTO products (name, price, image, description, other_images, stock, expiration_date)
+            VALUES (?, ?, ?, ?, ?, ?, ?)";
+
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param('sdsssi', $name, $price, $image, $description, $other_images_json, $stock);
+    $stmt->bind_param('sdsssds', $name, $price, $image, $description, $other_images_json, $stock, $expiration_date);
     if ($stmt->execute()) {
         echo "Product created successfully!";
     } else {
         echo "Error: " . $stmt->error;
     }
 
+
     $stmt->close();
     $conn->close();
 }
+
 ?>
 
 
@@ -54,13 +63,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .card {
-   
+
             background-color: #F5E6E9!important; /* Override the background color */
         }
         .card-icon {
             font-size: 3rem;
             cursor: pointer;
-     
+
             color: #007bff;
             margin-top: 80px;
         }
@@ -71,16 +80,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         .card-title{
             font-family: "Barlow";
-            color: #EA7C69 !important; 
+            color: #EA7C69 !important;
         }
 
     </style>
 </head>
 <body>
 
-<div class="container mt-5 px-4"> 
-    <div class="row justify-content-center"> 
-        <div class="col-md-4"> 
+<div class="container mt-5 px-4">
+    <div class="row justify-content-center">
+        <div class="col-md-4">
             <div class="card h-100">
                 <div class="card-body d-flex flex-column justify-content-center align-items-center">
                     <div class="card-icon" data-bs-toggle="modal" data-bs-target="#formModal">
@@ -126,16 +135,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <input type="number" name="stock" class="form-control" id="stock">
                     </div>
                     <div class="mb-3">
+                        <label for="expiration_date" class="form-label">Expiration Date (Month and Year)</label>
+                        <input type="month" name="expiration_date" class="form-control"
+                        value="<?= isset($product['expiration_date']) ? date('Y-m', strtotime($product['expiration_date'])) : ''; ?>">
+                    </div>
+
+                    <div class="mb-3">
                         <label for="other_images" class="form-label">Other Images</label>
                         <input type="file" name="other_images[]" multiple class="form-control" id="other_images">
                     </div>
                     <button type="submit" class="btn btn-primary">Create</button>
                 </form>
+
             </div>
-            
+
         </div>
     </div>
-    
+
 </div>
 
 

@@ -14,7 +14,7 @@ require_once '../endpoint/session_config.php';
     <div class="container">
         <div class="flex-container">
             <!-- Image Section -->
-            <?php include("cartZ.php"); ?>
+            <?php include("cartItems.php"); ?>
             <!-- Form Section -->
             <div class="main">
 <script>

@@ -113,32 +113,36 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
             <div class="modal-body">
                 <!-- Form goes here -->
-                <form action="" method="post" enctype="multipart/form-data">
+                <form action="create_product.php" method="post" enctype="multipart/form-data">
                     <div class="mb-3">
                         <label for="name" class="form-label">Name</label>
-                        <input type="text" name="name" class="form-control" id="name">
+                        <input type="text" name="name" class="form-control" id="name" required>
                     </div>
                     <div class="mb-3">
                         <label for="price" class="form-label">Price</label>
-                        <input type="number" name="price" step="0.01" class="form-control" id="price">
+                        <input type="number" name="price" step="0.01" class="form-control" id="price" required>
                     </div>
                     <div class="mb-3">
                         <label for="image" class="form-label">Main Image</label>
-                        <input type="file" name="image" class="form-control" id="image">
+                        <input type="file" name="image" class="form-control" id="image" required>
                     </div>
                     <div class="mb-3">
                         <label for="description" class="form-label">Description</label>
                         <textarea name="description" class="form-control" id="description"></textarea>
                     </div>
-                    <div class="mb-3">
-                        <label for="stock" class="form-label">Stock</label>
-                        <input type="number" name="stock" class="form-control" id="stock">
+
+                    <!-- Stock and Expiration Date Batches -->
+                    <div id="batchSection">
+                        <div class="mb-3 batch">
+                            <label for="stock_batch[]" class="form-label">Stock Batch</label>
+                            <input type="number" name="stock_batch[]" class="form-control" placeholder="Stock Amount" required>
+                            <label for="expiration_date_batch[]" class="form-label">Expiration Date (Month and Year)</label>
+                            <input type="month" name="expiration_date_batch[]" class="form-control" required>
+                            <input type="text" name="code_name_batch[]" class="form-control" placeholder="Batch Code (e.g. CGB001)" required>
+                            <hr>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="expiration_date" class="form-label">Expiration Date (Month and Year)</label>
-                        <input type="month" name="expiration_date" class="form-control"
-                        value="<?= isset($product['expiration_date']) ? date('Y-m', strtotime($product['expiration_date'])) : ''; ?>">
-                    </div>
+                    <button type="button" id="addBatch" class="btn btn-secondary">Add Another Batch</button>
 
                     <div class="mb-3">
                         <label for="other_images" class="form-label">Other Images</label>
@@ -146,13 +150,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     </div>
                     <button type="submit" class="btn btn-primary">Create</button>
                 </form>
-
             </div>
-
         </div>
     </div>
-
 </div>
+
+
+<script>
+    // Add another stock batch section
+    document.getElementById('addBatch').addEventListener('click', function() {
+        const batchSection = document.getElementById('batchSection');
+        const newBatch = document.createElement('div');
+        newBatch.classList.add('mb-3', 'batch');
+        newBatch.innerHTML = `
+            <label for="stock_batch[]" class="form-label">Stock Batch</label>
+            <input type="number" name="stock_batch[]" class="form-control" placeholder="Stock Amount" required>
+            <label for="expiration_date_batch[]" class="form-label">Expiration Date (Month and Year)</label>
+            <input type="month" name="expiration_date_batch[]" class="form-control" required>
+            <input type="text" name="code_name_batch[]" class="form-control" placeholder="Batch Code (e.g. CGB001)" required>
+            <hr>
+        `;
+        batchSection.appendChild(newBatch);
+    });
+</script>
+
 
 
 

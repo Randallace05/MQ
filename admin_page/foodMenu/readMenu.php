@@ -180,10 +180,6 @@ foreach ($product_details as $detail) {
                                     <textarea name="description" class="form-control"><?= $product['description']; ?></textarea>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="stock" class="form-label">Stock</label>
-                                    <input type="number" name="stock" class="form-control" value="<?= $product['stock']; ?>">
-                                </div>
-                                <div class="mb-3">
                                     <label for="image" class="form-label">Image</label>
                                     <input type="file" name="image" class="form-control">
                                     <small>Current Image: <img src="uploads/<?= $product['image']; ?>" class="product-img"></small>
@@ -213,22 +209,21 @@ foreach ($product_details as $detail) {
         <table class="table table-bordered">
             <thead>
                 <tr>
-                    <th>Product ID</th>
                     <th>Product Name</th>
                     <th>Price</th>
-                    <th>Stock</th>
-                    <th>Expiration Date</th>
                     <th>Image</th>
                 </tr>
             </thead>
             <tbody>
                 <?php foreach ($products as $product): ?>
                     <tr>
-                        <td><?= $product['id']; ?></td>
-                        <td><?= htmlspecialchars($product['name']); ?></td>
+                    <td>
+                        <a href="#" class="text-decoration-none" data-bs-toggle="modal"
+                        data-bs-target="#addStockModal" data-product-id="<?= $product['id']; ?>">
+                        <?= htmlspecialchars($product['name']); ?>
+                        </a>
+                    </td>
                         <td>&#8369; <?= number_format($product['price'], 2); ?></td>
-                        <td><?= $product['stock']; ?></td>
-                        <td><?= isset($product['expiration_date']) ? date('F Y', strtotime($product['expiration_date'])) : 'N/A'; ?></td>
                         <td>
                             <img src="uploads/<?= htmlspecialchars($product['image']); ?>" class="product-img" alt="Product Image">
                         </td>
@@ -238,6 +233,38 @@ foreach ($product_details as $detail) {
         </table>
     </div>
 </div>
+<!-- Add Stock Modal -->
+<div class="modal fade" id="addStockModal" tabindex="-1" aria-labelledby="addStockModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addStockModalLabel">Add Stock for Product</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Form for adding stock -->
+                <form action="add_stock.php" method="post">
+                    <div class="mb-3">
+                        <label for="stock" class="form-label">Stock Quantity</label>
+                        <input type="number" name="stock" class="form-control" id="stock" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="expiration_date" class="form-label">Expiration Date (Month and Year)</label>
+                        <input type="month" name="expiration_date" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="code_name" class="form-label">Batch Code</label>
+                        <input type="text" name="code_name" class="form-control" id="code_name" placeholder="Batch Code (e.g. CGB001)" required>
+                    </div>
+                    <input type="hidden" name="product_id" id="product_id" value="">
+                    <button type="submit" class="btn btn-primary">Add Stock</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <div class="container mt-5">
     <h2 class="text-center">Order History</h2>
 
@@ -296,6 +323,23 @@ foreach ($product_details as $detail) {
     // Event listeners for sorting buttons
     sortHighButton.addEventListener('click', () => sortTable('high'));
     sortLowButton.addEventListener('click', () => sortTable('low'));
+</script>
+<script>
+    // Get the add stock modal
+    var addStockModal = document.getElementById('addStockModal');
+
+    // Add event listener to the modal to set the product ID dynamically
+    addStockModal.addEventListener('show.bs.modal', function (event) {
+        // Get the button that triggered the modal
+        var button = event.relatedTarget;
+
+        // Extract product ID from the data attribute
+        var productId = button.getAttribute('data-product-id');
+
+        // Set the product ID in the hidden input field of the modal
+        var productIdInput = document.getElementById('product_id');
+        productIdInput.value = productId;
+    });
 </script>
 
 </body>

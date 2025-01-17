@@ -44,8 +44,6 @@
                                 </ul>
                             </div>
                         </div>
-
-
                         <!-- Content Row -->
                         <div class="row">
                             <!-- Cards -->
@@ -58,15 +56,11 @@
                         </div>
                     </div>
                     <!-- /.container-fluid -->
-
                 <!-- Footer -->
                 <?php include ('../includesAdmin/footer.php');?>
                 <!-- End of Footer -->
-
             </div>
             <!-- End of Main Content -->
-
- 
         </div>
         <!-- End of Content Wrapper -->
     </div>

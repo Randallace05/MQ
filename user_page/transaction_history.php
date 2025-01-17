@@ -269,7 +269,6 @@ $result_history = $stmt_history->get_result();
                         echo "<td><span class='status " . $statusClass . "'>" . htmlspecialchars($row['status']) . "</span></td>";
 
                         // Completed Button
-                        // Completed Button
                         echo "<td class='actions'>";
                         echo "<form method='POST' action='reorder.php'>";
                         echo "<input type='hidden' name='order_id' value='" . htmlspecialchars($row['id']) . "'>";
@@ -280,23 +279,23 @@ $result_history = $stmt_history->get_result();
 
                         // Receipt Link
                         echo "<td>";
-                        echo "<a href='receipt.php?order_id=" . htmlspecialchars($row['id']) . "' 
+                        echo "<a href='receipt.php?order_id=" . htmlspecialchars($row['id']) . "'
                                 style='
-                                    display: inline-block; 
-                                    padding: 8px 12px; 
-                                    background-color: #007BFF; 
-                                    color: white; 
-                                    text-decoration: none; 
+                                    display: inline-block;
+                                    padding: 8px 12px;
+                                    background-color: #007BFF;
+                                    color: white;
+                                    text-decoration: none;
                                     border-radius: 5px;
                                     font-size: 14px;
                                     text-align: center;
-                                ' 
-                                onmouseover='this.style.backgroundColor=\"#0056b3\"' 
+                                '
+                                onmouseover='this.style.backgroundColor=\"#0056b3\"'
                                 onmouseout='this.style.backgroundColor=\"#007BFF\"'>
                                 View Receipt
                             </a>";
                         "</td>";
-                        
+
                     }
                 } else {
                     echo "<tr><td colspan='8'>No records found</td></tr>";

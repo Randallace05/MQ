@@ -3,82 +3,96 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Include database connection
 include '../conn/conn.php';
 
 // Check if the user is logged in
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
-    echo "
-    <script>
-        alert('You must log in to reorder.');
+    echo "<script>
+        alert('You need to log in to reorder items.');
         window.location.href = '../index.php';
     </script>";
     exit;
 }
 
-// Get the logged-in user's ID
-$tbl_user_id = intval($_SESSION['tbl_user_id']);
+// Check if order_id is passed via POST request
+if (isset($_POST['order_id'])) {
+    $orderId = $_POST['order_id']; // Get the order_id from the form
 
-// Check if order ID is provided
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['order_id'])) {
-    $order_id = intval($_POST['order_id']);
+    try {
+        // Fetch cart_items from the transaction_history using the order ID
+        $stmt = $conn->prepare("SELECT cart_items FROM transaction_history WHERE id = ?");
+        $stmt->bind_param("i", $orderId); // Bind the integer order_id to the placeholder
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $transaction = $result->fetch_assoc();
 
-    // Fetch cart items from the transaction history
-    $query = "SELECT cart_items FROM transaction_history WHERE id = ? AND tbl_user_id = ?";
-    $stmt = $conn->prepare($query);
-    $stmt->bind_param('ii', $order_id, $tbl_user_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
+        if (!$transaction) {
+            die("Transaction not found.");
+        }
 
-    if ($result->num_rows > 0) {
-        $row = $result->fetch_assoc();
-        $cart_items = json_decode($row['cart_items'], true); // Decode JSON cart items
+        // Debug: Output the raw cart_items value
+        $cartItemsString = $transaction['cart_items'];
+        echo "Raw cart_items: " . $cartItemsString; // Check what we're getting from DB
 
-        if (is_array($cart_items)) {
-            // Add each item to the current cart
-            foreach ($cart_items as $item) {
-                $product_id = intval($item['product_id']);
-                $quantity = intval($item['quantity']);
+        // Split the cart_items string by comma or any delimiter you're using to separate the products
+        $cartItemsArray = explode(",", $cartItemsString); // Split string into array by comma (or other delimiter)
 
-                // Check if the product already exists in the cart
-                $check_cart_query = "SELECT quantity FROM cart WHERE tbl_user_id = ? AND product_id = ?";
-                $stmt_check_cart = $conn->prepare($check_cart_query);
-                $stmt_check_cart->bind_param('ii', $tbl_user_id, $product_id);
-                $stmt_check_cart->execute();
-                $cart_result = $stmt_check_cart->get_result();
+        if (empty($cartItemsArray)) {
+            die("No items in the transaction to reorder.");
+        }
 
-                if ($cart_result->num_rows > 0) {
-                    // Update quantity if the product already exists in the cart
-                    $update_cart_query = "UPDATE cart SET quantity = quantity + ? WHERE tbl_user_id = ? AND product_id = ?";
-                    $stmt_update_cart = $conn->prepare($update_cart_query);
-                    $stmt_update_cart->bind_param('iii', $quantity, $tbl_user_id, $product_id);
-                    $stmt_update_cart->execute();
-                    $stmt_update_cart->close();
-                } else {
-                    // Insert a new row if the product does not exist in the cart
-                    $insert_cart_query = "INSERT INTO cart (tbl_user_id, product_id, quantity) VALUES (?, ?, ?)";
-                    $stmt_insert_cart = $conn->prepare($insert_cart_query);
-                    $stmt_insert_cart->bind_param('iii', $tbl_user_id, $product_id, $quantity);
-                    $stmt_insert_cart->execute();
-                    $stmt_insert_cart->close();
-                }
+        // Get the logged-in user's ID (assuming it's stored in session)
+        $tbl_user_id = $_SESSION['tbl_user_id']; // Replace this with your actual session variable for user ID
 
-                $stmt_check_cart->close();
+        // Loop through the cart items and insert them into the cart table
+        foreach ($cartItemsArray as $cartItem) {
+            $cartItem = trim($cartItem); // Trim any extra spaces
+
+            // Remove quantity info if it's part of the cart item string (e.g., "Chili Garlic Bagoong (1x)")
+            // This pattern removes the quantity part, leaving just the product name
+            $cartItemName = preg_replace('/\s*\(\d+x\)\s*/', '', $cartItem);
+
+            // Fetch product details from the products table using the cleaned-up product name
+            $productStmt = $conn->prepare("SELECT id, name, price, image FROM products WHERE name = ?");
+            $productStmt->bind_param("s", $cartItemName); // Bind the cleaned-up product name
+            $productStmt->execute();
+            $productResult = $productStmt->get_result();
+            $product = $productResult->fetch_assoc();
+
+            if (!$product) {
+                echo "Product '$cartItemName' not found in the products table. Skipping.<br>";
+                continue; // Skip this item if it's not found in the database
             }
 
-            echo "<script>alert('Products have been added to your cart successfully.'); window.location.href = 'cart.php';</script>";
-        } else {
-            echo "<script>alert('No valid items found to reorder.'); window.location.href = 'orders.php';</script>";
+            // Assuming the quantity is always 1 (you can adjust this based on your format in cart_items)
+            $productId = $product['id'];
+            $quantity = 1;
+            $price = $product['price'];
+            $image = $product['image'];
+            $totalPrice = $price * $quantity;
+
+            // Insert the product into the cart table (no need to include cart_id)
+            $cartStmt = $conn->prepare(
+                "INSERT INTO cart (product_id, name, price, image, quantity, total_price, tbl_user_id)
+                VALUES (?, ?, ?, ?, ?, ?, ?)"
+            );
+            $cartStmt->bind_param("isssidi", $productId, $cartItemName, $price, $image, $quantity, $totalPrice, $tbl_user_id);
+            $cartStmt->execute();
+
+            // Check if the insert was successful
+            if ($cartStmt->affected_rows > 0) {
+                echo "Inserted product: $cartItemName successfully.<br>";
+            } else {
+                echo "Failed to insert product: $cartItemName.<br>";
+            }
         }
-    } else {
-        echo "<script>alert('Order not found.'); window.location.href = 'orders.php';</script>";
+
+        // Redirect to the cart.php page after successful insertion
+        header("Location: cart.php");
+        exit; // Ensure the script stops after header redirect to stop further script execution
+
+    } catch (mysqli_sql_exception $e) {
+        echo "Error: " . $e->getMessage();
     }
-
-    $stmt->close();
-} else {
-    echo "<script>alert('Invalid request.'); window.location.href = 'orders.php';</script>";
 }
-
-// Close the database connection
-$conn->close();
 ?>

@@ -94,14 +94,15 @@ $result_history = $stmt_history->get_result();
         body {
             font-family: Arial, sans-serif;
             margin: 0;
-            padding: 0;
+            padding: 0;x
             background-color: #f9f9f9;
         }
 
         .container {
             max-width: 1200px;
-            margin: 20px auto;
-            padding: 20px;
+            margin: 10px auto;
+            padding: 10px;
+            padding-top: 5px;
             background-color: #fff;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
@@ -116,7 +117,7 @@ $result_history = $stmt_history->get_result();
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            margin-top: auto;
         }
 
         th, td {
@@ -182,13 +183,17 @@ $result_history = $stmt_history->get_result();
         .actions button:hover {
             background-color: #c82333;
         }
+        caption {
+            font-size: 1.5em;
+            text-align: center;
+        }
+
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Orders and Checkout</h1>
-
         <table>
+        <caption style="caption-side: top; font-size: 1.3em; font-weight: bold; margin-bottom: 10px; text-align: left;">Order Management</caption>
             <thead>
                 <tr>
                     <th>Order ID</th>
@@ -232,11 +237,12 @@ $result_history = $stmt_history->get_result();
             </tbody>
         </table>
     </div>
+</body>
 
-    <div class="container">
-    <h1>Transaction History</h1>
 
+<div class="container">
         <table>
+        <caption style="caption-side: top; font-size: 1.5em; font-weight: bold; margin-bottom: 10px; text-align: left;">Order Status</caption>
             <thead>
                 <tr>
                     <th>ID</th>
@@ -245,12 +251,13 @@ $result_history = $stmt_history->get_result();
                     <th>Cart Items</th>
                     <th>Amount</th>
                     <th>Status</th>
+                    <th>Completed</th>
+                    <th>Receipt</th>
                 </tr>
             </thead>
             <tbody>
                 <?php
                 if ($result_history->num_rows > 0) {
-                    // Output data for each row
                     while ($row = $result_history->fetch_assoc()) {
                         $statusClass = strtolower($row['status']); // Convert status to lowercase for class
                         echo "<tr>";
@@ -260,10 +267,39 @@ $result_history = $stmt_history->get_result();
                         echo "<td>" . htmlspecialchars($row['cart_items']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['total_amount']) . "</td>";
                         echo "<td><span class='status " . $statusClass . "'>" . htmlspecialchars($row['status']) . "</span></td>";
-                        echo "</tr>";
+
+                        // Completed Button
+                        // Completed Button
+                        echo "<td class='actions'>";
+                        echo "<form method='POST' action='reorder.php'>";
+                        echo "<input type='hidden' name='order_id' value='" . htmlspecialchars($row['id']) . "'>";
+                        echo "<button type='submit' style='padding: 8px 12px; border: none; border-radius: 5px; background-color: #28a745; color: white; cursor: pointer;'>Re-order</button>";
+                        echo "</form>";
+                        echo "</td>";
+
+
+                        // Receipt Link
+                        echo "<td>";
+                        echo "<a href='receipt.php?order_id=" . htmlspecialchars($row['id']) . "' 
+                                style='
+                                    display: inline-block; 
+                                    padding: 8px 12px; 
+                                    background-color: #007BFF; 
+                                    color: white; 
+                                    text-decoration: none; 
+                                    border-radius: 5px;
+                                    font-size: 14px;
+                                    text-align: center;
+                                ' 
+                                onmouseover='this.style.backgroundColor=\"#0056b3\"' 
+                                onmouseout='this.style.backgroundColor=\"#007BFF\"'>
+                                View Receipt
+                            </a>";
+                        "</td>";
+                        
                     }
                 } else {
-                    echo "<tr><td colspan='6'>No records found</td></tr>";
+                    echo "<tr><td colspan='8'>No records found</td></tr>";
                 }
                 ?>
             </tbody>

@@ -13,11 +13,12 @@ try {
 
     // Query to fetch sales data grouped by month from the `transaction_history` table
     $query = "
-        SELECT DATE_FORMAT(order_date, '%Y-%m') AS order_date,
+        SELECT DATE(order_date) AS order_date,
                SUM(total_amount) AS total
         FROM transaction_history
-        WHERE YEAR(order_date) = 2025
-        GROUP BY DATE_FORMAT(order_date, '%Y-%m')
+        WHERE YEAR(order_date) = YEAR(CURDATE())
+        GROUP BY DATE(order_date)
+        ORDER BY order_date
     ";
     $stmt = $pdo->prepare($query);
     $stmt->execute();
@@ -31,3 +32,4 @@ try {
     echo json_encode(['error' => $e->getMessage()]);
 }
 ?>
+

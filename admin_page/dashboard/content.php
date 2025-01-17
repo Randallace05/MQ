@@ -80,12 +80,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function updateChart(period) {
         const ctx = document.getElementById("myAreaChart").getContext("2d");
-        
+
         let labels, values;
-        switch(period) {
+        switch (period) {
             case 'yearly':
                 labels = [...new Set(salesData.map(item => item.order_date.substring(0, 4)))];
-                values = labels.map(year => 
+                values = labels.map(year =>
                     salesData.filter(item => item.order_date.startsWith(year))
                         .reduce((sum, item) => sum + parseFloat(item.total), 0)
                 );
@@ -95,7 +95,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 values = salesData.map(item => parseFloat(item.total));
                 break;
             case 'daily':
-                // Assuming you have daily data available
                 labels = salesData.map(item => item.order_date);
                 values = salesData.map(item => parseFloat(item.total));
                 break;
@@ -146,41 +145,126 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Generate Excel report
     function generateExcelReport(period) {
-        let data = [];
-        switch(period) {
-            case 'yearly':
-                data = [...new Set(salesData.map(item => item.order_date.substring(0, 4)))].map(year => ({
-                    Year: year,
-                    Total: salesData.filter(item => item.order_date.startsWith(year))
-                        .reduce((sum, item) => sum + parseFloat(item.total), 0)
-                }));
-                break;
-            case 'monthly':
-                data = salesData.map(item => ({
-                    Month: item.order_date,
-                    Total: parseFloat(item.total)
-                }));
-                break;
-            case 'daily':
-                // Assuming you have daily data
-                data = salesData.map(item => ({
-                    Date: item.order_date,
-                    Total: parseFloat(item.total)
-                }));
-                break;
-        }
+    let data = [];
+    let totalRevenue = 0;
 
-        const worksheet = XLSX.utils.json_to_sheet(data);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Sales Report");
-        XLSX.writeFile(workbook, `Sales_Report_${period}.xlsx`);
+    switch (period) {
+        case 'yearly':
+            salesData.forEach(item => {
+                const yearlyTotal = parseFloat(item.total);
+                totalRevenue += yearlyTotal;
+
+                item.cart_items.split(',').forEach(cartItem => {
+                    item.payment_methods.split(',').forEach(paymentMethod => {
+                        data.push({
+                            Year: item.order_date.substring(0, 4),
+                            Total: yearlyTotal,
+                            Cart_Item: cartItem.trim(),
+                            Payment_Method: paymentMethod.trim()
+                        });
+                    });
+                });
+            });
+            break;
+
+        case 'monthly':
+            salesData.forEach(item => {
+                const monthlyTotal = parseFloat(item.total);
+                totalRevenue += monthlyTotal;
+
+                item.cart_items.split(',').forEach(cartItem => {
+                    item.payment_methods.split(',').forEach(paymentMethod => {
+                        data.push({
+                            Month: item.order_date,
+                            Total: monthlyTotal,
+                            Cart_Item: cartItem.trim(),
+                            Payment_Method: paymentMethod.trim()
+                        });
+                    });
+                });
+            });
+            break;
+
+        case 'daily':
+            salesData.forEach(item => {
+                const dailyTotal = parseFloat(item.total);
+                totalRevenue += dailyTotal;
+
+                item.cart_items.split(',').forEach(cartItem => {
+                    item.payment_methods.split(',').forEach(paymentMethod => {
+                        data.push({
+                            Date: item.order_date,
+                            Total: dailyTotal,
+                            Cart_Item: cartItem.trim(),
+                            Payment_Method: paymentMethod.trim()
+                        });
+                    });
+                });
+            });
+            break;
     }
+
+    // Add a summary row for total revenue
+    data.push({
+        [`${period.charAt(0).toUpperCase() + period.slice(1)} Summary`]: "Total Revenue",
+        Total: totalRevenue,
+        Cart_Item: "",
+        Payment_Method: ""
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+
+    // Auto-adjust column widths
+    const colWidths = Object.keys(data[0]).map(key => ({
+        wch: Math.max(
+            key.length, // Header length
+            ...data.map(row => (row[key] ? row[key].toString().length : 0)) // Data length
+        )
+    }));
+    worksheet["!cols"] = colWidths;
+
+    // Apply text wrapping to all cells and alternate row colors
+    Object.keys(worksheet).forEach((cellAddress, index) => {
+        if (cellAddress[0] !== "!") { // Skip metadata
+            const rowIndex = XLSX.utils.decode_cell(cellAddress).r; // Get row index
+            // Apply alternating row colors
+            if (rowIndex % 2 === 0) {
+                worksheet[cellAddress].s = {
+                    alignment: { wrapText: true, vertical: "top" },
+                    fill: { fgColor: { rgb: "efa190" } } 
+                };
+            } else {
+                worksheet[cellAddress].s = {
+                    alignment: { wrapText: true, vertical: "top" },
+                    fill: { fgColor: { rgb: "FFFFFF" } } 
+                };
+            }
+        }
+    });
+
+    // Highlight total row
+    const totalRowIndex = data.length - 1;
+    Object.keys(data[0]).forEach((_, index) => {
+        const cellAddress = XLSX.utils.encode_cell({ r: totalRowIndex, c: index });
+        worksheet[cellAddress].s = {
+            font: { bold: true },
+            fill: { fgColor: { rgb: "FFA07A" } },
+            alignment: { wrapText: true, vertical: "top" }
+        };
+    });
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Sales Report");
+    XLSX.writeFile(workbook, `Sales_Report_${period}.xlsx`);
+}
 
     // Event listeners for report generation
     document.getElementById('generateYearlyReport').addEventListener('click', () => generateExcelReport('yearly'));
     document.getElementById('generateMonthlyReport').addEventListener('click', () => generateExcelReport('monthly'));
     document.getElementById('generateDailyReport').addEventListener('click', () => generateExcelReport('daily'));
 });
+
+
 
 document.addEventListener("DOMContentLoaded", function () {
     fetch("fetch_sales_data1.php")

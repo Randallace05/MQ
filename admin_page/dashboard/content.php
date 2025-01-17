@@ -231,12 +231,12 @@ document.addEventListener("DOMContentLoaded", function () {
             if (rowIndex % 2 === 0) {
                 worksheet[cellAddress].s = {
                     alignment: { wrapText: true, vertical: "top" },
-                    fill: { fgColor: { rgb: "efa190" } } 
+                    fill: { fgColor: { rgb: "F0F0F0" } } // Light gray for even rows
                 };
             } else {
                 worksheet[cellAddress].s = {
                     alignment: { wrapText: true, vertical: "top" },
-                    fill: { fgColor: { rgb: "FFFFFF" } } 
+                    fill: { fgColor: { rgb: "FFFFFF" } } // White for odd rows
                 };
             }
         }
@@ -347,5 +347,8 @@ document.addEventListener("DOMContentLoaded", function () {
             console.error("Error fetching product data:", error);
         });
 });
+
+
 </script>
+
 

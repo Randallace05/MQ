@@ -358,6 +358,10 @@ footer a:hover {
                                     <textarea name="description" class="form-control"><?= $product['description']; ?></textarea>
                                 </div>
                                 <div class="mb-3">
+                                    <label for="description" class="form-label">Description</label>
+                                    <textarea name="description" class="form-control"><?= $product['expiration_date']; ?></textarea>
+                                </div>
+                                <div class="mb-3">
                                     <label for="image" class="form-label">Image</label>
                                     <input type="file" name="image" class="form-control">
                                     <small>Current Image: <img src="uploads/<?= $product['image']; ?>" class="product-img"></small>

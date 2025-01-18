@@ -70,62 +70,218 @@ foreach ($product_details as $detail) {
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        .card {
-            border-radius: 15px;
-            box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
-            background-color: #F5E6E9 !important;
-        }
+    /* Base Styles */
+    <style>
+/* General Body Styling */
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f4f5f7;
+    color: #2e2e2e;
+    margin: 0;
+    padding: 0;
+}
 
-        .product-img {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin: 0 auto;
-        }
+/* Headers and Titles */
+h2 {
+    color: #34495e;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 20px;
+}
 
-        .card-body {
-            padding: 1.5rem;
-            text-align: center;
-        }
+/* Product Cards */
+.card {
+    border-radius: 12px;
+    box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(135deg, #ffffff, #f9f9f9);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
 
-        .card-icon {
-            font-size: 3rem;
-            cursor: pointer;
-            text-align: center;
-            margin-bottom: 1rem;
-        }
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.15);
+}
 
-        .fa-color {
-            color: #EA7C69;
-        }
+.product-img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 15px auto;
+    display: block;
+}
 
-        .card-title {
-            font-family: "Barlow";
-            color: #EA7C69 !important;
-            margin-bottom: 1rem;
-        }
-        .table-container {
-            margin-top: 30px;
-        }
+.card-body {
+    text-align: center;
+    padding: 20px;
+}
 
-        .table th, .table td {
-            text-align: center;
-            vertical-align: middle;
-        }
+.card-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #34495e;
+}
 
-        .table thead {
-            background-color: #f8d7da; /* Light pink header */
-            color: #721c24; /* Darker pink text */
-        }
+.card-price {
+    font-size: 1.1rem;
+    color: #7f8c8d;
+    margin-bottom: 15px;
+}
 
-        .product-img {
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
-            border-radius: 50%;
-        }
+.btn-container {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #2575fc, #6a11cb);
+    box-shadow: 0px 4px 10px rgba(106, 17, 203, 0.4);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.btn-danger:hover {
+    background: linear-gradient(135deg, #c0392b, #e74c3c);
+    box-shadow: 0px 4px 10px rgba(231, 76, 60, 0.4);
+}
+
+/* Responsive Tables */
+.table-container {
+    margin-top: 30px;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 auto;
+    background-color: white;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.table thead th {
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    color: white;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    padding: 15px;
+}
+
+.table tbody tr {
+    transition: background-color 0.3s ease;
+}
+
+.table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.table tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+.table tbody td {
+    padding: 15px;
+    text-align: center;
+}
+
+/* Small product image in the table */
+.product-img-small {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+/* Sort Buttons */
+.sort-buttons {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.sort-buttons button {
+    margin: 0 5px;
+    padding: 8px 15px;
+    border-radius: 8px;
+    font-weight: 600;
+    border: none;
+    color: #ffffff;
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    transition: all 0.3s ease;
+}
+
+.sort-buttons button:hover {
+    background: linear-gradient(135deg, #2575fc, #6a11cb);
+    box-shadow: 0px 4px 10px rgba(106, 17, 203, 0.4);
+}
+
+/* Modal Styles */
+.modal-content {
+    border-radius: 12px;
+    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    color: white;
+    border-bottom: none;
+}
+
+.modal-title {
+    font-weight: 600;
+}
+
+.btn-close {
+    color: white;
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: 20px;
+    margin-top: 50px;
+    background-color: #2c3e50;
+    color: #ecf0f1;
+    font-size: 0.9rem;
+}
+
+footer a {
+    color: #6a11cb;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
 </style>
+
+
+</style>
+
 </head>
 <body>
 
@@ -270,8 +426,8 @@ foreach ($product_details as $detail) {
 
     <!-- Sorting Buttons -->
     <div class="sort-buttons">
-        <button id="sortHigh" class="btn btn-primary">Sort: High to Low</button>
-        <button id="sortLow" class="btn btn-secondary">Sort: Low to High</button>
+        <button id="sortHigh" class="btn btn-primary">↑</button>
+        <button id="sortLow" class="btn btn-secondary">↓</button>
     </div>
 
    <!-- Order History Table -->

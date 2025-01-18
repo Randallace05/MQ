@@ -60,32 +60,60 @@ $reviews = fetchReviews($conn);
     <link href="../dashboard/css/sb-admin-2.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 20px;
+  body {
+        font-family: 'Arial', sans-serif;
+        background-color: #eef2f5;
+        margin: 0;
+        padding: 0;
     }
 
-    table, th, td {
-        border: 1px solid #ddd;
-    }
+        .container {
+            width: 85%;
+            margin: 50px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
 
-    th, td {
-        padding: 10px;
-        text-align: left;
-    }
+        h1 {
+            font-size: 24px;
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
 
-    th {
-        background-color: #f4f4f4;
-    }
+        /* Table Styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+        }
 
-    tr:nth-child(even) {
-        background-color: #f9f9f9;
-    }
+        th, td {
+            text-align: center;
+            padding: 12px 15px;
+            border-bottom: 1px solid #ddd;
+            font-size: 14px;
+        }
 
-    tr:hover {
-        background-color: #f1f1f1;
-    }
+        th {
+            background-color: #007bff;
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #eaf1f8;
+            transition: background-color 0.3s;
+        }
 </style>
 
 </head>
@@ -112,10 +140,6 @@ $reviews = fetchReviews($conn);
                 <!-- Begin Page Content -->
                 <div class="container-fluid">
 
-                    <!-- Page Heading -->
-                    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                        <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
-                    </div>
 
                     <!-- Content Row -->
                     <div class="row">
@@ -161,13 +185,6 @@ $reviews = fetchReviews($conn);
             <!-- End of Main Content -->
 
             <!-- Footer -->
-            <footer class="sticky-footer bg-white">
-                <div class="container my-auto">
-                    <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; Your Website 2024</span>
-                    </div>
-                </div>
-            </footer>
             <!-- End of Footer -->
 
         </div>

@@ -119,9 +119,9 @@ $conn->close();
 
         /* Dropdown Styling */
         .form-select {
-            width: 100%;
+            width: 110%;
             padding: 8px 10px;
-            font-size: 14px;
+            font-size: 12px;
             border: 1px solid #ccc;
             border-radius: 5px;
             background-color: #f9f9f9;
@@ -179,6 +179,12 @@ $conn->close();
             font-weight: 600;
             padding: 20px;
         }
+        .container .pagination {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
         
         
     </style>

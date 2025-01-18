@@ -418,7 +418,7 @@ footer a:hover {
         <!-- Order History Section -->
         <div class="col-md-6">
             <div class="table-container">
-                <h2 class="text-center mb-4" style="color: #34495e;">Order History</h2>
+                <h2 class="text-center mb-4" style="color: #EA7C69;">Order History</h2>
 
                      <!-- Order History Table -->
                 <div class="table-responsive">

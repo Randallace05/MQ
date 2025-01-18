@@ -197,6 +197,7 @@ $conn->close(); // Close the database connection
             background-color: #0056b3;
             font-weight: bold;
         }
+        
     </style>
 </head>
 

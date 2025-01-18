@@ -94,7 +94,7 @@ $result_history = $stmt_history->get_result();
         body {
             font-family: Arial, sans-serif;
             margin: 0;
-            padding: 0;x
+            padding: 0;
             background-color: #f9f9f9;
         }
 
@@ -276,7 +276,7 @@ $result_history = $stmt_history->get_result();
                         echo "</form>";
                         echo "</td>";
 
---
+
                         // Receipt Link
                         echo "<td>";
                         echo "<a href='receipt.php?order_id=" . htmlspecialchars($row['id']) . "'

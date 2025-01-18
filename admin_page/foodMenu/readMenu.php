@@ -71,7 +71,7 @@ foreach ($product_details as $detail) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
     /* Base Styles */
-    <style>
+    
 /* General Body Styling */
 body {
     font-family: 'Inter', sans-serif;

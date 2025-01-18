@@ -64,67 +64,95 @@ $conn->close(); // Close the database connection
     <style>
         /* Custom styles */
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            font-family: 'Arial', sans-serif;
+            background-color: #eef2f5;
             margin: 0;
             padding: 0;
         }
 
-        .container {
-            width: 80%;
-            margin: 50px auto;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
+    .container {
+        width: 85%;
+        margin: 50px auto;
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
+    h1 {
+        font-size: 24px;
+        color: #333;
+        text-align: center;
+        margin-bottom: 20px;
+    }
 
-        table, th, td {
-            border: 1px solid #ddd;
-        }
+    /* Table Styling */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        background-color: #fff;
+        border-radius: 8px;
+        overflow: hidden;
+    }
 
-        th, td {
-            padding: 10px;
-            text-align: left;
-        }
+    th, td {
+        text-align: center;
+        padding: 12px 15px;
+        border-bottom: 1px solid #ddd;
+        font-size: 14px;
+    }
 
-        th {
-            background-color: #f4f4f4;
-        }
+    th {
+        background-color: #007bff;
+        color: white;
+        font-weight: 600;
+    }
 
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
+    tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
 
         tr:hover {
-            background-color: #f1f1f1;
+            background-color: #e9ecef;
         }
 
+        td {
+            border: none;
+        }
+
+        .no-orders {
+            text-align: center;
+            font-weight: bold;
+            color: #6c757d;
+            padding: 20px;
+        }
+
+        /* Button styles */
         .btn {
             text-decoration: none;
-            padding: 5px 10px;
+            padding: 8px 12px;
             border-radius: 4px;
-            color: white;
-            font-size: 14px;
+            font-size: 10px;
+            transition: background-color 0.3s ease;
         }
 
         .btn-primary {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #218838;
+        }
+
+        .btn-view {
             background-color: #007bff;
+            color: white;
         }
 
-        .btn-danger {
-            background-color: #dc3545;
-        }
-
-        .proof-img {
-            max-width: 100px;
-            max-height: 100px;
+        .btn-view:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
@@ -151,13 +179,8 @@ $conn->close(); // Close the database connection
                 <!-- Begin Page Content -->
                 <div class="container-fluid">
 
-                    <!-- Page Heading -->
-                    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                        <h1 class="h3 mb-0 text-gray-800">Orders</h1>
-                    </div>
-
                     <div class="container">
-                        <h2>Order List</h2>
+                        <h4>Order List</h4>
                         <table>
                             <thead>
                                 <tr>

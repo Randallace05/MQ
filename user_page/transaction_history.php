@@ -276,7 +276,7 @@ $result_history = $stmt_history->get_result();
                         echo "</form>";
                         echo "</td>";
 
-
+--
                         // Receipt Link
                         echo "<td>";
                         echo "<a href='receipt.php?order_id=" . htmlspecialchars($row['id']) . "'

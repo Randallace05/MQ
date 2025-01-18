@@ -48,38 +48,49 @@ $conn->close(); // Close the database connection
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            font-family: 'Arial', sans-serif;
+            background-color: #eef2f5;
             margin: 0;
             padding: 0;
         }
 
         .container {
-            width: 80%;
+            width: 85%;
             margin: 50px auto;
             background-color: #fff;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
+        h1 {
+            font-size: 24px;
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        /* Table Styling */
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
-        }
-
-        table, th, td {
-            border: 1px solid #ddd;
+            background-color: #fff;
+            border-radius: 8px;
+            overflow: hidden;
         }
 
         th, td {
-            padding: 10px;
-            text-align: left;
+            text-align: center;
+            padding: 12px 15px;
+            border-bottom: 1px solid #ddd;
+            font-size: 14px;
         }
 
         th {
-            background-color: #f4f4f4;
+            background-color: #007bff;
+            color: white;
+            font-weight: 600;
         }
 
         tr:nth-child(even) {
@@ -87,72 +98,71 @@ $conn->close(); // Close the database connection
         }
 
         tr:hover {
-            background-color: #f1f1f1;
+            background-color: #eaf1f8;
+            transition: background-color 0.3s;
         }
-        /* Dropdown styling */
+
+        /* Dropdown Styling */
         .form-select {
             width: 100%;
-            padding: 8px 12px;
-            font-size: 16px;
-            color: #555;
-            background-color: #fff;
-            border: 1px solid #ddd;
+            padding: 8px 10px;
+            font-size: 14px;
+            border: 1px solid #ccc;
             border-radius: 5px;
+            background-color: #f9f9f9;
             appearance: none;
-            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 5"%3E%3Cpath fill="%23666" d="M2 0L0 2h4z" /%3E%3C/svg%3E');
-            background-repeat: no-repeat;
-            background-position: right 10px center;
-            background-size: 10px;
-            cursor: pointer;
             transition: border-color 0.3s, box-shadow 0.3s;
         }
 
-        /* Hover and focus effects */
         .form-select:hover {
-            border-color: #999;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
         }
 
         .form-select:focus {
-            border-color: #007bff;
+            border-color: #0056b3;
             outline: none;
-            box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
-        }
-
-        /* Table row hover effect */
-        table tbody tr:hover td {
-            background-color: #f9f9f9;
-        }
-        /* Dropdown animation */
-        .form-select {
-            transition: all 0.3s ease;
-        }
-        .custom-width {
-        width: 150px; /* Adjust the width as needed */
-        }
-        .status-dropdown {
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        color: #fff;
-        background-color: #ccc; /* Default color */
-        transition: background-color 0.3s, border-color 0.3s;
+            box-shadow: 0 0 5px rgba(0, 86, 179, 0.5);
         }
 
         /* Status-specific colors */
         .status-order-placed {
             background-color: orange;
+            color: #fff;
         }
 
         .status-order-shipped {
             background-color: blue;
+            color: #fff;
         }
 
         .status-delivered {
             background-color: green;
+            color: #fff;
         }
 
         .status-ng-cancel {
             background-color: red;
+            color: #fff;
+        }
+
+        /* Button for status */
+        .status-dropdown {
+            text-align: center;
+            font-size: 13px;
+            color: #fff;
+            font-weight: 600;
+            padding: 6px 8px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* Empty Table Message */
+        table tbody tr td[colspan] {
+            text-align: center;
+            color: #999;
+            font-weight: 600;
+            padding: 20px;
         }
 
     </style>
@@ -167,47 +177,48 @@ $conn->close(); // Close the database connection
                     <div class="d-flex align-items-center justify-content-between mb-2">
 <body>
     <div class="container">
-        <h1>Order History</h1>
+        <h4>Order History</h4>
         <table>
-            <thead>
-                <tr>
-                    <th>Order ID</th>
-                    <th>Customer</th>
-                    <th>Order Date</th>
-                    <th>Shipping Address</th>
-                    <th>Total Amount</th>
-                    <th>Payment Method</th>
-                    <th>Cart Items</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-                        <tbody>
-                            <?php
-                            if (!empty($inventory)) {
-                                foreach ($inventory as $item) {
-                                    echo "<tr>";
-                                    echo "<td>" . htmlspecialchars($item['order_id']) . "</td>";
-                                    echo "<td>" . htmlspecialchars($item['username']) . "</td>";
-                                    echo "<td>" . htmlspecialchars($item['order_date']) . "</td>";
-                                    echo "<td>" . htmlspecialchars($item['shipping_address']) . "</td>";
-                                    echo "<td>₱ " . number_format($item['total_amount'], 2) . "</td>";
-                                    echo "<td>" . htmlspecialchars($item['payment_method']) . "</td>";
-                                    echo "<td>" . htmlspecialchars($item['cart_items']) . "</td>";
-                                    echo '<td>';
-                                    echo '<select class="form-select status-dropdown" style="width: 150px;" data-order-id="' . htmlspecialchars($item['order_id']) . '" data-status="' . htmlspecialchars($item['status']) . '">';
-                                    echo '<option value="Order Placed"' . ($item['status'] == 'Order Placed' ? ' selected' : '') . '>Order Placed</option>';
-                                    echo '<option value="Order Shipped"' . ($item['status'] == 'Order Shipped' ? ' selected' : '') . '>Order Shipped</option>';
-                                    echo '<option value="Delivered"' . ($item['status'] == 'Delivered' ? ' selected' : '') . '>Delivered</option>';
-                                    echo '<option value="Ng Cancel"' . ($item['status'] == 'Ng Cancel' ? ' selected' : '') . '>Cancel</option>';
-                                    echo '</select>';
-                                    echo '</td>';
-                                    echo "</tr>";
-                                }
-                            } else {
-                                echo "<tr><td colspan='8'>No transaction history found.</td></tr>";
-                            }
-                            ?>
-                        </tbody>
+        <thead>
+    <tr>
+        <th>Order ID</th>
+        <th>Customer</th>
+        <th>Order Date</th>
+        <th>Shipping Address</th>
+        <th>Total Amount</th>
+        <th>Payment Method</th>
+        <th>Cart Items</th>
+        <th>Status</th>
+    </tr>
+</thead>
+<tbody>
+    <?php if (!empty($inventory)): ?>
+        <?php foreach ($inventory as $item): ?>
+            <tr>
+                <td><?= htmlspecialchars($item['order_id']); ?></td>
+                <td><?= htmlspecialchars($item['username']); ?></td>
+                <td><?= htmlspecialchars($item['order_date']); ?></td>
+                <td><?= htmlspecialchars($item['shipping_address']); ?></td>
+                <td>₱ <?= number_format($item['total_amount'], 2); ?></td>
+                <td><?= htmlspecialchars($item['payment_method']); ?></td>
+                <td><?= htmlspecialchars($item['cart_items']); ?></td>
+                <td>
+                    <select class="form-select status-dropdown status-<?= strtolower(str_replace(' ', '-', $item['status'])); ?>" data-order-id="<?= htmlspecialchars($item['order_id']); ?>" data-status="<?= htmlspecialchars($item['status']); ?>">
+                        <option value="Order Placed" <?= $item['status'] == 'Order Placed' ? 'selected' : ''; ?>>Placed</option>
+                        <option value="Order Shipped" <?= $item['status'] == 'Order Shipped' ? 'selected' : ''; ?>>Shipped</option>
+                        <option value="Delivered" <?= $item['status'] == 'Delivered' ? 'selected' : ''; ?>>Delivered</option>
+                        <option value="Ng Cancel" <?= $item['status'] == 'Ng Cancel' ? 'selected' : ''; ?>>Cancel</option>
+                    </select>
+                </td>
+            </tr>
+        <?php endforeach; ?>
+    <?php else: ?>
+        <tr>
+            <td colspan="8">No transaction history found.</td>
+        </tr>
+    <?php endif; ?>
+</tbody>
+
         </table>
     </div>
     <script src="vendor/jquery/jquery.min.js"></script>

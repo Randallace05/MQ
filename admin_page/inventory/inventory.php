@@ -1,19 +1,18 @@
 <?php
-// Include the database connection
 include("../../conn/conn.php");
 
-function fetchInventory($conn) {
-    // Modify the query to join the transaction_history and users tables
+function fetchInventory($conn, $limit, $offset) {
     $sql = "
         SELECT th.order_id, th.tbl_user_id, th.order_date, th.shipping_address, th.total_amount, th.payment_method, th.cart_items, th.status, u.username
         FROM transaction_history th
         LEFT JOIN tbl_user u ON th.tbl_user_id = u.tbl_user_id
         ORDER BY th.order_date DESC
+        LIMIT $limit OFFSET $offset
     ";
     $result = $conn->query($sql);
 
     if (!$result) {
-        die("Query Error: " . $conn->error); // Debugging query errors
+        die("Query Error: " . $conn->error);
     }
 
     $inventory = [];
@@ -25,10 +24,26 @@ function fetchInventory($conn) {
     return $inventory;
 }
 
-$inventory = fetchInventory($conn);
+function getTotalRecords($conn) {
+    $sql = "SELECT COUNT(*) AS total FROM transaction_history";
+    $result = $conn->query($sql);
+    $row = $result->fetch_assoc();
+    return $row['total'];
+}
 
-$conn->close(); // Close the database connection
+// Pagination parameters
+$limit = 10; // Items per page
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$offset = ($page - 1) * $limit;
+
+$totalRecords = getTotalRecords($conn);
+$totalPages = ceil($totalRecords / $limit);
+
+$inventory = fetchInventory($conn, $limit, $offset);
+
+$conn->close();
 ?>
+
 
 
 <!DOCTYPE html>
@@ -84,7 +99,7 @@ $conn->close(); // Close the database connection
             text-align: center;
             padding: 12px 15px;
             border-bottom: 1px solid #ddd;
-            font-size: 14px;
+            font-size: 16px;
         }
 
         th {
@@ -164,7 +179,8 @@ $conn->close(); // Close the database connection
             font-weight: 600;
             padding: 20px;
         }
-
+        
+        
     </style>
 </head>
 <body id="page-top">
@@ -175,52 +191,67 @@ $conn->close(); // Close the database connection
                 <?php include("../includesAdmin/topbar.php"); ?>
                 <div class="container-fluid">
                     <div class="d-flex align-items-center justify-content-between mb-2">
-<body>
-    <div class="container">
-        <h4>Order History</h4>
-        <table>
+                    <div class="container">
+    <h4>Order History</h4>
+    <table>
         <thead>
-    <tr>
-        <th>Order ID</th>
-        <th>Customer</th>
-        <th>Order Date</th>
-        <th>Shipping Address</th>
-        <th>Total Amount</th>
-        <th>Payment Method</th>
-        <th>Cart Items</th>
-        <th>Status</th>
-    </tr>
-</thead>
-<tbody>
-    <?php if (!empty($inventory)): ?>
-        <?php foreach ($inventory as $item): ?>
             <tr>
-                <td><?= htmlspecialchars($item['order_id']); ?></td>
-                <td><?= htmlspecialchars($item['username']); ?></td>
-                <td><?= htmlspecialchars($item['order_date']); ?></td>
-                <td><?= htmlspecialchars($item['shipping_address']); ?></td>
-                <td>₱ <?= number_format($item['total_amount'], 2); ?></td>
-                <td><?= htmlspecialchars($item['payment_method']); ?></td>
-                <td><?= htmlspecialchars($item['cart_items']); ?></td>
-                <td>
-                    <select class="form-select status-dropdown status-<?= strtolower(str_replace(' ', '-', $item['status'])); ?>" data-order-id="<?= htmlspecialchars($item['order_id']); ?>" data-status="<?= htmlspecialchars($item['status']); ?>">
-                        <option value="Order Placed" <?= $item['status'] == 'Order Placed' ? 'selected' : ''; ?>>Placed</option>
-                        <option value="Order Shipped" <?= $item['status'] == 'Order Shipped' ? 'selected' : ''; ?>>Shipped</option>
-                        <option value="Delivered" <?= $item['status'] == 'Delivered' ? 'selected' : ''; ?>>Delivered</option>
-                        <option value="Ng Cancel" <?= $item['status'] == 'Ng Cancel' ? 'selected' : ''; ?>>Cancel</option>
-                    </select>
-                </td>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Order Date</th>
+                <th>Shipping Address</th>
+                <th>Total Amount</th>
+                <th>Payment Method</th>
+                <th>Cart Items</th>
+                <th>Status</th>
             </tr>
-        <?php endforeach; ?>
-    <?php else: ?>
-        <tr>
-            <td colspan="8">No transaction history found.</td>
-        </tr>
-    <?php endif; ?>
-</tbody>
+        </thead>
+        <tbody>
+            <?php if (!empty($inventory)): ?>
+                <?php foreach ($inventory as $item): ?>
+                    <tr>
+                        <td><?= htmlspecialchars($item['order_id']); ?></td>
+                        <td><?= htmlspecialchars($item['username']); ?></td>
+                        <td><?= htmlspecialchars($item['order_date']); ?></td>
+                        <td><?= htmlspecialchars($item['shipping_address']); ?></td>
+                        <td>₱ <?= number_format($item['total_amount'], 2); ?></td>
+                        <td><?= htmlspecialchars($item['payment_method']); ?></td>
+                        <td><?= htmlspecialchars($item['cart_items']); ?></td>
+                        <td>
+                            <select class="form-select status-dropdown" data-order-id="<?= htmlspecialchars($item['order_id']); ?>">
+                                <option value="Order Placed" <?= $item['status'] == 'Order Placed' ? 'selected' : ''; ?>>Placed</option>
+                                <option value="Order Shipped" <?= $item['status'] == 'Order Shipped' ? 'selected' : ''; ?>>Shipped</option>
+                                <option value="Delivered" <?= $item['status'] == 'Delivered' ? 'selected' : ''; ?>>Delivered</option>
+                                <option value="Ng Cancel" <?= $item['status'] == 'Ng Cancel' ? 'selected' : ''; ?>>Cancel</option>
+                            </select>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <tr>
+                    <td colspan="8">No transaction history found.</td>
+                </tr>
+            <?php endif; ?>
+        </tbody>
+    </table>
 
-        </table>
+    <!-- Pagination -->
+    <div class="pagination">
+        <?php if ($page > 1): ?>
+            <a href="?page=<?= $page - 1; ?>" class="btn btn-primary">Previous</a>
+        <?php endif; ?>
+
+        <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+            <a href="?page=<?= $i; ?>" class="btn <?= $i == $page ? 'btn-secondary' : 'btn-primary'; ?>"><?= $i; ?></a>
+        <?php endfor; ?>
+
+        <?php if ($page < $totalPages): ?>
+            <a href="?page=<?= $page + 1; ?>" class="btn btn-primary">Next</a>
+        <?php endif; ?>
     </div>
+</div>
+</body>
+    
     <script src="vendor/jquery/jquery.min.js"></script>
     <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="vendor/jquery-easing/jquery.easing.min.js"></script>

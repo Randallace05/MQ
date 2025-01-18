@@ -2,8 +2,25 @@
 // Include the database connection
 include("../../conn/conn.php");
 
-function fetchOrders($conn) {
-    // Adjust the SQL query to fetch data correctly, including gcash_proof
+// Number of orders to display per page
+$limit = 10;
+
+// Get the current page from the URL, default to page 1
+$page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+
+// Calculate the offset for the query
+$offset = ($page - 1) * $limit;
+
+// Function to fetch total number of orders
+function getTotalOrders($conn) {
+    $sql = "SELECT COUNT(*) AS total FROM orders";
+    $result = $conn->query($sql);
+    $row = $result->fetch_assoc();
+    return $row['total'];
+}
+
+// Function to fetch orders with limit and offset for pagination
+function fetchOrders($conn, $limit, $offset) {
     $sql = "SELECT
                 tbl_user.username,
                 orders.id AS order_id,
@@ -12,20 +29,20 @@ function fetchOrders($conn) {
                 orders.shipping_address,
                 orders.payment_method,
                 checkout.cart_items,
-                checkout.gcash_proof -- Ensure this column exists in the checkout table
+                checkout.gcash_proof
             FROM
                 tbl_user
             INNER JOIN orders
                 ON tbl_user.tbl_user_id = orders.tbl_user_id
             LEFT JOIN checkout
                 ON orders.id = checkout.orders_id
-            ORDER BY orders.order_date DESC";
-
-    $result = $conn->query($sql);
-
-    if (!$result) {
-        die("Query Error: " . $conn->error);
-    }
+            ORDER BY orders.order_date DESC
+            LIMIT ? OFFSET ?";
+    
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ii", $limit, $offset);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
     $orders = [];
     if ($result->num_rows > 0) {
@@ -33,10 +50,16 @@ function fetchOrders($conn) {
             $orders[] = $row;
         }
     }
+    $stmt->close();
     return $orders;
 }
 
-$orders = fetchOrders($conn);
+// Get total number of orders and calculate total pages
+$totalOrders = getTotalOrders($conn);
+$totalPages = ceil($totalOrders / $limit);
+
+// Fetch orders for the current page
+$orders = fetchOrders($conn, $limit, $offset);
 
 $conn->close(); // Close the database connection
 ?>
@@ -100,7 +123,7 @@ $conn->close(); // Close the database connection
         text-align: center;
         padding: 12px 15px;
         border-bottom: 1px solid #ddd;
-        font-size: 14px;
+        font-size: 16px;
     }
 
     th {
@@ -133,7 +156,7 @@ $conn->close(); // Close the database connection
             text-decoration: none;
             padding: 8px 12px;
             border-radius: 4px;
-            font-size: 10px;
+            font-size: 14px;
             transition: background-color 0.3s ease;
         }
 
@@ -153,6 +176,26 @@ $conn->close(); // Close the database connection
 
         .btn-view:hover {
             background-color: #0056b3;
+        }
+        .pagination {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+        }
+        .pagination a {
+            margin: 0 5px;
+            padding: 8px 12px;
+            text-decoration: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 4px;
+        }
+        .pagination a:hover {
+            background-color: #0056b3;
+        }
+        .pagination a.active {
+            background-color: #0056b3;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -179,56 +222,71 @@ $conn->close(); // Close the database connection
                 <!-- Begin Page Content -->
                 <div class="container-fluid">
 
-                    <div class="container">
-                        <h4>Order List</h4>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Customer</th>
-                                    <th>Order ID</th>
-                                    <th>Cart Items</th>
-                                    <th>Order Date</th>
-                                    <th>Shipping Address</th>
-                                    <th>Total Amount</th>
-                                    <th>Payment Method</th>
-                                    <th>GCash Proof</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php
-                                if (!empty($orders)) {
-                                    foreach ($orders as $order) {
-                                        echo "<tr>";
-                                        echo "<td>" . htmlspecialchars($order['username']) . "</td>";
-                                        echo "<td>" . htmlspecialchars($order['order_id']) . "</td>";
-                                        echo "<td>" . htmlspecialchars($order['cart_items']) . "</td>";
-                                        echo "<td>" . htmlspecialchars($order['order_date']) . "</td>";
-                                        echo "<td>" . htmlspecialchars($order['shipping_address']) . "</td>";
-                                        echo "<td>₱ " . number_format($order['total_amount'], 2) . "</td>";
-                                        echo "<td>" . htmlspecialchars($order['payment_method']) . "</td>";
-                                        echo "<td>";
-                                        if (!empty($order['gcash_proof'])) {
-                                            echo "<a href='../bill/uploads" . htmlspecialchars($order['gcash_proof']) . "' target='_blank'>";
-                                            echo "<img src='../bill/uploads" . htmlspecialchars($order['gcash_proof']) . "' alt='GCash Proof' class='proof-img'>";
-                                            echo "</a>";
-                                        } else {
-                                            echo "COD";
-                                        }
-                                        echo "</td>";
-                                        echo "<td>";
-                                        echo "<a href='arrange_order.php?order_id=" . urlencode($order['order_id']) . "' class='btn btn-primary'>Arrange Order</a> ";
-                                        echo "<a href='delete_order.php?order_id=" . urlencode($order['order_id']) . "' class='btn btn-danger'>Cancel</a>";
-                                        echo "</td>";
-                                        echo "</tr>";
-                                    }
-                                } else {
-                                    echo "<tr><td colspan='9'>No orders found</td></tr>";
-                                }
-                                ?>
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="container">
+    <h4>Order List</h4>
+    <table>
+        <thead>
+            <tr>
+                <th>Customer</th>
+                <th>Order ID</th>
+                <th>Cart Items</th>
+                <th>Order Date</th>
+                <th>Shipping Address</th>
+                <th>Total Amount</th>
+                <th>Payment Method</th>
+                <th>GCash Proof</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php
+            if (!empty($orders)) {
+                foreach ($orders as $order) {
+                    echo "<tr>";
+                    echo "<td>" . htmlspecialchars($order['username']) . "</td>";
+                    echo "<td>" . htmlspecialchars($order['order_id']) . "</td>";
+                    echo "<td>" . htmlspecialchars($order['cart_items']) . "</td>";
+                    echo "<td>" . htmlspecialchars($order['order_date']) . "</td>";
+                    echo "<td>" . htmlspecialchars($order['shipping_address']) . "</td>";
+                    echo "<td>₱ " . number_format($order['total_amount'], 2) . "</td>";
+                    echo "<td>" . htmlspecialchars($order['payment_method']) . "</td>";
+                    echo "<td>";
+                    if (!empty($order['gcash_proof'])) {
+                        echo "<a href='../bill/uploads/" . htmlspecialchars($order['gcash_proof']) . "' target='_blank'>";
+                        echo "<img src='../bill/uploads/" . htmlspecialchars($order['gcash_proof']) . "' alt='GCash Proof' class='proof-img' style='width:50px;height:50px;'>";
+                        echo "</a>";
+                    } else {
+                        echo "COD";
+                    }
+                    echo "</td>";
+                    echo "<td>";
+                    echo "<a href='arrange_order.php?order_id=" . urlencode($order['order_id']) . "' class='btn btn-primary'>Arrange Order</a> ";
+                    echo "<a href='delete_order.php?order_id=" . urlencode($order['order_id']) . "' class='btn btn-danger'>Cancel</a>";
+                    echo "</td>";
+                    echo "</tr>";
+                }
+            } else {
+                echo "<tr><td colspan='9'>No orders found</td></tr>";
+            }
+            ?>
+        </tbody>
+    </table>
+
+    <!-- Pagination Controls -->
+    <div class="pagination">
+        <?php if ($page > 1): ?>
+            <a href="?page=<?= $page - 1 ?>">Previous</a>
+        <?php endif; ?>
+
+        <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+            <a href="?page=<?= $i ?>" class="<?= $i == $page ? 'active' : '' ?>"><?= $i ?></a>
+        <?php endfor; ?>
+
+        <?php if ($page < $totalPages): ?>
+            <a href="?page=<?= $page + 1 ?>">Next</a>
+        <?php endif; ?>
+    </div>
+</div>                    
                 </div>
             </div>
         </div>

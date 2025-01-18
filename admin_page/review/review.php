@@ -7,7 +7,8 @@ if (session_status() === PHP_SESSION_NONE) {
 // Include database connection
 include '../../conn/conn.php';
 
-function fetchReviews($conn) {
+// Function to fetch reviews with pagination
+function fetchReviews($conn, $limit, $offset) {
     $sql = "SELECT
                product_id,
                username,
@@ -16,7 +17,8 @@ function fetchReviews($conn) {
                rating,
                is_anonymous
             FROM reviews
-            ORDER BY created_at DESC"; // Order by creation date, optional
+            ORDER BY created_at DESC
+            LIMIT $limit OFFSET $offset";
 
     $result = $conn->query($sql);
 
@@ -33,8 +35,26 @@ function fetchReviews($conn) {
     return $reviews;
 }
 
-$reviews = fetchReviews($conn);
+// Function to get the total number of reviews
+function getTotalReviews($conn) {
+    $sql = "SELECT COUNT(*) AS total FROM reviews";
+    $result = $conn->query($sql);
+    if (!$result) {
+        die("Query Error: " . $conn->error);
+    }
+    $row = $result->fetch_assoc();
+    return $row['total'];
+}
 
+// Pagination settings
+$limit = 10; // Reviews per page
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$offset = ($page - 1) * $limit;
+
+$totalReviews = getTotalReviews($conn);
+$totalPages = ceil($totalReviews / $limit);
+
+$reviews = fetchReviews($conn, $limit, $offset);
 
 ?>
 <!DOCTYPE html>
@@ -97,7 +117,7 @@ $reviews = fetchReviews($conn);
             text-align: center;
             padding: 12px 15px;
             border-bottom: 1px solid #ddd;
-            font-size: 14px;
+            font-size: 16px;
         }
 
         th {
@@ -113,6 +133,31 @@ $reviews = fetchReviews($conn);
         tr:hover {
             background-color: #eaf1f8;
             transition: background-color 0.3s;
+        }
+        .pagination {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .pagination a {
+            text-decoration: none;
+            margin: 0 5px;
+            padding: 10px 15px;
+            border: 1px solid #007bff;
+            border-radius: 5px;
+            color: #007bff;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .pagination a:hover {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        .pagination .current {
+            background-color: #007bff;
+            color: #fff;
+            pointer-events: none;
         }
 </style>
 
@@ -143,40 +188,54 @@ $reviews = fetchReviews($conn);
 
                     <!-- Content Row -->
                     <div class="row">
-                    <div class="container">
-    <h2>Product Reviews</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Product ID</th>
-                <th>Username</th>
-                <th>Review Text</th>
-                <th>Created At</th>
-                <th>Rating</th>
-                <th>Anonymous</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php
-            if (!empty($reviews)) {
-                foreach ($reviews as $review) {
-                    echo "<tr>";
-                    echo "<td>" . htmlspecialchars($review['product_id']) . "</td>";
-                    echo "<td>" . htmlspecialchars($review['is_anonymous'] ? 'Anonymous' : $review['username']) . "</td>";
-                    echo "<td>" . htmlspecialchars($review['review_text']) . "</td>";
-                    echo "<td>" . htmlspecialchars($review['created_at']) . "</td>";
-                    echo "<td>" . htmlspecialchars($review['rating']) . "</td>";
-                    echo "<td>" . htmlspecialchars($review['is_anonymous'] ? 'Yes' : 'No') . "</td>";
-                    echo "</tr>";
-                }
-            } else {
-                echo "<tr><td colspan='6'>No reviews found</td></tr>";
-            }
-            ?>
-        </tbody>
-    </table>
-</div>
+                        <div class="container">
+                            <h2>Product Reviews</h2>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Product ID</th>
+                                        <th>Username</th>
+                                        <th>Review Text</th>
+                                        <th>Created At</th>
+                                        <th>Rating</th>
+                                        <th>Anonymous</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    if (!empty($reviews)) {
+                                        foreach ($reviews as $review) {
+                                            echo "<tr>";
+                                            echo "<td>" . htmlspecialchars($review['product_id']) . "</td>";
+                                            echo "<td>" . htmlspecialchars($review['is_anonymous'] ? 'Anonymous' : $review['username']) . "</td>";
+                                            echo "<td>" . htmlspecialchars($review['review_text']) . "</td>";
+                                            echo "<td>" . htmlspecialchars($review['created_at']) . "</td>";
+                                            echo "<td>" . htmlspecialchars($review['rating']) . "</td>";
+                                            echo "<td>" . htmlspecialchars($review['is_anonymous'] ? 'Yes' : 'No') . "</td>";
+                                            echo "</tr>";
+                                        }
+                                    } else {
+                                        echo "<tr><td colspan='6'>No reviews found</td></tr>";
+                                    }
+                                    ?>
+                                </tbody>
+                            </table>
 
+                            <div class="pagination">
+                                <?php if ($page > 1): ?>
+                                    <a href="?page=<?= $page - 1; ?>">&laquo; Previous</a>
+                                <?php endif; ?>
+
+                                <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                                    <a href="?page=<?= $i; ?>" class="<?= $i == $page ? 'current' : ''; ?>"> <?= $i; ?> </a>
+                                <?php endfor; ?>
+
+                                <?php if ($page < $totalPages): ?>
+                                    <a href="?page=<?= $page + 1; ?>">Next &raquo;</a>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>                
 
                 </div>
                 <!-- /.container-fluid -->

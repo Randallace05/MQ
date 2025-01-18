@@ -129,6 +129,15 @@ h2 {
     color: #7f8c8d;
     margin-bottom: 15px;
 }
+.table-container {
+    margin-bottom: 20px;
+}
+
+h2 {
+    color: #EA7C69;
+    font-weight: bold;
+}
+
 
 .btn-container {
     display: flex;
@@ -217,15 +226,14 @@ h2 {
 /* Sort Buttons */
 .sort-buttons {
     display: flex;
-    justify-content: center;
-    margin-bottom: 20px;
+    justify-content: right;
 }
 
 .sort-buttons button {
     margin: 0 5px;
     padding: 8px 15px;
     border-radius: 8px;
-    font-weight: 600;
+    font-weight: 200;
     border: none;
     color: #ffffff;
     background: linear-gradient(135deg, #6a11cb, #2575fc);
@@ -235,12 +243,14 @@ h2 {
 .sort-buttons button:hover {
     background: linear-gradient(135deg, #2575fc, #6a11cb);
     box-shadow: 0px 4px 10px rgba(106, 17, 203, 0.4);
+    text-align: left;
 }
 
 /* Modal Styles */
 .modal-content {
     border-radius: 12px;
     box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.2);
+    font-size: 16px;
 }
 
 .modal-header {
@@ -275,6 +285,18 @@ footer a {
 
 footer a:hover {
     text-decoration: underline;
+}
+.table-container {
+    margin-bottom: 20px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+.table th,
+.table td {
+    vertical-align: middle; /* Ensures content aligns vertically in cells */
 }
 
 </style>
@@ -359,99 +381,74 @@ footer a:hover {
         <?php endforeach; ?>
     </div>
 </div>
-<div class="container table-container">
-    <h2 class="text-center mb-4" style="color: #EA7C69;">Product Inventory</h2>
-    <div class="table-responsive">
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Product Name</th>
-                    <th>Price</th>
-                    <th>Image</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($products as $product): ?>
-                    <tr>
-                    <td>
-                        <a href="#" class="text-decoration-none" data-bs-toggle="modal"
-                        data-bs-target="#addStockModal" data-product-id="<?= $product['id']; ?>">
-                        <?= htmlspecialchars($product['name']); ?>
-                        </a>
-                    </td>
-                        <td>&#8369; <?= number_format($product['price'], 2); ?></td>
-                        <td>
-                            <img src="uploads/<?= htmlspecialchars($product['image']); ?>" class="product-img" alt="Product Image">
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    </div>
-</div>
-<!-- Add Stock Modal -->
-<div class="modal fade" id="addStockModal" tabindex="-1" aria-labelledby="addStockModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addStockModalLabel">Add Stock for Product</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="row align-items-start g-4"> <!-- Use align-items-start for proper vertical alignment -->
+        <div class="col-md-6">
+            <div class="table-container">
+                <h2 class="text-center mb-4" style="color: #EA7C69;">Product Inventory</h2>
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Product Name</th>
+                                <th>Price</th>
+                                <th>Image</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($products as $product): ?>
+                                <tr>
+                                    <td>
+                                        <a href="#" class="text-decoration-none" data-bs-toggle="modal"
+                                           data-bs-target="#addStockModal" data-product-id="<?= $product['id']; ?>">
+                                            <?= htmlspecialchars($product['name']); ?>
+                                        </a>
+                                    </td>
+                                    <td>&#8369; <?= number_format($product['price'], 2); ?></td>
+                                    <td>
+                                        <img src="uploads/<?= htmlspecialchars($product['image']); ?>" class="product-img-small" alt="Product Image">
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-            <div class="modal-body">
-                <!-- Form for adding stock -->
-                <form action="add_stock.php" method="post">
-                    <div class="mb-3">
-                        <label for="stock" class="form-label">Stock Quantity</label>
-                        <input type="number" name="stock" class="form-control" id="stock" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="expiration_date" class="form-label">Expiration Date (Month and Year)</label>
-                        <input type="month" name="expiration_date" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="code_name" class="form-label">Batch Code</label>
-                        <input type="text" name="code_name" class="form-control" id="code_name" placeholder="Batch Code (e.g. CGB001)" required>
-                    </div>
-                    <input type="hidden" name="product_id" id="product_id" value="">
-                    <button type="submit" class="btn btn-primary">Add Stock</button>
-                </form>
+        </div>
+
+        <!-- Order History Section -->
+        <div class="col-md-6">
+            <div class="table-container">
+                <h2 class="text-center mb-4" style="color: #34495e;">Order History</h2>
+
+                     <!-- Order History Table -->
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="orderHistoryTable">
+                        <thead>
+                            <tr>
+                                <th>Product ID</th>
+                                <th>Product Name</th>
+                                <th>Quantity Ordered</th>
+                                <th>Total Price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($aggregated_details as $detail): ?>
+                                <tr>
+                                    <td><?= $detail['product_id']; ?></td>
+                                    <td><?= htmlspecialchars($detail['product_name']); ?></td>
+                                    <td class="quantity"><?= $detail['quantity']; ?></td>
+                                    <td>&#8369; <?= number_format($detail['total_price'], 2); ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 
-<div class="container mt-5">
-    <h2 class="text-center">Order History</h2>
-
-    <!-- Sorting Buttons -->
-    <div class="sort-buttons">
-        <button id="sortHigh" class="btn btn-primary">↑</button>
-        <button id="sortLow" class="btn btn-secondary">↓</button>
-    </div>
-
-   <!-- Order History Table -->
-   <table class="table table-bordered" id="orderHistoryTable">
-        <thead>
-            <tr>
-                <th>Product ID</th>
-                <th>Product Name</th>
-                <th>Quantity Ordered</th>
-                <th>Total Price</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($aggregated_details as $detail): ?>
-                <tr>
-                    <td><?= $detail['product_id']; ?></td>
-                    <td><?= htmlspecialchars($detail['product_name']); ?></td>
-                    <td class="quantity"><?= $detail['quantity']; ?></td>
-                    <td>&#8369; <?= number_format($detail['total_price'], 2); ?></td>
-                </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
-</div>
 
 <!-- Bootstrap JS and dependencies -->
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>

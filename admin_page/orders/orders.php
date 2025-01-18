@@ -100,7 +100,7 @@ $conn->close(); // Close the database connection
         text-align: center;
         padding: 12px 15px;
         border-bottom: 1px solid #ddd;
-        font-size: 14px;
+        font-size: 16px;
     }
 
     th {
@@ -133,7 +133,7 @@ $conn->close(); // Close the database connection
             text-decoration: none;
             padding: 8px 12px;
             border-radius: 4px;
-            font-size: 10px;
+            font-size: 14px;
             transition: background-color 0.3s ease;
         }
 

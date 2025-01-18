@@ -84,7 +84,7 @@ $conn->close(); // Close the database connection
             text-align: center;
             padding: 12px 15px;
             border-bottom: 1px solid #ddd;
-            font-size: 14px;
+            font-size: 16px;
         }
 
         th {

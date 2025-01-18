@@ -66,69 +66,111 @@ $users = fetchUsers($conn, $selectedRole);
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
+    .table-container {
+        width: 80%;
+        margin: 20px auto;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .table-header, .table-row {
+        display: grid;
+        grid-template-columns: 2fr 2fr 1fr; /* Adjust column sizes */
+        text-align: center;
+        padding: 10px 14px;
+    }
+
+    .table-header {
+        background-color: #007bff;
+        color: white;
+        font-weight: bold;
+    }
+
+    .table-row {
+        background-color: #ffffff;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .table-row:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    .table-row:last-child {
+        border-bottom: none;
+    }
+
+    .btn {
+        border: none;
+        padding: 6px 12px;
+        border-radius: 4px;
+        color: white;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .btn-success {
+        background-color: #28a745;
+    }
+
+    .btn-success:hover {
+        background-color: #218838;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+    }
+
+    .btn-danger:hover {
+        background-color: #c82333;
+    }
+
+    /* Center Content */
+    .table-header > div, .table-row > div {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 5px 0;
+        font-size: 18px;
+    }
+
+    /* Adjust for Small Screens */
+    @media (max-width: 768px) {
         .table-container {
-            width: 60%;
-            margin: 20px auto;
-            border-collapse: collapse;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            overflow: hidden;
+            width: 90%; /* Reduce width for smaller screens */
         }
+
         .table-header, .table-row {
+            grid-template-columns: 1fr; /* Switch to single-column layout */
+            text-align: left;
+        }
+
+        .table-header > div, .table-row > div {
+            justify-content: flex-start;
+            padding: 8px 10px;
+        }
+
+        .table-row > div {
             display: flex;
             justify-content: space-between;
-            background-color: #f5e6e7;
-            text-align: left;
-            color: #e84949;
-            padding: 10px;
         }
-        .table-row {
-            background-color: #f9eaea;
+    }
+
+    @media (max-width: 480px) {
+        .btn {
+            padding: 4px 8px;
+            font-size: 12px;
         }
-        .table-row:nth-child(even) {
-            background-color: #f7dada;
+
+        .table-header, .table-row {
+            padding: 6px 8px;
         }
-        .table-cell {
-            width: 48%;
-        }
-        .avatar {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background-color: #d3d3d3;
-            margin-right: 10px;
-            display: inline-block;
-        }
-        /* Media Query for Smaller Screens */
-        @media (max-width: 768px) {
-            .table-container {
-                width: 100%;
-            }
-            .table-header, .table-row {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .table-cell {
-                width: 100%;
-                padding: 5px 0;
-            }
-        }
-        @media (max-width: 480px) {
-            .table-header, .table-row {
-                padding: 8px;
-            }
-            .table-cell {
-                font-size: 14px;
-            }
-            .avatar {
-                width: 20px;
-                height: 20px;
-            }
-        }
-    </style>
+    }
+</style>
+
+
+
+
 </head>
 
 <body id="page-top">
@@ -149,7 +191,7 @@ $users = fetchUsers($conn, $selectedRole);
  -->
                     <!-- Dropdown for Filtering -->
                     <form method="GET" action="">
-                        <label for="userRoleFilter">Filter:</label>
+                        <label for="userRoleFilter">Sort:</label>
                         <select name="user_role" id="userRoleFilter" onchange="this.form.submit()">
                             <option value="all" <?php echo $selectedRole == 'all' ? 'selected' : ''; ?>>All</option>
                             <option value="customer" <?php echo $selectedRole == 'customer' ? 'selected' : ''; ?>>Customer</option>

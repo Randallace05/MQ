@@ -25,9 +25,9 @@ while ($row = $result->fetch_assoc()) {
 
     foreach ($cart_items as $item) {
         // Extract product name and quantity using regex
-        if (preg_match('/^(.*?) $$(\d+)x$$$/', trim($item), $matches)) {
-            $product_name = $matches[1];
-            $quantity = (int) $matches[2];
+        if (preg_match('/^(.*?) \((\d+)x\)$/', trim($item), $matches)) {
+            $product_name = $matches[1]; // Extracted product name
+            $quantity = (int) $matches[2]; // Extracted quantity
 
             // Check if product exists in the product map
             if (isset($product_map[$product_name])) {
@@ -62,8 +62,8 @@ foreach ($product_details as $detail) {
 
 // Function to get the next batch number
 function getNextBatchNumber($conn, $product_id) {
-    $sql = "SELECT MAX(CAST(SUBSTRING(condname, -1) AS UNSIGNED)) as max_batch 
-            FROM products 
+    $sql = "SELECT MAX(CAST(SUBSTRING(condname, -1) AS UNSIGNED)) as max_batch
+            FROM products
             WHERE id = ? AND condname REGEXP '^[A-Z]+[0-9]+$'";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $product_id);
@@ -91,20 +91,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_batch'])) {
         $new_condname = $product['condname'] . $next_batch_number;
 
         // Insert new batch
-        $insert_sql = "INSERT INTO products (name, price, image, description, other_images, stock, expiration_date, condname) 
+        $insert_sql = "INSERT INTO products (name, price, image, description, other_images, stock, expiration_date, condname)
                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         $insert_stmt = $conn->prepare($insert_sql);
-        $insert_stmt->bind_param("sdssssss", 
-            $product['name'], 
-            $product['price'], 
-            $product['image'], 
-            $product['description'], 
-            $product['other_images'], 
-            $new_stock, 
-            $new_expiration_date, 
+        $insert_stmt->bind_param("sdssssss",
+            $product['name'],
+            $product['price'],
+            $product['image'],
+            $product['description'],
+            $product['other_images'],
+            $new_stock,
+            $new_expiration_date,
             $new_condname
         );
-        
+
         if ($insert_stmt->execute()) {
             echo "<script>alert('New batch added successfully!');</script>";
         } else {
@@ -127,7 +127,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_batch'])) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
     /* Base Styles */
-    
+
 /* General Body Styling */
 body {
     font-family: 'Inter', sans-serif;
@@ -477,7 +477,7 @@ footer a:hover {
                                 <tr>
                                     <td>
                                         <a href="#" class="text-decoration-none" data-bs-toggle="modal"
-                                        data-bs-target="#productDetailsModal" 
+                                        data-bs-target="#productDetailsModal"
                                         data-product-id="<?= htmlspecialchars($product['id']); ?>">
                                             <?= htmlspecialchars($product['name']); ?>
                                         </a>
@@ -537,13 +537,6 @@ footer a:hover {
     </div>
 </div>
 
-<!-- Debug Information -->
-<div class="col-md-12 mt-4">
-    <h3>Debug Information</h3>
-    <pre><?php var_dump($aggregated_details); ?></pre>
-</div>
-
-
     </div>
 </div>
 
@@ -596,7 +589,7 @@ footer a:hover {
         </div>
     </div>
 </div>
-    
+
 <!-- Add Batch Modal -->
 <div class="modal fade" id="addBatchModal" tabindex="-1" aria-labelledby="addBatchModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -624,7 +617,7 @@ footer a:hover {
     </div>
 </div>
 
-    
+
 
 
 <!-- Bootstrap JS and dependencies -->
@@ -660,7 +653,7 @@ const productDetailsModal = document.getElementById('productDetailsModal');
 productDetailsModal.addEventListener('show.bs.modal', function (event) {
     const button = event.relatedTarget;
     const productId = button.getAttribute('data-product-id');
-    
+
     fetch(`getProductDetails.php?id=${productId}`)
         .then(response => response.json())
         .then(data => {

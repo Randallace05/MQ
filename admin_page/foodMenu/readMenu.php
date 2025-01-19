@@ -118,7 +118,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_batch'])) {
 ?>
 
 <!DOCTYPE html>
-< lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -379,7 +378,6 @@ footer a:hover {
 
 
 </head>
-<>
 
 <div class="container mt-5 px-4"> <!-- Added px-4 for left/right indent -->
     <div class="row justify-content-center g-4"> <!-- Added g-4 for consistent gap -->

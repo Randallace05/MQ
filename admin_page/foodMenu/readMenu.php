@@ -499,35 +499,51 @@ footer a:hover {
         </div>
 
         <!-- Order History Section -->
-        <div class="col-md-6">
-            <div class="table-container">
-                <h2 class="text-center mb-4" style="color: #EA7C69;">Order History</h2>
+<div class="col-md-6">
+    <div class="table-container">
+        <h2 class="text-center mb-4" style="color: #EA7C69;">Order History</h2>
 
-                     <!-- Order History Table -->
-                <div class="table-responsive">
-                    <table class="table table-bordered" id="orderHistoryTable">
-                        <thead>
+        <!-- Order History Table -->
+        <div class="table-responsive">
+            <?php
+            if (empty($aggregated_details)) {
+                echo '<p class="text-center">No order history available.</p>';
+            } else {
+            ?>
+                <table class="table table-bordered" id="orderHistoryTable">
+                    <thead>
+                        <tr>
+                            <th>Product ID</th>
+                            <th>Product Name</th>
+                            <th>Quantity Ordered</th>
+                            <th>Total Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($aggregated_details as $detail): ?>
                             <tr>
-                                <th>Product ID</th>
-                                <th>Product Name</th>
-                                <th>Quantity Ordered</th>
-                                <th>Total Price</th>
+                                <td><?= htmlspecialchars($detail['product_id'] ?? 'N/A'); ?></td>
+                                <td><?= htmlspecialchars($detail['product_name'] ?? 'N/A'); ?></td>
+                                <td class="quantity"><?= htmlspecialchars($detail['quantity'] ?? '0'); ?></td>
+                                <td>&#8369; <?= number_format($detail['total_price'] ?? 0, 2); ?></td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($aggregated_details as $detail): ?>
-                                <tr>
-                                    <td><?= $detail['product_id']; ?></td>
-                                    <td><?= htmlspecialchars($detail['product_name']); ?></td>
-                                    <td class="quantity"><?= $detail['quantity']; ?></td>
-                                    <td>&#8369; <?= number_format($detail['total_price'], 2); ?></td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            <?php
+            }
+            ?>
         </div>
+    </div>
+</div>
+
+<!-- Debug Information -->
+<div class="col-md-12 mt-4">
+    <h3>Debug Information</h3>
+    <pre><?php var_dump($aggregated_details); ?></pre>
+</div>
+
+
     </div>
 </div>
 

@@ -57,6 +57,10 @@ function fetchOrders($conn, $limit, $offset) {
 $gcashProofPath = null;
 
 // Handle Gcash payment proof upload
+// Initialize $paymentMethod with a default value
+$paymentMethod = isset($_POST['payment_method']) ? $_POST['payment_method'] : null;
+
+// Handle Gcash payment proof upload
 if ($paymentMethod === 'Gcash Payment' && isset($_FILES['gcash_proof']) && $_FILES['gcash_proof']['error'] === UPLOAD_ERR_OK) {
     $uploadDir = '../../uploads/payment_proofs/';
     if (!is_dir($uploadDir)) {
@@ -81,6 +85,7 @@ if ($paymentMethod === 'Gcash Payment' && isset($_FILES['gcash_proof']) && $_FIL
         die("Invalid file type. Only JPG, JPEG, PNG, and GIF are allowed.");
     }
 }
+
 
 
 // Get total number of orders and calculate total pages
@@ -285,7 +290,7 @@ $conn->close(); // Close the database connection
                         $baseUrl = "../../uploads/payment_proofs/";
                         
                             echo "<a href='" . $baseUrl . htmlspecialchars($order['gcash_proof']) . "' target='_blank'>";
-                            echo '<img src="' . htmlspecialchars($gcashProofPath) . '" alt="GCash Proof" />';
+                            echo '<img src="../../uploads/gcash.jpg" alt="GCash Proof" style="width: 50px; height: 50px; object-fit: cover;" />';
                             echo "</a>";
                     } else {
                         echo "COD";

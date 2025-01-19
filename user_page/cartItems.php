@@ -114,85 +114,158 @@ if (isset($_POST['update_product_quantity'])) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet">
     <link href="css/styless.css" rel="stylesheet">
     <style>
-        .cart-container {
-            max-width: 900px;
-            margin: 0 auto;
+        /* General layout */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
         }
 
+        .cart-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1.heading {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 2em;
+            color: #333;
+        }
+
+        /* Table */
         table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
+            background-color: #fff;
         }
 
         th, td {
-            padding: 10px;
+            padding: 12px 15px;
             text-align: center;
             border: 1px solid #ddd;
         }
 
         th {
             background-color: #f4f4f4;
+            font-weight: bold;
         }
 
-        .bottom-btn {
-            display: inline-block;
-            background-color:rgb(255, 0, 0);
-            color: white;
-            text-decoration: none;
-            padding: 10px 15px;
+        td img {
+            width: 100px;
+            height: auto;
             border-radius: 5px;
         }
 
-        .bottom-btn.disabled {
-            background-color: #ccc;
-            pointer-events: none;
+        .quantity_box {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
         }
 
-        .delete-all-btn {
-            display: block;
+        .quantity-btn {
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        .quantity-btn:hover {
+            background-color: #d43a3a;
+        }
+
+        .quantity-input {
+            width: 50px;
             text-align: center;
-            color: red;
-            margin-top: 15px;
-            text-decoration: none;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 5px;
+            font-size: 16px;
         }
 
-/* Center-align the quantity box in the column */
-.quantity_box {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 5px; /* Space between buttons and input */
-}
+        /* Bottom section */
+        .table_bottom {
+            text-align: center;
+            margin-top: 20px;
+        }
 
-/* Style the buttons */
-.quantity-btn {
-    background-color: #ff4d4d; /* Red color */
-    color: #fff; /* White text */
-    border: none;
-    border-radius: 5px;
-    padding: 5px 10px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s ease;
-}
+        .bottom-btn {
+            background-color: rgb(255, 0, 0);
+            color: white;
+            padding: 12px 18px;
+            border-radius: 5px;
+            text-decoration: none; /* Ensure no underline */
+            display: inline-block;
+            margin-top: 10px;
+            font-size: 18px;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
 
-.quantity-btn:hover {
-    background-color: #d43a3a; /* Darker red on hover */
-}
+        .bottom-btn:hover {
+            background-color: #d43a3a;
+            transform: scale(1.05); /* Slight scaling effect on hover */
+        }
 
-/* Style the input field */
-.quantity-input {
-    width: 50px;
-    text-align: center;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    padding: 5px;
-    font-size: 16px;
-}
+        /* Remove underline and other link styles specifically for "Continue Shopping" and "Proceed to Checkout" */
+        .bottom-btn:focus, .bottom-btn:hover {
+            text-decoration: none; /* Prevent underline and other default link styles */
+        }
 
+        td a {
+            text-decoration: none;
+            color: red;
+        }
 
+        td a:hover {
+            color: darkred;
+            text-decoration: none; /* No underline on hover for "Remove" */
+        }
 
+        /* "Delete All" link specific */
+        .delete-all-btn {
+            color: red;
+            text-align: center;
+            text-decoration: none; /* Ensure no underline */
+            margin-top: 20px;
+            font-size: 18px;
+            display: block;
+        }
+
+        .delete-all-btn:hover {
+            text-decoration: none; /* Prevent underline on hover */
+            color: darkred;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            table, th, td {
+                font-size: 14px;
+                padding: 8px;
+            }
+
+            .bottom-btn {
+                font-size: 16px;
+                padding: 10px 15px;
+            }
+
+            .quantity-input {
+                width: 40px;
+            }
+
+            .quantity-btn {
+                padding: 6px 10px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -200,7 +273,19 @@ if (isset($_POST['update_product_quantity'])) {
     <section class="shopping_cart">
         <h1 class="heading">My Cart</h1>
         <form id="cart-form" method="POST">
-            <table>
+        <table>
+            <thead>
+                <tr>
+                    <th>Sl No</th>
+                    <th>Product Name</th>
+                    <th>Product Image</th>
+                    <th>Product Price</th>
+                    <th>Product Quantity</th>
+                    <th>Total Price</th>
+                    <th>Remove</th>
+                </tr>
+            </thead>
+            <tbody>
                 <?php
                 $select_cart_products = $conn->prepare("SELECT * FROM `cart` WHERE tbl_user_id = ?");
                 $select_cart_products->bind_param("i", $tbl_user_id);
@@ -208,19 +293,6 @@ if (isset($_POST['update_product_quantity'])) {
                 $result = $select_cart_products->get_result();
 
                 if ($result->num_rows > 0) {
-                    echo "<thead>
-                        <tr>
-                            <th>Sl No</th>
-                            <th>Product Name</th>
-                            <th>Product Image</th>
-                            <th>Product Price</th>
-                            <th>Product Quantity</th>
-                            <th>Total Price</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>";
-
                     $sl_no = 1;
                     while ($fetch_cart_products = $result->fetch_assoc()) {
                         ?>
@@ -229,10 +301,9 @@ if (isset($_POST['update_product_quantity'])) {
                             <td><?php echo htmlspecialchars($fetch_cart_products['name']); ?></td>
                             <td>
                                 <img src="../admin_page/foodMenu/uploads/<?php echo htmlspecialchars($fetch_cart_products['image']); ?>"
-                                     alt="" style="width: 100px; height: auto;">
+                                    alt="">
                             </td>
                             <td><?php echo "₱" . htmlspecialchars($fetch_cart_products['price']); ?></td>
-
                             <td>
                                 <div class="quantity_box">
                                     <button class="quantity-btn minus" data-cart-id="<?php echo $fetch_cart_products['cart_id']; ?>">-</button>
@@ -241,31 +312,29 @@ if (isset($_POST['update_product_quantity'])) {
                                         class="quantity-input"
                                         value="<?php echo htmlspecialchars($fetch_cart_products['quantity']); ?>"
                                         readonly
-                                        data-cart-id="<?php echo $fetch_cart_products['cart_id']; ?>"
-                                    />
+                                        data-cart-id="<?php echo $fetch_cart_products['cart_id']; ?>"/>
                                     <button class="quantity-btn plus" data-cart-id="<?php echo $fetch_cart_products['cart_id']; ?>">+</button>
                                 </div>
                             </td>
-
-
-
                             <td><?php echo "₱" . htmlspecialchars($fetch_cart_products['price'] * $fetch_cart_products['quantity']); ?></td>
                             <td>
                                 <a href="delete_cart_item.php?id=<?php echo htmlspecialchars($fetch_cart_products['cart_id']); ?>"
-                                   onclick="return confirm('Are you sure you want to remove this item?');">
+                                onclick="return confirm('Are you sure you want to remove this item?');">
                                     <i class="fas fa-trash"></i> Remove
                                 </a>
                             </td>
                         </tr>
                         <?php
                     }
-                    echo "</tbody>";
                 } else {
-                    echo "<tr><td colspan='7'>No products in the cart</td></tr>";
+                    echo "<tr><td colspan='7' class='text-center'>Your cart is empty. Start shopping now!</td></tr>";
                 }
                 ?>
-            </table>
+            </tbody>
+        </table>
+
         </form>
+
         <div class="table_bottom">
             <a href="shop.php" class="bottom-btn">Continue Shopping</a>
             <h3 class="bottom-btn">
@@ -285,6 +354,7 @@ if (isset($_POST['update_product_quantity'])) {
                 Proceed to Checkout
             </a>
         </div>
+
         <a href="delete_all_cart_items.php" class="delete-all-btn"
            onclick="return confirm('Are you sure you want to remove all items?');">
             <i class="fas fa-trash"></i> Delete All

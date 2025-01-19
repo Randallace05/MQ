@@ -669,7 +669,7 @@ productDetailsModal.addEventListener('show.bs.modal', function (event) {
                 let firstBatchCodename = ''; // Variable to store the first batch's codename
 
                 batches.forEach((batch, index) => {
-                    const [batchNumber, stock, expirationDate, batchCodename] = batch.split(':');
+                    const [batchNumber, stock, expirationDate, batchCodename, status] = batch.split(':');
 
                     // Set the first batch codename (for the first iteration only)
                     if (index === 0) {
@@ -685,14 +685,17 @@ productDetailsModal.addEventListener('show.bs.modal', function (event) {
                             <td>${expirationDate}</td>
                             <td>${batchCodename}</td>
                             <td>
-                                <button id="statusBtn-${batchNumber}" class="btn btn-${isActive ? 'primary' : 'secondary'}" onclick="updateBatchStatus('${batchNumber}', '${isActive ? 0 : 1}')">
+                                <button id="statusBtn-${batchNumber}" class="btn btn-${isActive ? 'primary' : 'secondary'}" onclick="updateBatchStatus('${batchNumber}', '${isActive ? '0' : '1'}')">
                                     ${isActive ? 'Active' : 'Inactive'}
                                 </button>
-                           </td>
+                            </td>
                         </tr>
                     `;
                     batchInfo.innerHTML += row;
                 });
+
+                // Update all button states after adding rows
+                updateAllButtonStates();
 
                 // Display the first batch codename in the codename element
                 document.getElementById('productCodename').textContent = firstBatchCodename || 'N/A';
@@ -714,11 +717,10 @@ productDetailsModal.addEventListener('show.bs.modal', function (event) {
         console.error('Fetch error:', error);
         alert('Error loading product details: ' + error.message);
     });
+});
 
-// Add event listener to the Add Batch button
 function updateBatchStatus(batchNumber, newStatus) {
-    console.log(`Batch ${batchNumber} status is being updated to: ${newStatus}`);
-
+    console.log(`Updating batch ${batchNumber} status to: ${newStatus}`);
     fetch('updateBatchStatus.php', {
         method: 'POST',
         headers: {
@@ -728,19 +730,8 @@ function updateBatchStatus(batchNumber, newStatus) {
     })
     .then(response => response.json())
     .then(data => {
-        console.log('Response from server:', data); // Log the server response
-
         if (data.success) {
-            const button = document.querySelector(`#statusBtn-${batchNumber}`);
-            if (newStatus === 1) {
-                button.classList.remove('btn-secondary');
-                button.classList.add('btn-primary');
-                button.textContent = 'Active';
-            } else {
-                button.classList.remove('btn-primary');
-                button.classList.add('btn-secondary');
-                button.textContent = 'Inactive';
-            }
+            updateButtonStates(batchNumber, newStatus);
         } else {
             alert('Error: ' + data.message);
         }
@@ -751,12 +742,42 @@ function updateBatchStatus(batchNumber, newStatus) {
     });
 }
 
+function updateButtonStates(activeBatchNumber, newStatus) {
+    const buttons = document.querySelectorAll('[id^="statusBtn-"]');
+    buttons.forEach(button => {
+        const batchNumber = button.id.split('-')[1];
+        if (batchNumber === activeBatchNumber) {
+            updateButtonState(button, newStatus);
+        } else {
+            updateButtonState(button, '0');
+        }
+    });
+}
 
+function updateButtonState(button, status) {
+    if (status === '1') {
+        button.classList.remove('btn-secondary');
+        button.classList.add('btn-primary');
+        button.textContent = 'Active';
+        button.setAttribute('onclick', `updateBatchStatus('${button.id.split('-')[1]}', '0')`);
+    } else {
+        button.classList.remove('btn-primary');
+        button.classList.add('btn-secondary');
+        button.textContent = 'Inactive';
+        button.setAttribute('onclick', `updateBatchStatus('${button.id.split('-')[1]}', '1')`);
+    }
+}
 
-});
+// Add this function to update all buttons when the modal is shown
+function updateAllButtonStates() {
+    const buttons = document.querySelectorAll('[id^="statusBtn-"]');
+    buttons.forEach(button => {
+        const currentStatus = button.classList.contains('btn-primary') ? '1' : '0';
+        updateButtonState(button, currentStatus);
+    });
+}
 </script>
 </body>
 </html>
-
 
 

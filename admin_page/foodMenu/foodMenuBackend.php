@@ -17,6 +17,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $new_stock = $_POST['stock'];
         $new_expiration_date = $_POST['expiration_date'];
 
+        // Fetch the product name from the products table
+        $product_query = "SELECT name FROM products WHERE id = ?";
+        $product_stmt = $conn->prepare($product_query);
+        $product_stmt->bind_param("i", $product_id);
+        $product_stmt->execute();
+        $product_result = $product_stmt->get_result();
+        $product_row = $product_result->fetch_assoc();
+
+        if (!$product_row) {
+            echo "Error: Product not found.";
+            exit();
+        }
+
+        $name = $product_row['name']; // Product name
+        $product_stmt->close();
+
         // Get the next batch number
         $batch_query = "SELECT MAX(batch_number) as max_batch FROM product_batches WHERE product_id = ?";
         $batch_stmt = $conn->prepare($batch_query);
@@ -25,14 +41,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $batch_result = $batch_stmt->get_result();
         $batch_row = $batch_result->fetch_assoc();
         $next_batch_number = ($batch_row['max_batch'] !== null) ? $batch_row['max_batch'] + 1 : 1;
+        
+        // Generate batch codename
+        $batch_codename = generateCodename($name) . '-' . $new_expiration_date . '-' . $next_batch_number;
+
+        $batch_stmt->close();
 
         // Insert new batch
-        $insert_sql = "INSERT INTO product_batches (product_id, stock, expiration_date, batch_number) VALUES (?, ?, ?, ?)";
+        $insert_sql = "INSERT INTO product_batches (product_id, stock, expiration_date, batch_number, batch_codename) VALUES (?, ?, ?, ?, ?)";
         $insert_stmt = $conn->prepare($insert_sql);
-        $insert_stmt->bind_param("iisi", $product_id, $new_stock, $new_expiration_date, $next_batch_number);
+        $insert_stmt->bind_param("iisis", $product_id, $new_stock, $new_expiration_date, $next_batch_number, $batch_codename);
 
         if ($insert_stmt->execute()) {
-            echo "New batch added successfully!";
+            header('Location: foodMenu.php');
         } else {
             echo "Error adding new batch: " . $insert_stmt->error;
         }
@@ -41,28 +62,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $name = $_POST['name'];
         $price = $_POST['price'];
         $description = $_POST['description'];
-        $stock = $_POST['stock'];
 
         // Generate codename
         $codename = generateCodename($name);
-
-        // Handle expiration date correctly
-        $expiration_date = isset($_POST['expiration_date']) && !empty($_POST['expiration_date']) ? $_POST['expiration_date'] : null;
-
-        // Check if expiration_date is set and not empty
-        if ($expiration_date) {
-            // Ensure the date is in the correct format (YYYY-MM-DD)
-            $formatted_date = date('Y-m-d', strtotime($expiration_date));
-
-            // Validate the formatted date
-            if ($formatted_date && $formatted_date != '1970-01-01') {
-                $expiration_date = $formatted_date;
-            } else {
-                $expiration_date = null;  // Invalid date, set to null
-            }
-        } else {
-            $expiration_date = null;  // If no expiration date, set it to null
-        }
 
         // Upload main image
         $image = $_FILES['image']['name'];
@@ -84,12 +86,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $other_images_json = json_encode($other_images);
 
         // SQL query with MySQLi
-        $sql = "INSERT INTO products (name, price, image, description, other_images, stock, expiration_date, codename)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO products (name, price, image, description, other_images, codename)
+                VALUES (?, ?, ?, ?, ?, ?)";
 
         // Prepare and bind the statement
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param('sdsssdss', $name, $price, $image, $description, $other_images_json, $stock, $expiration_date, $codename);
+        $stmt->bind_param('sdssss', $name, $price, $image, $description, $other_images_json, $codename);
         if ($stmt->execute()) {
             echo "Product created successfully!";
         } else {
@@ -172,14 +174,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <div class="mb-3">
                         <label for="description" class="form-label">Description</label>
                         <textarea name="description" class="form-control" id="description"></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label for="stock" class="form-label">Stock</label>
-                        <input type="number" name="stock" class="form-control" id="stock" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="expiration_date" class="form-label">Expiration Date</label>
-                        <input type="date" name="expiration_date" class="form-control" id="expiration_date" required>
                     </div>
                     <div class="mb-3">
                         <label for="other_images" class="form-label">Other Images</label>

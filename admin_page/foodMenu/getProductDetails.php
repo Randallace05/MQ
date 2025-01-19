@@ -7,12 +7,13 @@ if(isset($_GET['id'])) {
     $id = $_GET['id'];
     
     $sql = "SELECT p.*, 
-                   COALESCE(SUM(pb.stock), 0) as total_stock,
-                   GROUP_CONCAT(DISTINCT CONCAT(pb.batch_number, ':', pb.stock, ':', IFNULL(pb.expiration_date, 'N/A')) SEPARATOR '|') as batch_info
-            FROM products p
-            LEFT JOIN product_batches pb ON p.id = pb.product_id
-            WHERE p.id = ?
-            GROUP BY p.id";
+    COALESCE(SUM(CASE WHEN pb.status = 'active' THEN pb.stock ELSE 0 END), 0) as total_stock,
+    GROUP_CONCAT(DISTINCT CONCAT(pb.batch_number, ':', pb.stock, ':', IFNULL(pb.expiration_date, 'N/A'), ':', pb.batch_codename, ':', pb.status) SEPARATOR '|') as batch_info
+FROM products p
+LEFT JOIN product_batches pb ON p.id = pb.product_id
+WHERE p.id = ?
+GROUP BY p.id";
+
     
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $id);

@@ -104,7 +104,31 @@ try {
             echo "Error: " . $stmt->error;
         }
     }
-
+    if ($paymentMethod === 'Gcash Payment' && isset($_FILES['gcash_proof']) && $_FILES['gcash_proof']['error'] === UPLOAD_ERR_OK) {
+        $uploadDir = '../../uploads/payment_proofs/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0777, true); // Create directory if it doesn't exist
+        }
+    
+        $fileInfo = pathinfo($_FILES['gcash_proof']['name']);
+        $fileExtension = strtolower($fileInfo['extension']);
+        $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+    
+        if (in_array($fileExtension, $allowedExtensions)) {
+            $fileName = uniqid() . '.' . $fileExtension;
+            $uploadFile = $uploadDir . $fileName;
+    
+            if (move_uploaded_file($_FILES['gcash_proof']['tmp_name'], $uploadFile)) {
+                // Save the relative file path to the database
+                $gcashProofPath = 'uploads/payment_proofs/' . $fileName;
+            } else {
+                die("Error uploading GCash payment proof. Please try again.");
+            }
+        } else {
+            die("Invalid file type. Only JPG, JPEG, PNG, and GIF are allowed.");
+        }
+    }
+    
 
 } catch (Exception $e) {
     die("Error: " . $e->getMessage());

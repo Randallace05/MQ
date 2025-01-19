@@ -44,38 +44,40 @@ $conn->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile Page</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
     <div class="container mt-5">
-        <h2 class="text-center">Profile</h2>
-        <div class="card">
-            <div class="card-body">
-                <form action="update_profile.php" method="POST">
-                    <div class="form-group">
-                        <label for="first_name">First Name</label>
-                        <input type="text" class="form-control" id="first_name" name="first_name" value="<?php echo htmlspecialchars($user['first_name']); ?>" required>
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <h1 class="text-center mb-4">Edit Profile</h1>
+                <div class="card shadow">
+                    <div class="card-body p-4">
+                        <form action="update_profile.php" method="POST">
+                            <div class="mb-3">
+                                <label for="first_name" class="form-label">First Name</label>
+                                <input type="text" class="form-control" id="first_name" name="first_name" value="<?php echo htmlspecialchars($user['first_name']); ?>" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="last_name" class="form-label">Last Name</label>
+                                <input type="text" class="form-control" id="last_name" name="last_name" value="<?php echo htmlspecialchars($user['last_name']); ?>" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" name="email" value="<?php echo htmlspecialchars($user['email']); ?>" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="contact_number" class="form-label">Contact Number</label>
+                                <input type="text" class="form-control" id="contact_number" name="contact_number" value="<?php echo htmlspecialchars($user['contact_number']); ?>">
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Save Changes</button>
+                            <a href="../dashboard/index.php" class="btn btn-secondary w-100 mt-2">Cancel</a>
+                        </form>
                     </div>
-                    <div class="form-group">
-                        <label for="last_name">Last Name</label>
-                        <input type="text" class="form-control" id="last_name" name="last_name" value="<?php echo htmlspecialchars($user['last_name']); ?>" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="email">Email</label>
-                        <input type="email" class="form-control" id="email" name="email" value="<?php echo htmlspecialchars($user['email']); ?>" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="phone">Contact</label>
-                        <input type="text" class="form-control" id="contact" name="contact_number" value="<?php echo htmlspecialchars($user['contact_number']); ?>">
-                    </div>
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
-                    <a href="../dashboard/index.php" class="btn btn-secondary">Cancel</a>
-                </form>
+                </div>
             </div>
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

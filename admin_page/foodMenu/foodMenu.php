@@ -70,21 +70,21 @@
 
             <!-- Main Content -->
             <div id="content">
-            
+
                 <!-- Topbar -->
                 <?php include("../includesAdmin/topbar.php"); ?>
                 <!-- End of Topbar -->
 
                 <!-- Begin Page Content -->
                 <div class="container-fluid">
-                    
+
 
                     <!-- Page Heading -->
                     <div class="d-sm-flex align-items-center justify-content-between mb-4">
                         <h1 class="h3 mb-0 text-gray-800" style="color:#AB1616 !important;">Products Management</h1>
                     </div>
 
-                    para maka  <a href="carousel.php">add</a> ng image sa shop page!  // 'di muna aayusin css 
+                    para maka  <a href="carousel.php">add</a> ng image sa shop page!  // 'di muna aayusin css
                     <!-- Alert Message Section -->
                     <?php
                     if (isset($_SESSION['message'])) {
@@ -93,7 +93,7 @@
                             {$_SESSION['message']}
                             <div class='progress-bar' id='progress-bar'></div> <!-- Animated line -->
                         </div>";
-                        
+
                         unset($_SESSION['message']);
                         unset($_SESSION['alert_type']);
                     }
@@ -115,7 +115,7 @@
                             </div>
                        </div>
                     </div>
-                    
+
                 </div>
                 <!-- /.container-fluid -->
 
@@ -127,12 +127,12 @@
 
     </div>
     <!-- End of Page Wrapper -->
-                    
+
     <!-- Scroll to Top Button-->
     <a class="scroll-to-top rounded" href="#page-top">
         <i class="fas fa-angle-up"></i>
     </a>
-                        
+
     <!-- Bootstrap core JavaScript-->
     <script src="vendor/jquery/jquery.min.js"></script>
     <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
@@ -163,7 +163,7 @@
         }
     }, timeBeforeClose);
     </script>
-            
+
 </body>
 
 </html>

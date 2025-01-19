@@ -53,6 +53,35 @@ function fetchOrders($conn, $limit, $offset) {
     $stmt->close();
     return $orders;
 }
+// Initialize $gcashProofPath with a default value
+$gcashProofPath = null;
+
+// Handle Gcash payment proof upload
+if ($paymentMethod === 'Gcash Payment' && isset($_FILES['gcash_proof']) && $_FILES['gcash_proof']['error'] === UPLOAD_ERR_OK) {
+    $uploadDir = '../../uploads/payment_proofs/';
+    if (!is_dir($uploadDir)) {
+        mkdir($uploadDir, 0777, true); // Create directory if it doesn't exist
+    }
+
+    $fileInfo = pathinfo($_FILES['gcash_proof']['name']);
+    $fileExtension = strtolower($fileInfo['extension']);
+    $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+
+    if (in_array($fileExtension, $allowedExtensions)) {
+        $fileName = uniqid() . '.' . $fileExtension;
+        $uploadFile = $uploadDir . $fileName;
+
+        if (move_uploaded_file($_FILES['gcash_proof']['tmp_name'], $uploadFile)) {
+            // Save the relative file path
+            $gcashProofPath = 'uploads/payment_proofs/' . $fileName;
+        } else {
+            die("Error uploading GCash payment proof. Please try again.");
+        }
+    } else {
+        die("Invalid file type. Only JPG, JPEG, PNG, and GIF are allowed.");
+    }
+}
+
 
 // Get total number of orders and calculate total pages
 $totalOrders = getTotalOrders($conn);
@@ -152,40 +181,31 @@ $conn->close(); // Close the database connection
         }
 
         /* Button styles */
-    .btn {
-        display: inline-block;
-        text-decoration: none;
-        padding: 10px 15px;
-        font-size: 14px;
-        font-weight: 600;
-        color: white;
-        border-radius: 6px;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
+        .btn {
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
 
-    .btn-primary {
-        background-color: #17a2b8; /* Lighter shade of blue */
-        border: 2px solid #138496; /* Slightly darker border */
-    }
+        .btn-primary {
+            background-color: #28a745;
+            color: white;
+        }
 
-    .btn-primary:hover {
-        background-color: #138496;
-        border-color: #117a8b;
-        transform: translateY(-2px); /* Add hover effect */
-    }
+        .btn-primary:hover {
+            background-color: #218838;
+        }
 
-    .btn-danger {
-        background-color: #dc3545; /* Standard red for danger */
-        border: 2px solid #bd2130; /* Darker border */
-    }
+        .btn-view {
+            background-color: #007bff;
+            color: white;
+        }
 
-    .btn-danger:hover {
-        background-color: #bd2130;
-        border-color: #9c1e2e;
-        transform: translateY(-2px);
-    }
-
+        .btn-view:hover {
+            background-color: #0056b3;
+        }
         .pagination {
             margin: 20px 0;
             display: flex;
@@ -262,9 +282,11 @@ $conn->close(); // Close the database connection
                     echo "<td>" . htmlspecialchars($order['payment_method']) . "</td>";
                     echo "<td>";
                     if (!empty($order['gcash_proof'])) {
-                        echo "<a href='../bill/uploads/" . htmlspecialchars($order['gcash_proof']) . "' target='_blank'>";
-                        echo "<img src='../bill/uploads/" . htmlspecialchars($order['gcash_proof']) . "' alt='GCash Proof' class='proof-img' style='width:50px;height:50px;'>";
-                        echo "</a>";
+                        $baseUrl = "../../uploads/payment_proofs/";
+                        
+                            echo "<a href='" . $baseUrl . htmlspecialchars($order['gcash_proof']) . "' target='_blank'>";
+                            echo '<img src="' . htmlspecialchars($gcashProofPath) . '" alt="GCash Proof" />';
+                            echo "</a>";
                     } else {
                         echo "COD";
                     }

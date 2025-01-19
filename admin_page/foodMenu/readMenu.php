@@ -118,7 +118,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_batch'])) {
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+< lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -379,7 +379,7 @@ footer a:hover {
 
 
 </head>
-<body>
+<>
 
 <div class="container mt-5 px-4"> <!-- Added px-4 for left/right indent -->
     <div class="row justify-content-center g-4"> <!-- Added g-4 for consistent gap -->
@@ -463,6 +463,7 @@ footer a:hover {
             <div class="table-container">
                 <h2 class="text-center mb-4" style="color: #EA7C69;">Product Inventory</h2>
                 <div class="table-responsive">
+                    <!-- Product Inventory Table -->
                     <table class="table table-bordered">
                         <thead>
                             <tr>
@@ -476,12 +477,8 @@ footer a:hover {
                                 <tr>
                                     <td>
                                         <a href="#" class="text-decoration-none" data-bs-toggle="modal"
-                                           data-bs-target="#productDetailsModal" 
-                                           data-product-id="<?= $product['id']; ?>"
-                                           data-product-name="<?= htmlspecialchars($product['name']); ?>"
-                                           data-product-codename="<?= htmlspecialchars($product['condname'] ?? ''); ?>"
-                                           data-product-expiration="<?= htmlspecialchars($product['expiration_date'] ?? ''); ?>"
-                                           data-product-stock="<?= htmlspecialchars($product['stock'] ?? ''); ?>">
+                                        data-bs-target="#productDetailsModal" 
+                                        data-product-id="<?= htmlspecialchars($product['id']); ?>">
                                             <?= htmlspecialchars($product['name']); ?>
                                         </a>
                                     </td>
@@ -534,10 +531,9 @@ footer a:hover {
     </div>
 </div>
 
-
 <!-- Product Details Modal -->
 <div class="modal fade" id="productDetailsModal" tabindex="-1" aria-labelledby="productDetailsModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header" style="background-color: #6A11CB; color: white;">
                 <h5 class="modal-title" id="productDetailsModalLabel">Product Details</h5>
@@ -545,17 +541,34 @@ footer a:hover {
             </div>
             <div class="modal-body">
                 <table class="table">
+                    <tr>
+                        <th>ID</th>
+                        <td id="productId"></td>
+                    </tr>
+                    <tr>
+                        <th>Name</th>
+                        <td id="productName"></td>
+                    </tr>
+                    <tr>
+                        <th>Codename</th>
+                        <td id="productCodename"></td>
+                    </tr>
+                    <tr>
+                        <th>Total Stock</th>
+                        <td id="productTotalStock"></td>
+                    </tr>
+                </table>
+                <h6>Batch Information:</h6>
+                <table class="table" id="batchTable">
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Codename</th>
-                            <th>Expiration Date</th>
+                            <th>Batch Number</th>
                             <th>Stock</th>
+                            <th>Expiration Date</th>
                         </tr>
                     </thead>
-                    <tbody id="productDetailsBody">
-                        <!-- Data will be populated here -->
+                    <tbody id="batchInfo">
+                        <!-- Batch info will be populated here -->
                     </tbody>
                 </table>
                 <button id="enableDisableBtn" class="btn" style="background-color: #6A11CB; color: white;">Enable/Disable</button>
@@ -567,7 +580,7 @@ footer a:hover {
         </div>
     </div>
 </div>
-
+    
 <!-- Add Batch Modal -->
 <div class="modal fade" id="addBatchModal" tabindex="-1" aria-labelledby="addBatchModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -577,22 +590,26 @@ footer a:hover {
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="addBatchForm" method="post" action="">
+                <form id="addBatchForm" action="foodMenuBackend.php" method="post">
                     <input type="hidden" id="batchProductId" name="product_id">
+                    <input type="hidden" name="add_batch" value="1">
                     <div class="mb-3">
-                        <label for="new_stock" class="form-label">New Stock</label>
-                        <input type="number" class="form-control" id="new_stock" name="new_stock" required>
+                        <label for="batchStock" class="form-label">Stock</label>
+                        <input type="number" class="form-control" id="batchStock" name="stock" required>
                     </div>
                     <div class="mb-3">
-                        <label for="new_expiration_date" class="form-label">New Expiration Date</label>
-                        <input type="date" class="form-control" id="new_expiration_date" name="new_expiration_date" required>
+                        <label for="batchExpirationDate" class="form-label">Expiration Date</label>
+                        <input type="date" class="form-control" id="batchExpirationDate" name="expiration_date" required>
                     </div>
-                    <button type="submit" class="btn btn-primary" name="add_batch">Add</button>
+                    <button type="submit" class="btn btn-primary">Add Batch</button>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
+    
+
 
 <!-- Bootstrap JS and dependencies -->
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
@@ -628,30 +645,37 @@ productDetailsModal.addEventListener('show.bs.modal', function (event) {
     const button = event.relatedTarget;
     const productId = button.getAttribute('data-product-id');
     
-    // Fetch product details from the server
     fetch(`getProductDetails.php?id=${productId}`)
         .then(response => response.json())
         .then(data => {
             if (!data.error) {
-                // Create the table row with the fetched data
-                const tbody = document.getElementById('productDetailsBody');
-                tbody.innerHTML = `
-                    <tr>
-                        <td>${data.id}</td>
-                        <td>${data.name}</td>
-                        <td>${data.codename || ''}</td>
-                        <td>${data.expiration_date || ''}</td>
-                        <td>${data.stock || '0'}</td>
-                    </tr>
-                `;
+                document.getElementById('productId').textContent = data.id;
+                document.getElementById('productName').textContent = data.name;
+                document.getElementById('productCodename').textContent = data.codename || '';
+                document.getElementById('productTotalStock').textContent = data.total_stock;
 
-                // Store the product data for the enable/disable button
+                const batchInfo = document.getElementById('batchInfo');
+                batchInfo.innerHTML = '';
+                if (data.batch_info) {
+                    const batches = data.batch_info.split('|');
+                    batches.forEach(batch => {
+                        const [batchNumber, stock, expirationDate] = batch.split(':');
+                        const row = `
+                            <tr>
+                                <td>${batchNumber}</td>
+                                <td>${stock}</td>
+                                <td>${expirationDate}</td>
+                            </tr>
+                        `;
+                        batchInfo.innerHTML += row;
+                    });
+                }
+
                 const enableDisableBtn = document.getElementById('enableDisableBtn');
                 enableDisableBtn.textContent = data.is_disabled == 1 ? 'Enable' : 'Disable';
                 enableDisableBtn.setAttribute('data-product-id', data.id);
                 enableDisableBtn.setAttribute('data-is-disabled', data.is_disabled);
 
-                // Set up the Add Batch button
                 const addBatchBtn = document.getElementById('addBatchBtn');
                 addBatchBtn.onclick = function() {
                     const addBatchModal = new bootstrap.Modal(document.getElementById('addBatchModal'));
@@ -659,43 +683,19 @@ productDetailsModal.addEventListener('show.bs.modal', function (event) {
                     addBatchModal.show();
                 };
             } else {
-                alert('Error loading product details');
+                alert('Error: ' + data.error);
             }
         })
         .catch(error => {
-            console.error('Error:', error);
-            alert('Error loading product details');
+            console.error('Fetch error:', error);
+            alert('Error loading product details: ' + error.message);
         });
 });
-
-// Enable/Disable button click handler
-document.getElementById('enableDisableBtn').addEventListener('click', function() {
-    const productId = this.getAttribute('data-product-id');
-    const isDisabled = this.getAttribute('data-is-disabled');
-    
-    // Send request to toggle status
-    fetch('toggleProductStatus.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: `id=${productId}&status=${isDisabled == '1' ? '0' : '1'}`
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            location.reload(); // Refresh the page to show updated status
-        } else {
-            alert('Error updating status');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error updating status');
-    });
-});
 </script>
-
 </body>
 </html>
+
+
+
+
 

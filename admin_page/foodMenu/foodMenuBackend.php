@@ -12,65 +12,92 @@ function generateCodename($name) {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $name = $_POST['name'];
-    $price = $_POST['price'];
-    $description = $_POST['description'];
-    $stock = $_POST['stock'];
+    if (isset($_POST['add_batch'])) {
+        $product_id = $_POST['product_id'];
+        $new_stock = $_POST['stock'];
+        $new_expiration_date = $_POST['expiration_date'];
 
-    // Generate codename
-    $codename = generateCodename($name);
+        // Get the next batch number
+        $batch_query = "SELECT MAX(batch_number) as max_batch FROM product_batches WHERE product_id = ?";
+        $batch_stmt = $conn->prepare($batch_query);
+        $batch_stmt->bind_param("i", $product_id);
+        $batch_stmt->execute();
+        $batch_result = $batch_stmt->get_result();
+        $batch_row = $batch_result->fetch_assoc();
+        $next_batch_number = ($batch_row['max_batch'] !== null) ? $batch_row['max_batch'] + 1 : 1;
 
-    // Handle expiration date correctly
-    $expiration_date = isset($_POST['expiration_date']) && !empty($_POST['expiration_date']) ? $_POST['expiration_date'] : null;
+        // Insert new batch
+        $insert_sql = "INSERT INTO product_batches (product_id, stock, expiration_date, batch_number) VALUES (?, ?, ?, ?)";
+        $insert_stmt = $conn->prepare($insert_sql);
+        $insert_stmt->bind_param("iisi", $product_id, $new_stock, $new_expiration_date, $next_batch_number);
 
-    // Check if expiration_date is set and not empty
-    if ($expiration_date) {
-        // Ensure the date is in the correct format (YYYY-MM-DD)
-        $formatted_date = date('Y-m-d', strtotime($expiration_date));
-        
-        // Validate the formatted date
-        if ($formatted_date && $formatted_date != '1970-01-01') {
-            $expiration_date = $formatted_date;
+        if ($insert_stmt->execute()) {
+            echo "New batch added successfully!";
         } else {
-            $expiration_date = null;  // Invalid date, set to null 
+            echo "Error adding new batch: " . $insert_stmt->error;
         }
+        $insert_stmt->close();
     } else {
-        $expiration_date = null;  // If no expiration date, set it to null
-    }
+        $name = $_POST['name'];
+        $price = $_POST['price'];
+        $description = $_POST['description'];
+        $stock = $_POST['stock'];
 
-    // Upload main image
-    $image = $_FILES['image']['name'];
-    if ($image) {
-        move_uploaded_file($_FILES['image']['tmp_name'], 'uploads/' . $image);
-    }
+        // Generate codename
+        $codename = generateCodename($name);
 
-    // Upload other images (up to 4)
-    $other_images = [];
-    if (!empty($_FILES['other_images']['tmp_name'][0])) {
-        foreach ($_FILES['other_images']['tmp_name'] as $key => $tmp_name) {
-            $file_name = $_FILES['other_images']['name'][$key];
-            if ($file_name) {
-                move_uploaded_file($tmp_name, 'uploads/' . $file_name);
-                $other_images[] = $file_name;
+        // Handle expiration date correctly
+        $expiration_date = isset($_POST['expiration_date']) && !empty($_POST['expiration_date']) ? $_POST['expiration_date'] : null;
+
+        // Check if expiration_date is set and not empty
+        if ($expiration_date) {
+            // Ensure the date is in the correct format (YYYY-MM-DD)
+            $formatted_date = date('Y-m-d', strtotime($expiration_date));
+
+            // Validate the formatted date
+            if ($formatted_date && $formatted_date != '1970-01-01') {
+                $expiration_date = $formatted_date;
+            } else {
+                $expiration_date = null;  // Invalid date, set to null
+            }
+        } else {
+            $expiration_date = null;  // If no expiration date, set it to null
+        }
+
+        // Upload main image
+        $image = $_FILES['image']['name'];
+        if ($image) {
+            move_uploaded_file($_FILES['image']['tmp_name'], 'uploads/' . $image);
+        }
+
+        // Upload other images (up to 4)
+        $other_images = [];
+        if (!empty($_FILES['other_images']['tmp_name'][0])) {
+            foreach ($_FILES['other_images']['tmp_name'] as $key => $tmp_name) {
+                $file_name = $_FILES['other_images']['name'][$key];
+                if ($file_name) {
+                    move_uploaded_file($tmp_name, 'uploads/' . $file_name);
+                    $other_images[] = $file_name;
+                }
             }
         }
+        $other_images_json = json_encode($other_images);
+
+        // SQL query with MySQLi
+        $sql = "INSERT INTO products (name, price, image, description, other_images, stock, expiration_date, codename)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+
+        // Prepare and bind the statement
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('sdsssdss', $name, $price, $image, $description, $other_images_json, $stock, $expiration_date, $codename);
+        if ($stmt->execute()) {
+            echo "Product created successfully!";
+        } else {
+            echo "Error: " . $stmt->error;
+        }
+
+        $stmt->close();
     }
-    $other_images_json = json_encode($other_images);
-
-    // SQL query with MySQLi
-    $sql = "INSERT INTO products (name, price, image, description, other_images, stock, expiration_date, codename)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-
-    // Prepare and bind the statement
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param('sdsssdss', $name, $price, $image, $description, $other_images_json, $stock, $expiration_date, $codename);
-    if ($stmt->execute()) {
-        echo "Product created successfully!";
-    } else {
-        echo "Error: " . $stmt->error;
-    }
-
-    $stmt->close();
     $conn->close();
 }
 ?>

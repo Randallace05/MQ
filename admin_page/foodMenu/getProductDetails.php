@@ -1,21 +1,33 @@
 <?php
 include '../../conn/conn.php';
 
+header('Content-Type: application/json');
+
 if(isset($_GET['id'])) {
     $id = $_GET['id'];
     
-    // Prepare the SQL query
-    $sql = "SELECT id, name, codename, expiration_date, stock, is_disabled FROM products WHERE id = ?";
+    $sql = "SELECT p.*, 
+                   COALESCE(SUM(pb.stock), 0) as total_stock,
+                   GROUP_CONCAT(DISTINCT CONCAT(pb.batch_number, ':', pb.stock, ':', IFNULL(pb.expiration_date, 'N/A')) SEPARATOR '|') as batch_info
+            FROM products p
+            LEFT JOIN product_batches pb ON p.id = pb.product_id
+            WHERE p.id = ?
+            GROUP BY p.id";
+    
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $id);
-    $stmt->execute();
-    $result = $stmt->get_result();
     
-    if($row = $result->fetch_assoc()) {
-        // Return the data as JSON
-        echo json_encode($row);
-    } else {
-        echo json_encode(['error' => 'Product not found']);
+    try {
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if($row = $result->fetch_assoc()) {
+            echo json_encode($row);
+        } else {
+            echo json_encode(['error' => 'Product not found']);
+        }
+    } catch (Exception $e) {
+        echo json_encode(['error' => $e->getMessage()]);
     }
     
     $stmt->close();

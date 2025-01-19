@@ -572,13 +572,14 @@ footer a:hover {
                             <th>Batch Number</th>
                             <th>Stock</th>
                             <th>Expiration Date</th>
+                            <th>Codename</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="batchInfo">
                         <!-- Batch info will be populated here -->
                     </tbody>
                 </table>
-                <button id="enableDisableBtn" class="btn" style="background-color: #6A11CB; color: white;">Enable/Disable</button>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -653,56 +654,109 @@ productDetailsModal.addEventListener('show.bs.modal', function (event) {
     const productId = button.getAttribute('data-product-id');
 
     fetch(`getProductDetails.php?id=${productId}`)
-        .then(response => response.json())
-        .then(data => {
-            if (!data.error) {
-                document.getElementById('productId').textContent = data.id;
-                document.getElementById('productName').textContent = data.name;
-                document.getElementById('productCodename').textContent = data.codename || '';
-                document.getElementById('productTotalStock').textContent = data.total_stock;
+    .then(response => response.json())
+    .then(data => {
+        if (!data.error) {
+            document.getElementById('productId').textContent = data.id;
+            document.getElementById('productName').textContent = data.name;
+            document.getElementById('productTotalStock').textContent = data.total_stock;
 
-                const batchInfo = document.getElementById('batchInfo');
-                batchInfo.innerHTML = '';
-                if (data.batch_info) {
-                    const batches = data.batch_info.split('|');
-                    batches.forEach(batch => {
-                        const [batchNumber, stock, expirationDate] = batch.split(':');
-                        const row = `
-                            <tr>
-                                <td>${batchNumber}</td>
-                                <td>${stock}</td>
-                                <td>${expirationDate}</td>
-                            </tr>
-                        `;
-                        batchInfo.innerHTML += row;
-                    });
-                }
+            const batchInfo = document.getElementById('batchInfo');
+            batchInfo.innerHTML = '';
 
-                const enableDisableBtn = document.getElementById('enableDisableBtn');
-                enableDisableBtn.textContent = data.is_disabled == 1 ? 'Enable' : 'Disable';
-                enableDisableBtn.setAttribute('data-product-id', data.id);
-                enableDisableBtn.setAttribute('data-is-disabled', data.is_disabled);
+            if (data.batch_info) {
+                const batches = data.batch_info.split('|');
+                let firstBatchCodename = ''; // Variable to store the first batch's codename
 
-                const addBatchBtn = document.getElementById('addBatchBtn');
-                addBatchBtn.onclick = function() {
-                    const addBatchModal = new bootstrap.Modal(document.getElementById('addBatchModal'));
-                    document.getElementById('batchProductId').value = data.id;
-                    addBatchModal.show();
-                };
+                batches.forEach((batch, index) => {
+                    const [batchNumber, stock, expirationDate, batchCodename] = batch.split(':');
+
+                    // Set the first batch codename (for the first iteration only)
+                    if (index === 0) {
+                        firstBatchCodename = batchCodename;
+                    }
+                    const isActive = status === '1';  // Check if status is 1 (active)
+                    const activeClass = isActive ? 'table-success' : '';
+
+                    const row = `
+                        <tr>
+                            <td>${batchNumber}</td>
+                            <td>${stock}</td>
+                            <td>${expirationDate}</td>
+                            <td>${batchCodename}</td>
+                            <td>
+                                <button id="statusBtn-${batchNumber}" class="btn btn-${isActive ? 'primary' : 'secondary'}" onclick="updateBatchStatus('${batchNumber}', '${isActive ? 0 : 1}')">
+                                    ${isActive ? 'Active' : 'Inactive'}
+                                </button>
+                           </td>
+                        </tr>
+                    `;
+                    batchInfo.innerHTML += row;
+                });
+
+                // Display the first batch codename in the codename element
+                document.getElementById('productCodename').textContent = firstBatchCodename || 'N/A';
             } else {
-                alert('Error: ' + data.error);
+                document.getElementById('productCodename').textContent = 'N/A';
             }
-        })
-        .catch(error => {
-            console.error('Fetch error:', error);
-            alert('Error loading product details: ' + error.message);
-        });
+
+            const addBatchBtn = document.getElementById('addBatchBtn');
+            addBatchBtn.onclick = function () {
+                const addBatchModal = new bootstrap.Modal(document.getElementById('addBatchModal'));
+                document.getElementById('batchProductId').value = data.id;
+                addBatchModal.show();
+            };
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Fetch error:', error);
+        alert('Error loading product details: ' + error.message);
+    });
+
+// Add event listener to the Add Batch button
+function updateBatchStatus(batchNumber, newStatus) {
+    console.log(`Batch ${batchNumber} status is being updated to: ${newStatus}`);
+
+    fetch('updateBatchStatus.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `batchId=${batchNumber}&status=${newStatus}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Response from server:', data); // Log the server response
+
+        if (data.success) {
+            const button = document.querySelector(`#statusBtn-${batchNumber}`);
+            if (newStatus === 1) {
+                button.classList.remove('btn-secondary');
+                button.classList.add('btn-primary');
+                button.textContent = 'Active';
+            } else {
+                button.classList.remove('btn-primary');
+                button.classList.add('btn-secondary');
+                button.textContent = 'Inactive';
+            }
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error updating batch status:', error);
+        alert('Error updating batch status: ' + error.message);
+    });
+}
+
+
+
 });
 </script>
 </body>
 </html>
-
-
 
 
 

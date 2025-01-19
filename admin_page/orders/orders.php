@@ -152,31 +152,40 @@ $conn->close(); // Close the database connection
         }
 
         /* Button styles */
-        .btn {
-            text-decoration: none;
-            padding: 8px 12px;
-            border-radius: 4px;
-            font-size: 14px;
-            transition: background-color 0.3s ease;
-        }
+    .btn {
+        display: inline-block;
+        text-decoration: none;
+        padding: 10px 15px;
+        font-size: 14px;
+        font-weight: 600;
+        color: white;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
 
-        .btn-primary {
-            background-color: #28a745;
-            color: white;
-        }
+    .btn-primary {
+        background-color: #17a2b8; /* Lighter shade of blue */
+        border: 2px solid #138496; /* Slightly darker border */
+    }
 
-        .btn-primary:hover {
-            background-color: #218838;
-        }
+    .btn-primary:hover {
+        background-color: #138496;
+        border-color: #117a8b;
+        transform: translateY(-2px); /* Add hover effect */
+    }
 
-        .btn-view {
-            background-color: #007bff;
-            color: white;
-        }
+    .btn-danger {
+        background-color: #dc3545; /* Standard red for danger */
+        border: 2px solid #bd2130; /* Darker border */
+    }
 
-        .btn-view:hover {
-            background-color: #0056b3;
-        }
+    .btn-danger:hover {
+        background-color: #bd2130;
+        border-color: #9c1e2e;
+        transform: translateY(-2px);
+    }
+
         .pagination {
             margin: 20px 0;
             display: flex;

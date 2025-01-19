@@ -1,20 +1,11 @@
 <?php
 include '../../conn/conn.php'; // Database connection
 
-// Start session if not already started
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-/**
- * Fetch users based on the selected role.
- *
- * @param mysqli $conn The database connection.
- * @param string $selectedRole The role to filter by (default: 'all').
- * @return array The fetched user data.
- */
 function fetchUsers($conn, $selectedRole = 'all') {
-    // Adjust SQL query based on selected role
     if ($selectedRole == 'all') {
         $sql = "SELECT username, user_role, is_active FROM tbl_user WHERE user_role != 'admin'";
         $stmt = $conn->prepare($sql);
@@ -24,11 +15,9 @@ function fetchUsers($conn, $selectedRole = 'all') {
         $stmt->bind_param('s', $selectedRole);
     }
 
-    // Execute the query
     $stmt->execute();
     $result = $stmt->get_result();
 
-    // Fetch all rows as an associative array
     $users = [];
     if ($result->num_rows > 0) {
         while ($row = $result->fetch_assoc()) {
@@ -36,150 +25,138 @@ function fetchUsers($conn, $selectedRole = 'all') {
         }
     }
 
-    // Clean up
     $stmt->close();
-
     return $users;
 }
 
-// Determine the selected role
 $selectedRole = isset($_GET['user_role']) ? $_GET['user_role'] : 'all';
-
-// Fetch users based on the selected role
 $users = fetchUsers($conn, $selectedRole);
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced User Dashboard</title>
 
-    <title>Users - Dashboard</title>
-
-    <!-- Custom fonts for this template-->
-    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
-    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:400,700&display=swap" rel="stylesheet">
     <link href="../dashboard/css/sb-admin-2.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <style>
-    .table-container {
-        width: 80%;
-        margin: 20px auto;
-        border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f8f9fc;
+        }
 
-    .table-header, .table-row {
-        display: grid;
-        grid-template-columns: 2fr 2fr 1fr; /* Adjust column sizes */
-        text-align: center;
-        padding: 10px 14px;
-    }
-
-    .table-header {
-        background-color: #007bff;
-        color: white;
-        font-weight: bold;
-    }
-
-    .table-row {
-        background-color: #ffffff;
-        border-bottom: 1px solid #ddd;
-    }
-
-    .table-row:nth-child(even) {
-        background-color: #f9f9f9;
-    }
-
-    .table-row:last-child {
-        border-bottom: none;
-    }
-
-    .btn {
-        border: none;
-        padding: 6px 12px;
-        border-radius: 4px;
-        color: white;
-        cursor: pointer;
-        font-size: 14px;
-    }
-
-    .btn-success {
-        background-color: #28a745;
-    }
-
-    .btn-success:hover {
-        background-color: #218838;
-    }
-
-    .btn-danger {
-        background-color: #dc3545;
-    }
-
-    .btn-danger:hover {
-        background-color: #c82333;
-    }
-
-    /* Center Content */
-    .table-header > div, .table-row > div {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 5px 0;
-        font-size: 18px;
-    }
-
-    /* Adjust for Small Screens */
-    @media (max-width: 768px) {
         .table-container {
-            width: 90%; /* Reduce width for smaller screens */
+            margin: 10px auto;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            background-color: white;
+            width: 95%;
+            max-width: 1200px;
         }
 
-        .table-header, .table-row {
-            grid-template-columns: 1fr; /* Switch to single-column layout */
-            text-align: left;
+        .table-header {
+            display: grid;
+            grid-template-columns: 2fr 2fr 1fr;
+            background-color: #4e73df;
+            color: white;
+            padding: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 14px;
         }
 
-        .table-header > div, .table-row > div {
-            justify-content: flex-start;
-            padding: 8px 10px;
+        .table-row {
+            display: grid;
+            grid-template-columns: 2fr 2fr 1fr;
+            padding: 10px;
+            transition: background-color 0.3s ease;
+            border-bottom: 1px solid #ddd;
+            font-size: 14px;
         }
 
-        .table-row > div {
-            display: flex;
-            justify-content: space-between;
+        .table-row:hover {
+            background-color: #f1f1f1;
         }
-    }
 
-    @media (max-width: 480px) {
         .btn {
-            padding: 4px 8px;
+            padding: 6px 10px;
+            border-radius: 5px;
             font-size: 12px;
+            cursor: pointer;
         }
 
-        .table-header, .table-row {
-            padding: 6px 8px;
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            transition: background-color 0.3s ease;
         }
-    }
-</style>
 
+        .btn-success:hover {
+            background-color: #218838;
+        }
 
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            transition: background-color 0.3s ease;
+        }
 
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
 
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1050;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .modal-buttons {
+            margin-top: 15px;
+        }
+
+        .modal-buttons .btn {
+            margin: 0 5px;
+        }
+
+        @media (max-width: 768px) {
+            .table-header, .table-row {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .table-container {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
-
-<body id="page-top">
+<body>
     <div id="wrapper">
-        <!-- Sidebar -->
         <?php include("../includesAdmin/sidebar.php"); ?>
-        <!-- End of Sidebar -->
-
-        <!-- Content Wrapper -->
         <div id="content-wrapper" class="d-flex flex-column">
             <div id="content">
                 <?php include("../includesAdmin/topbar.php"); ?>
@@ -187,9 +164,7 @@ $users = fetchUsers($conn, $selectedRole);
                     <div class="d-sm-flex align-items-center justify-content-between mb-4">
                         <h1 class="h3 mb-0 text-gray-800">Accounts</h1>
                     </div>
-                    <!--                 darrly nakuha mo ba
- -->
-                    <!-- Dropdown for Filtering -->
+
                     <form method="GET" action="">
                         <label for="userRoleFilter">Sort:</label>
                         <select name="user_role" id="userRoleFilter" onchange="this.form.submit()">
@@ -199,43 +174,56 @@ $users = fetchUsers($conn, $selectedRole);
                         </select>
                     </form>
 
-                    <!-- Table Container -->
                     <div class="table-container">
                         <div class="table-header">
-                            <span class="table-cell">Username</span>
-                            <span class="table-cell">Type</span>
-                            <span class="table-cell">Action</span>
-
+                            <div>Username</div>
+                            <div>Type</div>
+                            <div>Action</div>
                         </div>
 
                         <?php foreach ($users as $user) { ?>
                             <div class="table-row">
-                                <div class="table-cell">
-                                    <div class="avatar"></div>
-                                    <?php echo htmlspecialchars($user['username']); ?>
-                                </div>
-                                <div class="table-cell">
-                                    <?php echo htmlspecialchars($user['user_role']); ?>
-                                </div>
-                                <div class="table-cell">
-                                    <button class="btn btn-sm <?php echo $user['is_active'] ? 'btn-danger' : 'btn-success'; ?>" 
-                                            onclick="toggleUserStatus('<?php echo $user['username']; ?>', <?php echo $user['is_active'] ? '0' : '1'; ?>)">
+                                <div><?php echo htmlspecialchars($user['username']); ?></div>
+                                <div><?php echo htmlspecialchars($user['user_role']); ?></div>
+                                <div>
+                                    <button class="btn <?php echo $user['is_active'] ? 'btn-danger' : 'btn-success'; ?>" 
+                                            onclick="showModal('<?php echo $user['username']; ?>', <?php echo $user['is_active'] ? '0' : '1'; ?>)">
                                         <?php echo $user['is_active'] ? 'Disable' : 'Enable'; ?>
                                     </button>
                                 </div>
                             </div>
                         <?php } ?>
                     </div>
+
+                    <div id="confirmationModal" class="modal">
+                        <div class="modal-content">
+                            <p id="modalMessage"></p>
+                            <div class="modal-buttons">
+                                <button id="confirmButton" class="btn btn-success">Yes</button>
+                                <button onclick="closeModal()" class="btn btn-danger">No</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Scripts -->
-    <script src="vendor/jquery/jquery.min.js"></script>
-    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="js/sb-admin-2.min.js"></script>
     <script>
+        const modal = document.getElementById('confirmationModal');
+        const modalMessage = document.getElementById('modalMessage');
+        const confirmButton = document.getElementById('confirmButton');
+
+        function showModal(username, newStatus) {
+            modalMessage.textContent = `Are you sure you want to ${newStatus === 1 ? 'enable' : 'disable'} ${username}?`;
+            confirmButton.onclick = () => toggleUserStatus(username, newStatus);
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            modal.style.display = 'none';
+        }
+
         function toggleUserStatus(username, newStatus) {
             fetch('toggle_user_status.php', {
                 method: 'POST',
@@ -257,7 +245,5 @@ $users = fetchUsers($conn, $selectedRole);
                 alert('An error occurred while updating user status');
             });
         }
-    </script>
-</body>
-</html>
 
+        window.onclick = event

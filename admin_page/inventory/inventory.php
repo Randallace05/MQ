@@ -124,8 +124,6 @@ $conn->close();
             font-size: 12px;
             border: 1px solid #ccc;
             border-radius: 5px;
-            background-color: #f9f9f9;
-            appearance: none;
             transition: border-color 0.3s, box-shadow 0.3s;
         }
 
@@ -181,6 +179,7 @@ $conn->close();
         }
         .container .pagination {
             display: flex;
+            color:#0056b3;
             justify-content: center;
             margin: 20px 0;
         }
@@ -224,13 +223,18 @@ $conn->close();
                         <td><?= htmlspecialchars($item['payment_method']); ?></td>
                         <td><?= htmlspecialchars($item['cart_items']); ?></td>
                         <td>
-                            <select class="form-select status-dropdown" data-order-id="<?= htmlspecialchars($item['order_id']); ?>">
+                            <select 
+                                class="form-select status-dropdown" 
+                                data-order-id="<?= htmlspecialchars($item['order_id']); ?>" 
+                                data-status="<?= htmlspecialchars($item['status']); ?>"
+                            >
                                 <option value="Order Placed" <?= $item['status'] == 'Order Placed' ? 'selected' : ''; ?>>Placed</option>
                                 <option value="Order Shipped" <?= $item['status'] == 'Order Shipped' ? 'selected' : ''; ?>>Shipped</option>
                                 <option value="Delivered" <?= $item['status'] == 'Delivered' ? 'selected' : ''; ?>>Delivered</option>
                                 <option value="Ng Cancel" <?= $item['status'] == 'Ng Cancel' ? 'selected' : ''; ?>>Cancel</option>
                             </select>
                         </td>
+
                     </tr>
                 <?php endforeach; ?>
             <?php else: ?>
@@ -263,97 +267,61 @@ $conn->close();
     <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
     <script src="js/sb-admin-2.min.js"></script>
     <script>
-        // JavaScript function to handle sorting
-        function sortInventory() {
-            const sortOrder = document.getElementById('sortDropdown').value;
-            window.location.href = '?sort=' + sortOrder;
-        }
-
-        // JavaScript function to handle "Add Stock" button click
-        function addStock(productId) {
-            alert('Add stock functionality for Product ID: ' + productId);
-            // Implement your add stock logic here, such as opening a modal or making an AJAX call
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-        const dropdowns = document.querySelectorAll('.status-dropdown');
-        dropdowns.forEach(dropdown => {
-            dropdown.addEventListener('change', (e) => {
-                const orderId = e.target.getAttribute('data-order-id');
-                const status = e.target.value;
-
-                fetch('update_status.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ order_id: orderId, status: status })
-                })
-
-                .catch(error => {
-                    console.error('Error:', error);
-                });
-            });
-        });
-    });
-    document.addEventListener('DOMContentLoaded', function () {
-        const dropdowns = document.querySelectorAll('.status-dropdown');
-
-        dropdowns.forEach(function (dropdown) {
-            const currentStatus = dropdown.getAttribute('data-status');
-            applyStatusClass(dropdown, currentStatus);
-
-            // Update color on change
-            dropdown.addEventListener('change', function () {
-                const newStatus = dropdown.value;
-                applyStatusClass(dropdown, newStatus);
-            });
-        });
-
-        function applyStatusClass(element, status) {
-            element.classList.remove(
-                'status-order-placed',
-                'status-order-shipped',
-                'status-delivered',
-                'status-ng-cancel'
-            );
-
-            if (status === 'Order Placed') {
-                element.classList.add('status-order-placed');
-            } else if (status === 'Order Shipped') {
-                element.classList.add('status-order-shipped');
-            } else if (status === 'Delivered') {
-                element.classList.add('status-delivered');
-            } else if (status === 'Ng Cancel') {
-                element.classList.add('status-ng-cancel');
-            }
-        }
-    });
-
-    document.addEventListener('DOMContentLoaded', () => {
+      document.addEventListener('DOMContentLoaded', () => {
     const dropdowns = document.querySelectorAll('.status-dropdown');
-    dropdowns.forEach(dropdown => {
-        dropdown.addEventListener('change', (e) => {
-            const orderId = e.target.getAttribute('data-order-id');
-            const status = e.target.value;
 
+    dropdowns.forEach(dropdown => {
+        // Get default status and apply style
+        const status = dropdown.getAttribute('data-status');
+        applyStatusClass(dropdown, status);
+
+        // Update style and send API request on change
+        dropdown.addEventListener('change', (e) => {
+            const newStatus = e.target.value;
+            applyStatusClass(dropdown, newStatus);
+
+            // API request to update status
             fetch('update_status.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ order_id: orderId, status: status })
+                body: JSON.stringify({ 
+                    order_id: e.target.getAttribute('data-order-id'), 
+                    status: newStatus 
+                }),
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    console.log('Status updated successfully');
-                } else {
-                    console.error('Error updating status:', data.error);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log('Status updated successfully');
+                    } else {
+                        console.error('Error updating status:', data.error);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
         });
     });
+
+    // Function to apply status-specific styles
+    function applyStatusClass(element, status) {
+        element.classList.remove(
+            'status-order-placed',
+            'status-order-shipped',
+            'status-delivered',
+            'status-ng-cancel'
+        );
+
+        if (status === 'Order Placed') {
+            element.classList.add('status-order-placed');
+        } else if (status === 'Order Shipped') {
+            element.classList.add('status-order-shipped');
+        } else if (status === 'Delivered') {
+            element.classList.add('status-delivered');
+        } else if (status === 'Ng Cancel') {
+            element.classList.add('status-ng-cancel');
+        }
+    }
 });
+
 
     </script>
 </body>

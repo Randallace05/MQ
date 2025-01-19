@@ -32,7 +32,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($formatted_date && $formatted_date != '1970-01-01') {
             $expiration_date = $formatted_date;
         } else {
-            $expiration_date = null;  // Invalid date, set to null
+            $expiration_date = null;  // Invalid date, set to null 
         }
     } else {
         $expiration_date = null;  // If no expiration date, set it to null

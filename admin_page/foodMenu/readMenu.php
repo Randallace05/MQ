@@ -25,7 +25,7 @@ while ($row = $result->fetch_assoc()) {
 
     foreach ($cart_items as $item) {
         // Extract product name and quantity using regex
-        if (preg_match('/^(.*?) \((\d+)x\)$/', trim($item), $matches)) {
+        if (preg_match('/^(.*?) $$(\d+)x$$$/', trim($item), $matches)) {
             $product_name = $matches[1];
             $quantity = (int) $matches[2];
 
@@ -59,6 +59,62 @@ foreach ($product_details as $detail) {
         $aggregated_details[$product_id]['total_price'] += $detail['price'] * $detail['quantity'];
     }
 }
+
+// Function to get the next batch number
+function getNextBatchNumber($conn, $product_id) {
+    $sql = "SELECT MAX(CAST(SUBSTRING(condname, -1) AS UNSIGNED)) as max_batch 
+            FROM products 
+            WHERE id = ? AND condname REGEXP '^[A-Z]+[0-9]+$'";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $product_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+    return ($row['max_batch'] !== null) ? $row['max_batch'] + 1 : 2;
+}
+
+// Handle form submission for adding a new batch
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_batch'])) {
+    $product_id = $_POST['product_id'];
+    $new_stock = $_POST['new_stock'];
+    $new_expiration_date = $_POST['new_expiration_date'];
+
+    // Fetch the existing product details
+    $stmt = $conn->prepare("SELECT * FROM products WHERE id = ?");
+    $stmt->bind_param("i", $product_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $product = $result->fetch_assoc();
+
+    if ($product) {
+        $next_batch_number = getNextBatchNumber($conn, $product_id);
+        $new_condname = $product['condname'] . $next_batch_number;
+
+        // Insert new batch
+        $insert_sql = "INSERT INTO products (name, price, image, description, other_images, stock, expiration_date, condname) 
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        $insert_stmt = $conn->prepare($insert_sql);
+        $insert_stmt->bind_param("sdssssss", 
+            $product['name'], 
+            $product['price'], 
+            $product['image'], 
+            $product['description'], 
+            $product['other_images'], 
+            $new_stock, 
+            $new_expiration_date, 
+            $new_condname
+        );
+        
+        if ($insert_stmt->execute()) {
+            echo "<script>alert('New batch added successfully!');</script>";
+        } else {
+            echo "<script>alert('Error adding new batch: " . $insert_stmt->error . "');</script>";
+        }
+        $insert_stmt->close();
+    }
+    $stmt->close();
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -299,10 +355,28 @@ footer a:hover {
     vertical-align: middle; /* Ensures content aligns vertically in cells */
 }
 
+.modal-header {
+    border-bottom: none;
+}
+
+.modal-content {
+    border-radius: 8px;
+}
+
+.table td:first-child {
+    font-weight: normal;
+    width: 150px;
+}
+
+.btn-close-white {
+    filter: brightness(0) invert(1);
+}
+
+#enableDisableBtn:hover, #addBatchBtn:hover {
+    background-color: #5710A7 !important;
+}
 </style>
 
-
-</style>
 
 </head>
 <body>
@@ -358,8 +432,8 @@ footer a:hover {
                                     <textarea name="description" class="form-control"><?= $product['description']; ?></textarea>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="description" class="form-label">Description</label>
-                                    <textarea name="description" class="form-control"><?= $product['expiration_date']; ?></textarea>
+                                    <label for="expiration_date" class="form-label">Expiration Date</label>
+                                    <input type="date" name="expiration_date" class="form-control" value="<?= $product['expiration_date']; ?>">
                                 </div>
                                 <div class="mb-3">
                                     <label for="image" class="form-label">Image</label>
@@ -384,7 +458,6 @@ footer a:hover {
             </div>
         <?php endforeach; ?>
     </div>
-</div>
     <div class="row align-items-start g-4"> <!-- Use align-items-start for proper vertical alignment -->
         <div class="col-md-6">
             <div class="table-container">
@@ -403,13 +476,22 @@ footer a:hover {
                                 <tr>
                                     <td>
                                         <a href="#" class="text-decoration-none" data-bs-toggle="modal"
-                                           data-bs-target="#addStockModal" data-product-id="<?= $product['id']; ?>">
+                                           data-bs-target="#productDetailsModal" 
+                                           data-product-id="<?= $product['id']; ?>"
+                                           data-product-name="<?= htmlspecialchars($product['name']); ?>"
+                                           data-product-codename="<?= htmlspecialchars($product['condname'] ?? ''); ?>"
+                                           data-product-expiration="<?= htmlspecialchars($product['expiration_date'] ?? ''); ?>"
+                                           data-product-stock="<?= htmlspecialchars($product['stock'] ?? ''); ?>">
                                             <?= htmlspecialchars($product['name']); ?>
                                         </a>
                                     </td>
                                     <td>&#8369; <?= number_format($product['price'], 2); ?></td>
                                     <td>
-                                        <img src="uploads/<?= htmlspecialchars($product['image']); ?>" class="product-img-small" alt="Product Image">
+                                        <?php if (!empty($product['image'])): ?>
+                                            <img src="uploads/<?= htmlspecialchars($product['image']); ?>" class="product-img-small" alt="Product Image">
+                                        <?php else: ?>
+                                            <span>No image</span>
+                                        <?php endif; ?>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -453,6 +535,64 @@ footer a:hover {
 </div>
 
 
+<!-- Product Details Modal -->
+<div class="modal fade" id="productDetailsModal" tabindex="-1" aria-labelledby="productDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: #6A11CB; color: white;">
+                <h5 class="modal-title" id="productDetailsModalLabel">Product Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Codename</th>
+                            <th>Expiration Date</th>
+                            <th>Stock</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productDetailsBody">
+                        <!-- Data will be populated here -->
+                    </tbody>
+                </table>
+                <button id="enableDisableBtn" class="btn" style="background-color: #6A11CB; color: white;">Enable/Disable</button>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn" style="background-color: #6A11CB; color: white;" id="addBatchBtn">Add Batch</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Batch Modal -->
+<div class="modal fade" id="addBatchModal" tabindex="-1" aria-labelledby="addBatchModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addBatchModalLabel">Add New Batch</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addBatchForm" method="post" action="">
+                    <input type="hidden" id="batchProductId" name="product_id">
+                    <div class="mb-3">
+                        <label for="new_stock" class="form-label">New Stock</label>
+                        <input type="number" class="form-control" id="new_stock" name="new_stock" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="new_expiration_date" class="form-label">New Expiration Date</label>
+                        <input type="date" class="form-control" id="new_expiration_date" name="new_expiration_date" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" name="add_batch">Add</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Bootstrap JS and dependencies -->
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
@@ -482,22 +622,80 @@ footer a:hover {
     sortLowButton.addEventListener('click', () => sortTable('low'));
 </script>
 <script>
-    // Get the add stock modal
-    var addStockModal = document.getElementById('addStockModal');
+// Product Details Modal
+const productDetailsModal = document.getElementById('productDetailsModal');
+productDetailsModal.addEventListener('show.bs.modal', function (event) {
+    const button = event.relatedTarget;
+    const productId = button.getAttribute('data-product-id');
+    
+    // Fetch product details from the server
+    fetch(`getProductDetails.php?id=${productId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (!data.error) {
+                // Create the table row with the fetched data
+                const tbody = document.getElementById('productDetailsBody');
+                tbody.innerHTML = `
+                    <tr>
+                        <td>${data.id}</td>
+                        <td>${data.name}</td>
+                        <td>${data.codename || ''}</td>
+                        <td>${data.expiration_date || ''}</td>
+                        <td>${data.stock || '0'}</td>
+                    </tr>
+                `;
 
-    // Add event listener to the modal to set the product ID dynamically
-    addStockModal.addEventListener('show.bs.modal', function (event) {
-        // Get the button that triggered the modal
-        var button = event.relatedTarget;
+                // Store the product data for the enable/disable button
+                const enableDisableBtn = document.getElementById('enableDisableBtn');
+                enableDisableBtn.textContent = data.is_disabled == 1 ? 'Enable' : 'Disable';
+                enableDisableBtn.setAttribute('data-product-id', data.id);
+                enableDisableBtn.setAttribute('data-is-disabled', data.is_disabled);
 
-        // Extract product ID from the data attribute
-        var productId = button.getAttribute('data-product-id');
+                // Set up the Add Batch button
+                const addBatchBtn = document.getElementById('addBatchBtn');
+                addBatchBtn.onclick = function() {
+                    const addBatchModal = new bootstrap.Modal(document.getElementById('addBatchModal'));
+                    document.getElementById('batchProductId').value = data.id;
+                    addBatchModal.show();
+                };
+            } else {
+                alert('Error loading product details');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error loading product details');
+        });
+});
 
-        // Set the product ID in the hidden input field of the modal
-        var productIdInput = document.getElementById('product_id');
-        productIdInput.value = productId;
+// Enable/Disable button click handler
+document.getElementById('enableDisableBtn').addEventListener('click', function() {
+    const productId = this.getAttribute('data-product-id');
+    const isDisabled = this.getAttribute('data-is-disabled');
+    
+    // Send request to toggle status
+    fetch('toggleProductStatus.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `id=${productId}&status=${isDisabled == '1' ? '0' : '1'}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload(); // Refresh the page to show updated status
+        } else {
+            alert('Error updating status');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error updating status');
     });
+});
 </script>
 
 </body>
 </html>
+

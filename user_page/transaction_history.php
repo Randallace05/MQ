@@ -279,7 +279,7 @@ $result_history = $stmt_history->get_result();
 
                         // Receipt Link
                         echo "<td>";
-                        echo "<a href='receipt.php?order_id=" . htmlspecialchars($row['id']) . "'
+                        echo "<a href='../admin_page/bill/receipt.php?order_id=" . htmlspecialchars($row['id']) . "'
                                 style='
                                     display: inline-block;
                                     padding: 8px 12px;

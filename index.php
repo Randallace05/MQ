@@ -1,5 +1,5 @@
 <!-- session -->
-<?php 
+<?php
   session_start();
   if(isset($_SESSION['unique_id'])){
     header("location: user_page/shop.php");
@@ -27,7 +27,7 @@
 
     <!-- Main Container -->
     <div class="container">
-        <div class="flex-container"> 
+        <div class="flex-container">
             <!-- Image Section -->
             <div class="image-container">
                 <img src="uploads/try3.png" alt="MO Kitchen">
@@ -133,7 +133,7 @@
                                         It is your responsibility to select the appropriate role for your intended usage. Misuse of roles may result in account restrictions.</p>
 
                                         <p><strong>4. Data Privacy</strong><br>
-                                        Any personal data collected through this form will be used and stored in compliance with our Privacy Policy.<br>
+                                        Any personal data collected through this form will be used and stored in compliance with our Privacy Policy Republic Act 10173.<br>
                                         We respect your privacy and commit to protecting your personal information from unauthorized access or disclosure. By submitting the registration form, you consent to the processing of your data for account creation and other related services.</p>
 
                                         <p><strong>5. Account Management</strong><br>
@@ -219,9 +219,9 @@
     // New login form submission handler
     document.getElementById('loginFormSubmit').addEventListener('submit', function(e) {
         e.preventDefault();
-        
+
         const formData = new FormData(this);
-        
+
         fetch('endpoint/login.php', {
             method: 'POST',
             body: formData

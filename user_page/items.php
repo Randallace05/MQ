@@ -23,7 +23,7 @@ $product = $product_result->fetch_assoc();
 // Decode the JSON-encoded `other_images` field
 $other_images = json_decode($product['other_images'], true); // Use `true` for associative array
 if (is_array($other_images)) {
-   
+
 } else {
     echo "No additional images available.";
 }
@@ -408,7 +408,7 @@ $average_rating = $review_count > 0 ? round($total_rating / $review_count, 1) : 
     .chili-rating .chili.active {
         color: #ff0000;
     }
-        
+
     .review-form {
         background-color: #f9f9f9;
         padding: 20px;
@@ -423,7 +423,7 @@ $average_rating = $review_count > 0 ? round($total_rating / $review_count, 1) : 
     .btn-primary:hover {
         background-color: #cc0000;
     }
-    
+
 
     @media (max-width: 768px) {
         .main-image-container {
@@ -498,6 +498,23 @@ $average_rating = $review_count > 0 ? round($total_rating / $review_count, 1) : 
 .chili-rating i {
     margin-right: 2px;
 }
+.btn-secondary {
+    background-color: #f0f0f0;
+    color: #333;
+    border: 1px solid #ccc;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 4px;
+    text-decoration: none;
+    display: inline-block;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background-color: #ddd;
+    color: #000;
+}
+
 
 #reviews-section {
     scroll-margin-top: 20px;
@@ -507,7 +524,7 @@ $average_rating = $review_count > 0 ? round($total_rating / $review_count, 1) : 
     .rating-filters {
         flex-wrap: wrap;
     }
-    
+
     .filter-btn {
         font-size: 0.875rem;
     }
@@ -540,7 +557,7 @@ $average_rating = $review_count > 0 ? round($total_rating / $review_count, 1) : 
 
             <div class="col-md-6">
                 <h1 class="product-title"><?php echo htmlspecialchars($product['name']); ?></h1>
-                
+
                 <!-- average of rating -->
                 <div class="chili-rating">
                 <?php
@@ -587,13 +604,18 @@ $average_rating = $review_count > 0 ? round($total_rating / $review_count, 1) : 
                             Add to Cart
                         </button>
 
+
                         <button type="submit"
                                 name="add_to_wishlist"
                                 class="wishlist-btn">
                             <i class="fas fa-heart"></i>
                         </button>
+
                     </div>
                 </form>
+                <div class="path">Products / <span><?php echo htmlspecialchars($product['name']); ?></span></div>
+                <a href="shop.php" class="btn btn-secondary mt-3">Back to Shop</a>
+
 
                 <?php if (isset($wishlist_message)): ?>
                     <p class="text-info mt-2"><?php echo $wishlist_message; ?></p>
@@ -603,7 +625,7 @@ $average_rating = $review_count > 0 ? round($total_rating / $review_count, 1) : 
                     <p class="text-danger">This product is out of stock.</p>
                 <?php endif; ?>
             </div>
-        
+
     <h3 class="mb-4">Customer Reviews</h3>
 
     <!-- Review Submission Form -->
@@ -613,8 +635,8 @@ $average_rating = $review_count > 0 ? round($total_rating / $review_count, 1) : 
                 <label for="rating" class="form-label">Rating:</label>
                 <div class="chili-rating submission-chilies">
                     <?php for($i = 1; $i <= 5; $i++): ?>
-                        <i class="fa-solid fa-pepper-hot chili" 
-                           data-rating="<?php echo $i; ?>" 
+                        <i class="fa-solid fa-pepper-hot chili"
+                           data-rating="<?php echo $i; ?>"
                            style="color: #c2bdbd; --fa-rotate-angle: 320deg;">
                         </i>
                     <?php endfor; ?>
@@ -638,7 +660,7 @@ $average_rating = $review_count > 0 ? round($total_rating / $review_count, 1) : 
  <!-- Product Ratings Section -->
 <div class="container mt-5" id="reviews-section">
     <h2 class="mb-4">Product Ratings</h2>
-    
+
     <!-- Overall Rating Display -->
     <div class="rating-summary bg-white p-4 rounded-lg shadow-sm mb-4">
         <div class="d-flex align-items-center gap-4">
@@ -683,7 +705,7 @@ $average_rating = $review_count > 0 ? round($total_rating / $review_count, 1) : 
         // Calculate total reviews
         $total_reviews = array_sum($rating_counts);
         ?>
-        
+
         <button class="filter-btn active" data-rating="all">
             All (<?php echo $total_reviews; ?>)
         </button>
@@ -707,10 +729,10 @@ $average_rating = $review_count > 0 ? round($total_rating / $review_count, 1) : 
         $rating_condition = $rating_filter > 0 ? "AND r.rating = ?" : "";
 
         $review_query = "SELECT r.*, u.img
-                        FROM reviews r 
-                        LEFT JOIN tbl_user u ON r.tbl_user_id = u.tbl_user_id 
+                        FROM reviews r
+                        LEFT JOIN tbl_user u ON r.tbl_user_id = u.tbl_user_id
                         WHERE r.product_id = ? $rating_condition
-                        ORDER BY r.created_at DESC 
+                        ORDER BY r.created_at DESC
                         LIMIT ? OFFSET ?";
 
         $stmt = $conn->prepare($review_query);
@@ -732,14 +754,14 @@ $average_rating = $review_count > 0 ? round($total_rating / $review_count, 1) : 
                         <?php if ($review['is_anonymous']): ?>
                             <img src="../assets/default-avatar.png" alt="Anonymous" class="rounded-circle" width="48" height="48">
                         <?php else: ?>
-                            <img src="<?php echo $review['profile_image'] ?? '../assets/default-avatar.png'; ?>" 
-                                 alt="<?php echo htmlspecialchars($review['username']); ?>" 
-                                 class="rounded-circle" 
-                                 width="48" 
+                            <img src="<?php echo $review['profile_image'] ?? '../assets/default-avatar.png'; ?>"
+                                 alt="<?php echo htmlspecialchars($review['username']); ?>"
+                                 class="rounded-circle"
+                                 width="48"
                                  height="48">
                         <?php endif; ?>
                     </div>
-                    
+
                     <!-- Review Content -->
                     <div class="flex-grow-1">
                         <div class="d-flex justify-content-between align-items-start mb-2">
@@ -769,7 +791,7 @@ $average_rating = $review_count > 0 ? round($total_rating / $review_count, 1) : 
 
          <!-- Pagination -->
          <?php
-        $total_reviews_query = "SELECT COUNT(*) as total FROM reviews WHERE product_id = ? " . 
+        $total_reviews_query = "SELECT COUNT(*) as total FROM reviews WHERE product_id = ? " .
                               ($rating_filter > 0 ? "AND rating = ?" : "");
         $stmt = $conn->prepare($total_reviews_query);
         if ($rating_filter > 0) {
@@ -784,12 +806,12 @@ $average_rating = $review_count > 0 ? round($total_rating / $review_count, 1) : 
         if ($total_pages > 1):
         ?>
             <div class="pagination d-flex justify-content-center align-items-center gap-2 mt-4">
-                <a href="javascript:void(0)" 
+                <a href="javascript:void(0)"
                    onclick="loadReviewPage(<?php echo max(1, $page - 1); ?>)"
                    class="btn btn-outline-primary <?php echo $page <= 1 ? 'disabled' : ''; ?>">
                     Previous
                 </a>
-                
+
                 <?php
                 $start_page = max(1, $page - 2);
                 $end_page = min($total_pages, $start_page + 4);
@@ -798,14 +820,14 @@ $average_rating = $review_count > 0 ? round($total_rating / $review_count, 1) : 
                 }
                 for ($i = $start_page; $i <= $end_page; $i++):
                 ?>
-                    <a href="javascript:void(0)" 
+                    <a href="javascript:void(0)"
                        onclick="loadReviewPage(<?php echo $i; ?>)"
                        class="btn <?php echo $i === $page ? 'btn-primary' : 'btn-outline-primary'; ?>">
                         <?php echo $i; ?>
                     </a>
                 <?php endfor; ?>
-                
-                <a href="javascript:void(0)" 
+
+                <a href="javascript:void(0)"
                    onclick="loadReviewPage(<?php echo min($total_pages, $page + 1); ?>)"
                    class="btn btn-outline-primary <?php echo $page >= $total_pages ? 'disabled' : ''; ?>">
                     Next
@@ -845,20 +867,20 @@ $average_rating = $review_count > 0 ? round($total_rating / $review_count, 1) : 
         });
     });
 });
-   
+
 </script>
-   
+
 <script>
 function loadReviewPage(page, rating = 0) {
     const reviewsSection = document.querySelector('.reviews-container');
-    
+
     // Create URL with parameters
     const url = new URL(window.location.href);
     url.searchParams.set('review_page', page);
     if (rating > 0) {
         url.searchParams.set('rating', rating);
     }
-    
+
     // Use fetch to get new reviews
     fetch(url)
         .then(response => response.text())
@@ -866,15 +888,15 @@ function loadReviewPage(page, rating = 0) {
             // Create a temporary container
             const temp = document.createElement('div');
             temp.innerHTML = html;
-            
+
             // Find the reviews container in the response
             const newReviews = temp.querySelector('.reviews-container');
-            
+
             // Replace the current reviews with new ones
             if (newReviews) {
                 reviewsSection.innerHTML = newReviews.innerHTML;
             }
-            
+
             // Update URL without page reload
             window.history.pushState({}, '', url);
         });
@@ -882,13 +904,13 @@ function loadReviewPage(page, rating = 0) {
 
 document.addEventListener('DOMContentLoaded', function() {
     const filterButtons = document.querySelectorAll('.filter-btn');
-    
+
     filterButtons.forEach(button => {
         button.addEventListener('click', () => {
             // Update active button
             filterButtons.forEach(btn => btn.classList.remove('active'));
             button.classList.add('active');
-            
+
             // Load first page with selected rating
             const rating = button.dataset.rating;
             loadReviewPage(1, rating === 'all' ? 0 : rating);
@@ -899,7 +921,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <script>
         function loadReviewPage(page, rating = 0) {
             const reviewsSection = document.querySelector('.reviews-container');
-            
+
             // Create URL with parameters
             const url = new URL(window.location.href);
             url.searchParams.set('review_page', page);
@@ -908,7 +930,7 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 url.searchParams.delete('rating');
             }
-            
+
             // Use fetch to get new reviews
             fetch(url)
                 .then(response => response.text())
@@ -916,18 +938,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Create a temporary container
                     const temp = document.createElement('div');
                     temp.innerHTML = html;
-                    
+
                     // Find the reviews container in the response
                     const newReviews = temp.querySelector('.reviews-container');
-                    
+
                     // Replace the current reviews with new ones
                     if (newReviews) {
                         reviewsSection.innerHTML = newReviews.innerHTML;
                     }
-                    
+
                     // Update URL without page reload
                     window.history.pushState({}, '', url);
-                    
+
                     // Scroll to the reviews section
                     document.getElementById('reviews-section').scrollIntoView({ behavior: 'smooth' });
                 });
@@ -935,13 +957,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
         document.addEventListener('DOMContentLoaded', function() {
             const filterButtons = document.querySelectorAll('.filter-btn');
-            
+
             filterButtons.forEach(button => {
                 button.addEventListener('click', () => {
                     // Update active button
                     filterButtons.forEach(btn => btn.classList.remove('active'));
                     button.classList.add('active');
-                    
+
                     // Load first page with selected rating
                     const rating = button.dataset.rating;
                     loadReviewPage(1, rating === 'all' ? 0 : rating);
@@ -949,7 +971,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     </script>
-    
+
 </body>
 </html>
 

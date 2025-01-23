@@ -31,20 +31,39 @@ if ($user_result->num_rows === 0) {
     die("Invalid user ID. Please log in again.");
 }
 
-// Fetch cart items for the user
-$stmt = $conn->prepare("SELECT * FROM cart WHERE tbl_user_id = ?");
-$stmt->bind_param("i", $tbl_user_id);
-$stmt->execute();
-$result = $stmt->get_result();
-$cartItems = $result->fetch_all(MYSQLI_ASSOC);
+$cartItems = [];
+$total_amount = 0; // Initialize total amount
 
-// Check if there are cart items
-if (empty($cartItems)) {
-    die("No cart items found for this user.");
+// Fetch selected cart items
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['selected_products']) && !empty($_POST['selected_products'])) {
+    $selected_products = array_map('intval', $_POST['selected_products']); // Sanitize input
+
+    if (count($selected_products) > 0) {
+        // Prepare query with placeholders
+        $placeholders = implode(',', array_fill(0, count($selected_products), '?'));
+        $stmt = $conn->prepare("SELECT * FROM cart WHERE tbl_user_id = ? AND cart_id IN ($placeholders)");
+
+        // Bind dynamic parameters
+        $types = str_repeat('i', count($selected_products) + 1);
+        $stmt->bind_param($types, $tbl_user_id, ...$selected_products);
+
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $cartItems = $result->fetch_all(MYSQLI_ASSOC);
+
+        // Calculate total amount
+        foreach ($cartItems as $cartItem) {
+            $total_amount += $cartItem['price'] * $cartItem['quantity'];
+        }
+    } else {
+        die("No valid products selected.");
+    }
+} else {
+    die("No items selected. Please go back and select items to proceed.");
 }
 
 // Process the form submission
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
+if (isset($_POST['firstname'])) {
     // Retrieve and sanitize input data
     $first_name = trim($_POST['firstname']);
     $middle_name = trim($_POST['Mname']);
@@ -61,9 +80,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 
     // Validate and retrieve the payment method
-    if (isset($_POST['payment_method']) && in_array($_POST['payment_method'], ['Cash on Delivery', 'Gcash Payment'])) {
-        $payment_method = $_POST['payment_method'];
-    } else {
+    $payment_method = isset($_POST['payment_method']) ? $_POST['payment_method'] : null;
+    if (!in_array($payment_method, ['Cash on Delivery', 'Gcash Payment'])) {
         die("Invalid payment method selected. Please go back and try again.");
     }
 
@@ -72,7 +90,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if ($payment_method === "Gcash Payment" && isset($_FILES['gcash_proof']) && $_FILES['gcash_proof']['error'] === UPLOAD_ERR_OK) {
         $upload_dir = '../../uploads/payment_proofs/';
         if (!is_dir($upload_dir)) {
-            mkdir($upload_dir, 0777, true); // Create directory if it doesn't exist
+            mkdir($upload_dir, 0777, true);
         }
 
         $file_name = uniqid() . '_' . basename($_FILES['gcash_proof']['name']);
@@ -85,49 +103,37 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
     }
 
-    // Combine all cart items into a single field without including the price
-    $cart_items_combined = [];
-    foreach ($cartItems as $cartItem) {
-        $cart_items_combined[] = "{$cartItem['name']} ({$cartItem['quantity']}x)";
-    }
-    $cart_items_string = implode(", ", $cart_items_combined);
-
-    // Define the shipping fee (set a fixed amount or calculate dynamically if needed)
-    $shipping_fee = 60.00; // Example: 60 currency units for the shipping fee
-
-    // Calculate the total amount including the shipping fee
-    $total_amount = array_reduce($cartItems, function ($carry, $item) {
-        return $carry + ($item['price'] * $item['quantity']);
-    }, 0);
-
-    $total_amount += $shipping_fee; // Add the shipping fee to the total amount
-
-    // Insert into the orders table and retrieve the generated order ID
+    // Insert into orders table
     $order_stmt = $conn->prepare(
         "INSERT INTO orders (tbl_user_id, order_date, total_amount, shipping_address, payment_method)
         VALUES (?, NOW(), ?, ?, ?)"
     );
 
     $order_stmt->bind_param("idss", $tbl_user_id, $total_amount, $address, $payment_method);
-
     if (!$order_stmt->execute()) {
         die("Error inserting into orders table: " . $order_stmt->error);
     }
 
-    $orders_id = $order_stmt->insert_id; // Get the generated orders_id
+    $orders_id = $order_stmt->insert_id;
     $order_stmt->close();
 
     // Insert data into the checkout table
+    $cart_items_combined = [];
+    foreach ($cartItems as $cartItem) {
+        $cart_items_combined[] = "{$cartItem['name']} ({$cartItem['quantity']}x)";
+    }
+    $cart_items_string = implode(", ", $cart_items_combined);
+
     $checkout_stmt = $conn->prepare(
         "INSERT INTO checkout (orders_id, tbl_user_id, cart_items, firstname, middlename, lastname, address, city, zip_code, contact_number, payment_method, gcash_proof)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
     );
 
     $checkout_stmt->bind_param(
-        "iissssssssss", // Updated type string
+        "iissssssssss",
         $orders_id,
         $tbl_user_id,
-        $cart_items_string, // Use the formatted string without prices
+        $cart_items_string,
         $first_name,
         $middle_name,
         $last_name,
@@ -145,10 +151,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     $checkout_stmt->close();
 
-    // Redirect to receipt.php with order ID
-    header("Location: receipt.php?order_id=" . $orders_id);
+    // Delete selected items from cart
+    if (count($selected_products) > 0) {
+        $placeholders = implode(',', array_fill(0, count($selected_products), '?'));
+        $stmt = $conn->prepare("DELETE FROM cart WHERE tbl_user_id = ? AND cart_id IN ($placeholders)");
+        $types = str_repeat('i', count($selected_products) + 1);
+        $stmt->bind_param($types, $tbl_user_id, ...$selected_products);
+        $stmt->execute();
+    }
+
+    // Redirect to receipt
+    header("Location: receipt.php?order_id=$orders_id");
     exit;
 }
 
 // Close the database connection
 $conn->close();
+?>

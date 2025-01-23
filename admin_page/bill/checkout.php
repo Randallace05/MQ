@@ -237,50 +237,38 @@ try {
 </head>
 <body id="page-top">
     <div id="wrapper">
-        <!-- Sidebar -->
-        <!-- End of Sidebar -->
-
         <div id="content-wrapper" class="d-flex flex-column">
-            <!-- Topbar -->
-            <!-- End of Topbar -->
-
-            <!-- Begin Page Content -->
             <div class="container-fluid">
                 <h2 class="mt-4">Check Out</h2>
                 <div class="row">
                     <div class="col-75">
                         <div class="container">
-                        <form id="checkoutForm" action="action_page.php" method="POST" enctype="multipart/form-data" onsubmit="return handleCheckout(event)">
+                            <form id="checkoutForm" action="action_page.php" method="POST" enctype="multipart/form-data" onsubmit="return handleCheckout(event)">
                                 <div class="row">
                                     <div class="col-50">
                                         <h3>Billing Address</h3>
+                                        <!-- Billing fields -->
                                         <label for="fname"><i class="fa fa-user"></i> First Name</label>
                                         <input type="text" id="fname" name="firstname" required>
-
                                         <label for="email"><i class="fa fa-user"></i> Middle Name</label>
                                         <input type="text" id="email" name="Mname" required>
-
                                         <label for="email"><i class="fa fa-user"></i> Last Name</label>
                                         <input type="text" id="email" name="lname" required>
-
                                         <label for="adr"><i class="fa fa-institution"></i> Address</label>
                                         <input type="text" id="adr" name="address" required>
-
                                         <label for="city"><i class="fa fa-institution"></i> City</label>
                                         <input type="text" id="city" name="city" required>
-
                                         <label for="z"><i class="fa fa-institution"></i> Zip Code</label>
                                         <input type="text" id="z" name="z" required>
-
                                         <label for="num"><i class="fa fa-phone"></i> Contact Number</label>
                                         <input type="text" id="num" name="num" required>
                                     </div>
                                     <div class="col-50">
                                         <h3>Payment</h3>
+                                        <!-- Payment selection -->
                                         <label>
                                             <input type="radio" name="payment_method" value="Cash on Delivery" onclick="togglePaymentFields(false)" required> Cash on Delivery
-                                        </label>
-                                        <br>
+                                        </label><br>
                                         <label>
                                             <input type="radio" name="payment_method" value="Gcash Payment" onclick="togglePaymentFields(true)" required> GCash Payment
                                         </label>
@@ -292,8 +280,12 @@ try {
                                             <input type="file" id="gcash-proof" name="gcash_proof" accept="image/*">
                                         </div>
                                     </div>
-
                                 </div>
+                                <!-- Include hidden inputs for selected products -->
+                                <?php foreach ($selected_products as $product_id): ?>
+                                    <input type="hidden" name="selected_products[]" value="<?php echo htmlspecialchars($product_id); ?>">
+                                <?php endforeach; ?>
+
                                 <label>
                                     <input type="checkbox" checked="checked" name="sameadr"> Shipping address same as billing
                                 </label>
@@ -302,45 +294,46 @@ try {
                         </div>
                     </div>
                     <div class="col-25">
-    <div class="container">
-        <h4>Cart
-            <span class="price" style="color:black">
-                <i class="fa fa-shopping-cart"></i>
-                <b><?php echo count($cartItems); ?></b>
-            </span>
-        </h4>
-        <?php
-        $shippingFee = 60; // Fixed shipping fee
-        $totalPrice = 0;
+                        <div class="container">
+                            <h4>Cart
+                                <span class="price" style="color:black">
+                                    <i class="fa fa-shopping-cart"></i>
+                                    <b><?php echo count($cartItems); ?></b>
+                                </span>
+                            </h4>
+                            <?php
+                            $shippingFee = 60; // Fixed shipping fee
+                            $totalPrice = 0;
 
-        foreach ($cartItems as $item) {
-            // Assuming each item has 'name', 'price', and 'quantity' properties
-            $itemTotal = $item['price'] * $item['quantity'];
-            $totalPrice += $itemTotal;
-        ?>
-            <p>
-                <a href="#"><?php echo $item['name']; ?></a>
-                <span class="price"><?php echo '₱' . number_format($itemTotal, 2); ?></span>
-            </p>
-        <?php } ?>
+                            foreach ($cartItems as $item) {
+                                $itemTotal = $item['price'] * $item['quantity'];
+                                $totalPrice += $itemTotal;
+                            ?>
+                                <p>
+                                    <a href="#"><?php echo htmlspecialchars($item['name']); ?></a>
+                                    <span class="price"><?php echo '₱' . number_format($itemTotal, 2); ?></span>
+                                </p>
+                            <?php } ?>
 
-        <!-- Display shipping fee -->
-        <p>
-            <a href="#">Shipping Fee</a>
-            <span class="price"><?php echo '₱' . number_format($shippingFee, 2); ?></span>
-        </p>
+                            <p>
+                                <a href="#">Shipping Fee</a>
+                                <span class="price"><?php echo '₱' . number_format($shippingFee, 2); ?></span>
+                            </p>
 
-        <!-- Calculate and display total price including shipping -->
-        <?php $totalPrice += $shippingFee; ?>
-        <hr>
-        <p>
-            <b>Total</b>
-            <span class="price" style="color:black">
-                <b><?php echo '₱' . number_format($totalPrice, 2); ?></b>
-            </span>
-        </p>
+                            <?php $totalPrice += $shippingFee; ?>
+                            <hr>
+                            <p>
+                                <b>Total</b>
+                                <span class="price" style="color:black">
+                                    <b><?php echo '₱' . number_format($totalPrice, 2); ?></b>
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
 <!-- Scripts -->
 <script>
     function togglePaymentFields(show) {

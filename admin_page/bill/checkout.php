@@ -26,22 +26,39 @@ try {
     // Get logged-in user's ID
     $tbl_user_id = intval($_SESSION['tbl_user_id']); // Ensure ID is an integer for safety
 
-    // Fetch cart items for the user
-    $stmt = $conn->prepare("SELECT * FROM cart WHERE tbl_user_id = ?");
-    $stmt->bind_param("i", $tbl_user_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $cartItems = $result->fetch_all(MYSQLI_ASSOC);
-
-    // Calculate the total amount
+    $cartItems = [];
     $grandTotal = 0;
-    foreach ($cartItems as $item) {
-        $grandTotal += $item['price'] * $item['quantity'];
+
+    // Handle selected products
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['selected_products']) && !empty($_POST['selected_products'])) {
+        $selected_products = array_map('intval', $_POST['selected_products']); // Ensure IDs are integers
+
+        // Prepare query to fetch selected cart items
+        $placeholders = implode(',', array_fill(0, count($selected_products), '?'));
+        $stmt = $conn->prepare("SELECT * FROM cart WHERE tbl_user_id = ? AND cart_id IN ($placeholders)");
+
+        // Bind parameters dynamically
+        $types = str_repeat('i', count($selected_products) + 1); // 'i' for integers
+        $stmt->bind_param($types, $tbl_user_id, ...$selected_products);
+
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $cartItems = $result->fetch_all(MYSQLI_ASSOC);
+
+        // Calculate the total amount for selected items
+        foreach ($cartItems as $item) {
+            $grandTotal += $item['price'] * $item['quantity'];
+        }
+    } else {
+        echo "<script>
+            alert('No items selected. Please go back and select items to proceed.');
+            window.history.back();
+        </script>";
+        exit;
     }
 
-    // Handle form submission
-   // Check if the form was submitted
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Handle form submission for checkout
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['firstname'])) {
         // Fetch form data
         $firstName = htmlspecialchars($_POST['firstname']);
         $middleName = htmlspecialchars($_POST['Mname']);
@@ -93,6 +110,11 @@ try {
             // Get the last inserted order ID
             $order_id = $conn->insert_id;
 
+            // Remove processed items from the cart
+            $stmt = $conn->prepare("DELETE FROM cart WHERE tbl_user_id = ? AND cart_id IN ($placeholders)");
+            $stmt->bind_param($types, $tbl_user_id, ...$selected_products);
+            $stmt->execute();
+
             // Redirect based on payment method
             if ($paymentMethod === "Cash on Delivery") {
                 header("Location: receipt.php?order_id=$order_id");
@@ -104,14 +126,13 @@ try {
             echo "Error: " . $stmt->error;
         }
     }
-
-
 } catch (Exception $e) {
     die("Error: " . $e->getMessage());
 } finally {
     $conn->close(); // Close the database connection
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">

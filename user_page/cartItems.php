@@ -272,82 +272,70 @@ if (isset($_POST['update_product_quantity'])) {
 <div class="container cart-container">
     <section class="shopping_cart">
         <h1 class="heading">My Cart</h1>
-        <form id="cart-form" method="POST">
+        <form id="cart-form" method="POST" action="../admin_page/bill/checkout.php">
         <table>
         <thead>
-    <tr>
-        <th>Select</th> <!-- Add this column -->
-        <th>Sl No</th>
-        <th>Product Name</th>
-        <th>Product Image</th>
-        <th>Product Price</th>
-        <th>Product Quantity</th>
-        <th>Total Price</th>
-        <th>Remove</th>
-    </tr>
-</thead>
-<tbody>
-    <?php
-    $select_cart_products = $conn->prepare("SELECT * FROM `cart` WHERE tbl_user_id = ?");
-    $select_cart_products->bind_param("i", $tbl_user_id);
-    $select_cart_products->execute();
-    $result = $select_cart_products->get_result();
-
-    if ($result->num_rows > 0) {
-        $sl_no = 1;
-        while ($fetch_cart_products = $result->fetch_assoc()) {
-            ?>
             <tr>
-                <td>
-                    <input type="checkbox" class="select-product"
-                           data-price="<?php echo $fetch_cart_products['price'] * $fetch_cart_products['quantity']; ?>"
-                           data-cart-id="<?php echo $fetch_cart_products['cart_id']; ?>">
-                </td>
-                <td><?php echo $sl_no++; ?></td>
-                <td><?php echo htmlspecialchars($fetch_cart_products['name']); ?></td>
-                <td>
-                    <img src="../admin_page/foodMenu/uploads/<?php echo htmlspecialchars($fetch_cart_products['image']); ?>" alt="">
-                </td>
-                <td><?php echo "₱" . htmlspecialchars($fetch_cart_products['price']); ?></td>
-                <td>
-                    <div class="quantity_box">
-                        <button class="quantity-btn minus" data-cart-id="<?php echo $fetch_cart_products['cart_id']; ?>">-</button>
-                        <input
-                            type="number"
-                            class="quantity-input"
-                            value="<?php echo htmlspecialchars($fetch_cart_products['quantity']); ?>"
-                            readonly
-                            data-cart-id="<?php echo $fetch_cart_products['cart_id']; ?>"/>
-                        <button class="quantity-btn plus" data-cart-id="<?php echo $fetch_cart_products['cart_id']; ?>">+</button>
-                    </div>
-                </td>
-                <td><?php echo "₱" . htmlspecialchars($fetch_cart_products['price'] * $fetch_cart_products['quantity']); ?></td>
-                <td>
-                    <a href="delete_cart_item.php?id=<?php echo htmlspecialchars($fetch_cart_products['cart_id']); ?>" onclick="return confirm('Are you sure you want to remove this item?');">
-                        <i class="fas fa-trash"></i> Remove
-                    </a>
-                </td>
+                <th>Select</th>
+                <th>Sl No</th>
+                <th>Product Name</th>
+                <th>Product Image</th>
+                <th>Product Price</th>
+                <th>Product Quantity</th>
+                <th>Total Price</th>
+                <th>Remove</th>
             </tr>
+        </thead>
+        <tbody>
             <?php
-        }
-    } else {
-        echo "<tr><td colspan='8' class='text-center'>Your cart is empty. Start shopping now!</td></tr>";
-    }
-    ?>
-</tbody>
+            $select_cart_products = $conn->prepare("SELECT * FROM `cart` WHERE tbl_user_id = ?");
+            $select_cart_products->bind_param("i", $tbl_user_id);
+            $select_cart_products->execute();
+            $result = $select_cart_products->get_result();
 
+            if ($result->num_rows > 0) {
+                $sl_no = 1;
+                while ($fetch_cart_products = $result->fetch_assoc()) {
+                    ?>
+                    <tr>
+                        <td>
+                            <input type="checkbox" class="select-product" name="selected_products[]" value="<?php echo $fetch_cart_products['cart_id']; ?>" data-price="<?php echo $fetch_cart_products['price'] * $fetch_cart_products['quantity']; ?>">
+                        </td>
+                        <td><?php echo $sl_no++; ?></td>
+                        <td><?php echo htmlspecialchars($fetch_cart_products['name']); ?></td>
+                        <td>
+                            <img src="../admin_page/foodMenu/uploads/<?php echo htmlspecialchars($fetch_cart_products['image']); ?>" alt="">
+                        </td>
+                        <td><?php echo "₱" . htmlspecialchars($fetch_cart_products['price']); ?></td>
+                        <td>
+                            <div class="quantity_box">
+                                <button type="button" class="quantity-btn minus" data-cart-id="<?php echo $fetch_cart_products['cart_id']; ?>">-</button>
+                                <input type="number" class="quantity-input" value="<?php echo htmlspecialchars($fetch_cart_products['quantity']); ?>" readonly data-cart-id="<?php echo $fetch_cart_products['cart_id']; ?>">
+                                <button type="button" class="quantity-btn plus" data-cart-id="<?php echo $fetch_cart_products['cart_id']; ?>">+</button>
+                            </div>
+                        </td>
+                        <td><?php echo "₱" . htmlspecialchars($fetch_cart_products['price'] * $fetch_cart_products['quantity']); ?></td>
+                        <td>
+                            <a href="delete_cart_item.php?id=<?php echo htmlspecialchars($fetch_cart_products['cart_id']); ?>" onclick="return confirm('Are you sure you want to remove this item?');">
+                                Remove
+                            </a>
+                        </td>
+                    </tr>
+                    <?php
+                }
+            } else {
+                echo "<tr><td colspan='8' class='text-center'>Your cart is empty. Start shopping now!</td></tr>";
+            }
+            ?>
+        </tbody>
         </table>
 
-        </form>
-
         <div class="table_bottom">
-    <a href="shop.php" class="bottom-btn">Continue Shopping</a>
-    <h3 class="bottom-btn total-amount">Total: ₱0.00</h3>
-    <a href="../admin_page/bill/checkout.php" class="bottom-btn checkout-btn disabled"
-       style="pointer-events: none; opacity: 0.5;">
-        Proceed to Checkout
-    </a>
-</div>
+            <a href="shop.php" class="bottom-btn">Continue Shopping</a>
+            <h3 class="bottom-btn total-amount">Total: ₱0.00</h3>
+            <button type="submit" class="bottom-btn checkout-btn">Proceed to Checkout</button>
+        </div>
+        </form>
 
 
         <a href="delete_all_cart_items.php" class="delete-all-btn"

@@ -6,7 +6,7 @@ include '../conn/conn.php';
 $data = json_decode(file_get_contents("php://input"), true);
 
 if (isset($data['product_id']) && isset($data['action'])) {
-    $userId = $_SESSION['unique_id']; // Assuming user is logged in
+    $userId = $_SESSION['tbl_user_id']; // Assuming user is logged in
     $productId = intval($data['product_id']);
     $action = $data['action'];
 

@@ -30,7 +30,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
 $unique_id = intval($_SESSION['tbl_user_id']);
 
 // Fetch the latest checkout record for the user
-$checkout_sql = "SELECT checkout_id, firstname, middlename, lastname, address, city, zip_code, contact_number, payment_method
+$checkout_sql = "SELECT checkout_id, firstname, middlename, lastname, address, city, zip_code, contact_number, payment_method, cart_items
                  FROM checkout
                  WHERE tbl_user_id = $unique_id
                  ORDER BY checkout_id DESC
@@ -40,46 +40,73 @@ $checkout_result = $conn->query($checkout_sql);
 if ($checkout_result && $checkout_result->num_rows > 0) {
     $user = $checkout_result->fetch_assoc();
     $checkout_id = $user['checkout_id']; // Use `checkout_id` as the unique identifier
+
+    // Parse the `cart_items` field manually (assuming it's a plain string)
+    $cart_items_raw = $user['cart_items'];
+    $cart_items = [];
+
+    // Split items by comma (if multiple items exist)
+    $items = explode(',', $cart_items_raw);
+    foreach ($items as $item) {
+        // Use regex to extract item name and quantity
+        if (preg_match('/^(.*?)\s\((\d+)x\)$/', trim($item), $matches)) {
+            $cart_items[] = [
+                'name' => trim($matches[1]), // Item name
+                'quantity' => intval($matches[2]), // Quantity
+            ];
+        }
+    }
+
+    // Check if cart items were parsed
+    if (empty($cart_items)) {
+        die("Cart items could not be parsed. Please ensure the format is correct.");
+    }
 } else {
     die("No checkout details found for this user.");
 }
 
-// Fetch cart items
-// Fetch cart items and store in an array
-$cart_items = [];
-$cart_sql = "SELECT name, price, quantity FROM cart WHERE tbl_user_id = $unique_id";
-$cart_result = $conn->query($cart_sql);
-
-if ($cart_result && $cart_result->num_rows > 0) {
-    while ($row = $cart_result->fetch_assoc()) {
-        $cart_items[] = $row;
-    }
-} else {
-    die("No items in the cart for this user.");
-}
-
-// Calculate totals
+// Initialize variables
 $subtotal = 0;
 $shipping_fee = 60; // Fixed shipping fee
+
+// Prepare an array for item details
+$cart_details = [];
+
+// Fetch prices for each item from the database
 foreach ($cart_items as $item) {
-    $subtotal += $item['price'] * $item['quantity'];
+    $name = $conn->real_escape_string($item['name']);
+    $quantity = intval($item['quantity']);
+
+    // Fetch item price
+    $price_sql = "SELECT price FROM products WHERE name = '$name' LIMIT 1";
+    $price_result = $conn->query($price_sql);
+
+    if ($price_result && $price_result->num_rows > 0) {
+        $product = $price_result->fetch_assoc();
+        $price = $product['price'];
+        $item_total = $price * $quantity;
+
+        // Add to cart details
+        $cart_details[] = [
+            'name' => $name,
+            'quantity' => $quantity,
+            'price' => $price,
+            'total' => $item_total,
+        ];
+
+        // Calculate subtotal
+        $subtotal += $item_total;
+    } else {
+        die("Price not found for item: $name");
+    }
 }
+
 $grand_total = $subtotal + $shipping_fee;
 
 // Prepare shipping address
 $shipping_address = "{$user['address']}, {$user['city']}, {$user['zip_code']}";
-
-// Clear the cart
-$clear_cart_sql = "DELETE FROM cart WHERE tbl_user_id = $unique_id";
-
-if ($conn->query($clear_cart_sql) === TRUE) {
-    echo "<script>console.log('Cart cleared successfully.')</script>";
-} else {
-    echo "<script>console.error('Error clearing the cart: " . $conn->error . "');</script>";
-    die("Error clearing the cart: " . $conn->error);
-}
-
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -272,18 +299,16 @@ if ($conn->query($clear_cart_sql) === TRUE) {
                 </thead>
                 <tbody>
                     <?php
-                    foreach ($cart_items as $item) {
-                        $item_total = $item['price'] * $item['quantity'];
+                    foreach ($cart_details as $detail) {
                         echo "<tr>
-                                <td>{$item['name']}</td>
-                                <td>{$item['quantity']}</td>
-                                <td>₱" . number_format($item['price'], 2) . "</td>
-                                <td>₱" . number_format($item_total, 2) . "</td>
+                                <td>{$detail['name']}</td>
+                                <td>{$detail['quantity']}</td>
+                                <td>₱" . number_format($detail['price'], 2) . "</td>
+                                <td>₱" . number_format($detail['total'], 2) . "</td>
                             </tr>";
                     }
                     ?>
                 </tbody>
-
             </table>
             <p class="total">Subtotal: ₱<?php echo number_format($subtotal, 2); ?></p>
             <p class="total">Shipping Fee: ₱<?php echo number_format($shipping_fee, 2); ?></p>

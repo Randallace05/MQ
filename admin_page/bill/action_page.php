@@ -151,14 +151,6 @@ if (isset($_POST['firstname'])) {
 
     $checkout_stmt->close();
 
-    // Delete selected items from cart
-    if (count($selected_products) > 0) {
-        $placeholders = implode(',', array_fill(0, count($selected_products), '?'));
-        $stmt = $conn->prepare("DELETE FROM cart WHERE tbl_user_id = ? AND cart_id IN ($placeholders)");
-        $types = str_repeat('i', count($selected_products) + 1);
-        $stmt->bind_param($types, $tbl_user_id, ...$selected_products);
-        $stmt->execute();
-    }
 
     // Redirect to receipt
     header("Location: receipt.php?order_id=$orders_id");

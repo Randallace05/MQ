@@ -347,6 +347,9 @@ if (isset($_POST['update_product_quantity'])) {
 <script>
 document.addEventListener("DOMContentLoaded", () => {
     const buttons = document.querySelectorAll(".quantity-btn");
+    const checkboxes = document.querySelectorAll(".select-product");
+    const totalDisplay = document.querySelector(".total-amount");
+    const checkoutButton = document.querySelector(".checkout-btn");
 
     buttons.forEach(button => {
         button.addEventListener("click", (e) => {
@@ -365,42 +368,51 @@ document.addEventListener("DOMContentLoaded", () => {
             quantityInput.value = currentQuantity;
 
             // Send AJAX request to update the quantity
-            updateQuantity(cartId, currentQuantity);
+            updateQuantity(cartId, currentQuantity).then(() => {
+                // Update total price for the item in the DOM
+                const row = button.closest("tr");
+                const priceCell = row.querySelector("td:nth-child(5)");
+                const totalPriceCell = row.querySelector("td:nth-child(7)");
+
+                const price = parseFloat(priceCell.textContent.replace("₱", ""));
+                totalPriceCell.textContent = `₱${(price * currentQuantity).toFixed(2)}`;
+
+                // Recalculate the total amount
+                updateTotal();
+            });
         });
     });
 
-    const updateQuantity = (cartId, quantity) => {
-        fetch("update_cart_quantity.php", {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: `cart_id=${cartId}&quantity=${quantity}`
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    console.log("Quantity updated successfully");
-                } else {
-                    console.error(`Error: ${data.message}`);
-                    alert("Failed to update quantity");
-                }
-            })
-            .catch(error => {
-                console.error("Error:", error);
+    const updateQuantity = async (cartId, quantity) => {
+        try {
+            const response = await fetch("update_cart_quantity.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: `cart_id=${cartId}&quantity=${quantity}`
             });
+
+            const data = await response.json();
+
+            if (!data.success) {
+                console.error(`Error: ${data.message}`);
+                alert("Failed to update quantity.");
+            }
+        } catch (error) {
+            console.error("Error:", error);
+        }
     };
-});
-document.addEventListener("DOMContentLoaded", () => {
-    const checkboxes = document.querySelectorAll(".select-product");
-    const totalDisplay = document.querySelector(".total-amount");
-    const checkoutButton = document.querySelector(".checkout-btn");
 
     const updateTotal = () => {
         let total = 0;
         checkboxes.forEach(checkbox => {
             if (checkbox.checked) {
-                total += parseFloat(checkbox.getAttribute("data-price"));
+                const row = checkbox.closest("tr");
+                const totalPriceCell = row.querySelector("td:nth-child(7)");
+                const itemTotal = parseFloat(totalPriceCell.textContent.replace("₱", ""));
+                total += itemTotal;
             }
         });
+
         totalDisplay.textContent = `₱${total.toFixed(2)}`;
 
         // Enable or disable checkout button

@@ -11,83 +11,109 @@ require_once '../endpoint/session_config.php';
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" />
     <link href="css/styles.css" rel="stylesheet" />
     <style>
-        /* Container for main content */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
         .main-container {
             max-width: 1400px;
             margin: 0 auto;
             padding: 0 40px;
+            animation: fadeIn 1s ease-in-out;
         }
 
         .carousel-item img {
             height: 400px;
             object-fit: cover;
             width: 100%;
+            border-radius: 10px;
         }
 
         .promo-container {
             display: flex;
-            gap: 5px;
+            gap: 10px;
             padding: 20px;
             justify-content: center;
         }
 
         .promo-image {
-            width: calc(50% - 2.5px);
+            width: calc(50% - 5px);
             height: 250px;
             object-fit: cover;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .promo-image:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
         }
 
         .product-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             gap: 20px;
+            padding: 20px 0;
         }
 
         .product-card {
             position: relative;
-            border: 1px solid #ddd;
-            border-radius: 8px;
+            border: none;
+            border-radius: 15px;
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             background-color: #fff;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
         }
+
         .product-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(-10px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
         }
 
         .product-image {
             width: 100%;
             height: 200px;
             object-fit: cover;
+            border-bottom: 1px solid #ddd;
+            transition: transform 0.3s;
+        }
+
+        .product-card:hover .product-image {
+            transform: scale(1.1);
         }
 
         .wishlist-btn {
             position: absolute;
-            top: 10px;
-            right: 10px;
+            top: 15px;
+            right: 15px;
             background: white;
             border: none;
             border-radius: 50%;
-            width: 35px;
-            height: 35px;
+            width: 40px;
+            height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s, transform 0.3s;
         }
 
-        .wishlist-btn i {
-            color: #000;
-            transition: color 0.3s ease;
+        .wishlist-btn:hover {
+            background-color: #f8d7da;
+            transform: scale(1.1);
         }
 
         .wishlist-btn.active i {
-            color: red;
+            color: #ff0000;
         }
 
         .section-title {
@@ -106,32 +132,18 @@ require_once '../endpoint/session_config.php';
             width: 15px;
             height: 15px;
             background-color: #ff0000;
+            border-radius: 50%;
         }
 
         .section-title .highlight {
             color: #ff0000;
         }
 
-        hr {
-            margin: 0 40px;
-            border-top: 2px solid #ddd;
-        }
-
-        .dot {
-            cursor: pointer;
-            height: 15px;
-            width: 15px;
-            margin: 0 2px;
-            background-color: #bbb;
-            border-radius: 50%;
-            display: inline-block;
-            transition: background-color 0.6s ease;
-        }
-
         .product-info {
             flex-grow: 1;
             display: flex;
             flex-direction: column;
+            padding: 15px;
         }
 
         .chili-rating {
@@ -139,6 +151,7 @@ require_once '../endpoint/session_config.php';
             text-align: center;
             padding: 10px 0;
         }
+
         .chili-rating .total-ratings {
             font-size: 0.8em;
             color: #666;
@@ -152,10 +165,44 @@ require_once '../endpoint/session_config.php';
 
         .chili-rating .chili {
             opacity: 0.3;
+            transition: opacity 0.3s;
         }
 
         .chili-rating .chili.filled {
             opacity: 1;
+            color: #ff6347;
+        }
+
+        .carousel-dots {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .dot {
+            cursor: pointer;
+            height: 15px;
+            width: 15px;
+            margin: 0 5px;
+            background-color: #bbb;
+            border-radius: 50%;
+            display: inline-block;
+            transition: background-color 0.3s;
+        }
+
+        .dot.active {
+            background-color: #ff6347;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         @media (max-width: 1200px) {
@@ -168,11 +215,13 @@ require_once '../endpoint/session_config.php';
             .product-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
+
             .main-container {
                 padding: 0 20px;
             }
-            hr {
-                margin: 0 20px;
+
+            .promo-container {
+                flex-direction: column;
             }
         }
 
@@ -301,8 +350,6 @@ require_once '../endpoint/session_config.php';
                 while ($product = $result->fetch_assoc()) {
                     ?>
                     <div class="product-card">
-                        <button class="wishlist-btn" onclick="toggleWishlist(this, <?php echo $product['id']; ?>)">
-                            <i class="bi bi-heart"></i>
                         </button>
                         <a href="items.php?id=<?php echo $product['id']; ?>">
                             <img src="../admin_page/foodMenu/uploads/<?php echo htmlspecialchars($product['image']); ?>"
@@ -360,8 +407,6 @@ require_once '../endpoint/session_config.php';
                 while ($product = $result->fetch_assoc()) {
                     ?>
                     <div class="product-card">
-                        <button class="wishlist-btn" onclick="toggleWishlist(this, <?php echo $product['id']; ?>)">
-                            <i class="bi bi-heart"></i>
                         </button>
                         <a href="items.php?id=<?php echo $product['id']; ?>">
                             <img src="../admin_page/foodMenu/uploads/<?php echo htmlspecialchars($product['image']); ?>"

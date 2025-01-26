@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cancel_order_id'])) {
         // Commit transaction
         $conn->commit();
 
-        echo "<script>alert('Order and related data have been cancelled successfully.'); window.location.href = '../index.php';</script>";
+        echo "<script>alert('Order and related data have been cancelled successfully.'); window.location.href = 'transaction_history.php';</script>";
     } catch (Exception $e) {
         // Rollback transaction in case of error
         $conn->rollback();

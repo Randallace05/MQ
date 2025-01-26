@@ -240,6 +240,7 @@ try {
         <div id="content-wrapper" class="d-flex flex-column">
             <div class="container-fluid">
                 <h2 class="mt-4">Check Out</h2>
+                <a href="../../user_page/shop.php" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Shop</a>
                 <div class="row">
                     <div class="col-75">
                         <div class="container">

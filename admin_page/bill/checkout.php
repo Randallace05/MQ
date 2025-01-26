@@ -261,7 +261,14 @@ try {
                                         <label for="z"><i class="fa fa-institution"></i> Zip Code</label>
                                         <input type="text" id="z" name="z" required>
                                         <label for="num"><i class="fa fa-phone"></i> Contact Number</label>
-                                        <input type="text" id="num" name="num" required>
+                                        <input
+                                            type="text"
+                                            id="num"
+                                            name="num"
+                                            required
+                                            pattern="\d{11}"
+                                            title="Contact number must be exactly 11 digits."
+                                        >
                                     </div>
                                     <div class="col-50">
                                         <h3>Payment</h3>

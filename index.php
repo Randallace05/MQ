@@ -77,7 +77,15 @@
                         <div class="form-group registration row">
                             <div class="col-5">
                                 <label for="contactNumber">Contact Number:</label>
-                                <input type="number" class="form-control" id="contactNumber" name="contact_number" maxlength="11">
+                                <input
+                                            type="text"
+                                            id="contactNumber"
+                                            name="contact_number"
+                                            required
+                                            pattern="\d{11}"
+                                            title="Contact number must be exactly 11 digits."
+                                            class="form-control"
+                                        >
                             </div>
                             <div class="col-7">
                                 <label for="email">Email:</label>
@@ -90,7 +98,15 @@
                         </div>
                         <div class="form-group registration">
                             <label for="registerPassword">Password:</label>
-                            <input type="password" class="form-control" id="registerPassword" name="password">
+                            <input
+                                type="password"
+                                class="form-control"
+                                id="registerPassword"
+                                name="password"
+                                required
+                                pattern="^(?=.*[0-9])(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$"
+                                title="Password must be at least 8 characters long, include a number and a special character."
+                            >
                         </div>
                         <div class="radio-group">
                             <label><input type="radio" name="user_role" value="customer"> Customer</label>
@@ -150,9 +166,6 @@
                                         <p><strong>8. Disclaimer</strong><br>
                                         While we strive to ensure the security and functionality of our website, we cannot guarantee uninterrupted service or the absolute security of your data.<br>
                                         We are not liable for any losses or damages resulting from your use of our services unless caused directly by our negligence.</p>
-
-                                        <p><strong>9. Governing Law</strong><br>
-                                        These terms are governed by and construed in accordance with the laws of [Your Jurisdiction], without regard to its conflict of law provisions.</p>
                                     </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>

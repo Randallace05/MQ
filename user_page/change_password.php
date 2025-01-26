@@ -110,12 +110,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
         <div class="mb-3">
             <label for="new_password" class="form-label">New Password</label>
-            <input type="password" class="form-control" id="new_password" name="new_password" required>
+            <input
+                type="password"
+                class="form-control"
+                id="new_password"
+                name="new_password"
+                required
+                pattern="^(?=.*[0-9])(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$"
+                title="Password must be at least 8 characters long, contain at least one special character (!@#$%^&*), and at least one number."
+            >
         </div>
         <div class="mb-3">
             <label for="confirm_password" class="form-label">Confirm Password</label>
-            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+            <input
+                type="password"
+                class="form-control"
+                id="confirm_password"
+                name="confirm_password"
+                required
+                pattern="^(?=.*[0-9])(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$"
+                title="Password must be at least 8 characters long, contain at least one special character (!@#$%^&*), and at least one number."
+            >
         </div>
+
         <div class="d-flex justify-content-between">
             <button type="submit" class="btn btn-primary">Change Password</button>
             <a href="profile_page.php" class="btn btn-secondary">Cancel</a>

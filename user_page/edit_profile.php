@@ -107,7 +107,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
         <div class="mb-3">
             <label for="contact_number" class="form-label">Contact Number</label>
-            <input type="text" class="form-control" id="contact_number" name="contact_number" value="<?php echo htmlspecialchars($user_data['contact_number']); ?>" required>
+            <input
+                type="text"
+                class="form-control"
+                id="contact_number"
+                name="contact_number"
+                value="<?php echo htmlspecialchars($user_data['contact_number']); ?>"
+                required
+                pattern="\d{11}"
+                title="Contact number must be exactly 11 digits."
+            >
         </div>
         <div class="mb-3">
             <label for="email" class="form-label">Email</label>

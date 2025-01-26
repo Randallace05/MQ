@@ -39,9 +39,8 @@ require_once '../endpoint/session_config.php';
 
         .product-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr); /* Changed to 4 columns */
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             gap: 20px;
-            padding: 20px;
         }
 
         .product-card {
@@ -51,11 +50,18 @@ require_once '../endpoint/session_config.php';
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
         }
 
         .product-image {
             width: 100%;
-            height: 250px;
+            height: 200px;
             object-fit: cover;
         }
 
@@ -282,12 +288,12 @@ require_once '../endpoint/session_config.php';
             <?php
             include '../conn/conn.php';
 
-            $sql = "SELECT p.id, p.name, p.price, p.image, 
+            $sql = "SELECT p.id, p.name, p.price, p.image,
                COUNT(r.rating) as total_ratings,
                AVG(r.rating) as average_rating
-        FROM products p 
-        LEFT JOIN reviews r ON p.id = r.product_id 
-        WHERE p.is_disabled = 0 
+        FROM products p
+        LEFT JOIN reviews r ON p.id = r.product_id
+        WHERE p.is_disabled = 0
         GROUP BY p.id";
             $result = $conn->query($sql);
 
@@ -309,12 +315,12 @@ require_once '../endpoint/session_config.php';
                                 <p class="text-center mb-2">₱<?php echo number_format($product['price'], 2); ?></p>
                             </div>
                             <div class="chili-rating" data-product-id="<?php echo $product['id']; ?>">
-                                <?php 
+                                <?php
                                 $average_rating = round($product['average_rating'], 1);
-                                for($i = 1; $i <= 5; $i++): 
+                                for($i = 1; $i <= 5; $i++):
                                 ?>
                                     <span class="chili filled" data-value="<?php echo $i; ?>">
-                                        <?php 
+                                        <?php
                                         if ($i <= floor($average_rating)) {
                                             echo '🌶️';
                                         } elseif ($i == ceil($average_rating) && $average_rating != floor($average_rating)) {
@@ -341,12 +347,12 @@ require_once '../endpoint/session_config.php';
         </h2>
         <div class="product-grid">
             <?php
-            $sql = "SELECT p.id, p.name, p.price, p.image, 
+            $sql = "SELECT p.id, p.name, p.price, p.image,
                COUNT(r.rating) as total_ratings,
                AVG(r.rating) as average_rating
-                FROM products p 
-                LEFT JOIN reviews r ON p.id = r.product_id 
-                WHERE p.is_disabled = 0 
+                FROM products p
+                LEFT JOIN reviews r ON p.id = r.product_id
+                WHERE p.is_disabled = 0
                 GROUP BY p.id";
             $result = $conn->query($sql);
 
@@ -368,12 +374,12 @@ require_once '../endpoint/session_config.php';
                                 <p class="text-center mb-2">₱<?php echo number_format($product['price'], 2); ?></p>
                             </div>
                             <div class="chili-rating" data-product-id="<?php echo $product['id']; ?>">
-                                <?php 
+                                <?php
                                 $average_rating = round($product['average_rating'], 1);
-                                for($i = 1; $i <= 5; $i++): 
+                                for($i = 1; $i <= 5; $i++):
                                 ?>
                                     <span class="chili filled" data-value="<?php echo $i; ?>">
-                                        <?php 
+                                        <?php
                                         if ($i <= floor($average_rating)) {
                                             echo '🌶️';
                                         } elseif ($i == ceil($average_rating) && $average_rating != floor($average_rating)) {

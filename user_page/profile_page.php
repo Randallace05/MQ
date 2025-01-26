@@ -112,6 +112,7 @@ $user_data = $result->fetch_assoc();
     <div class="profile-actions">
         <a href="edit_profile.php">Edit Profile</a>
         <a href="change_password.php">Change Password</a>
+        <a href="shop.php" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Shop</a>
     </div>
 </div>
 

@@ -107,7 +107,6 @@ $grand_total = $subtotal + $shipping_fee;
 $shipping_address = "{$user['address']}, {$user['city']}, {$user['zip_code']}";
 ?>
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -316,38 +315,35 @@ $shipping_address = "{$user['address']}, {$user['city']}, {$user['zip_code']}";
         </div>
     </div>
     <div class="actions">
-        <button id="print-btn">Print</button>
+        <button class="print-btn" onclick="window.print()">Print</button>
         <button id="download-btn">Download PDF</button>
         <a href="../../user_page/shop.php" class="back-btn">Back to Shop</a>
     </div>
-</div>
 </body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+<script>
+    document.getElementById('download-btn').addEventListener('click', function () {
+        const { jsPDF } = window.jspdf;
+        const receipt = document.querySelector('.receipt-container');
+
+        html2canvas(receipt, { scale: 2 })
+            .then((canvas) => {
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF();
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                pdf.save('receipt.pdf');
+            })
+            .catch((err) => {
+                console.error('Error generating PDF:', err);
+            });
+    });
+</script>
 </html>
 
 <?php
 $conn->close();
 ?>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
-<script>
-    // Print Functionality
-    document.getElementById('print-btn').addEventListener('click', function () {
-        window.print();
-    });
-
-    // Download PDF Functionality
-    document.getElementById('download-btn').addEventListener('click', function () {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-
-        // Capture the receipt container
-        const receipt = document.querySelector('.receipt-container');
-        doc.html(receipt, {
-            callback: function (doc) {
-                doc.save('receipt.pdf');
-            },
-            x: 10,
-            y: 10
-        });
-    });
-</script>

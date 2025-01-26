@@ -533,7 +533,6 @@ $average_rating = $review_count > 0 ? round($total_rating / $review_count, 1) : 
 </head>
 <body>
     <?php include("../includes/topbar1.php"); ?>
-    <div class="path">Products / <span><?php echo htmlspecialchars($product['name']); ?></span></div>
     <div class="container py-5">
         <div class="row">
             <div class="col-md-6 mb-4">

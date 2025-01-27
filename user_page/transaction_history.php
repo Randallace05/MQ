@@ -95,7 +95,7 @@ $stmt_history->execute();
 $result_history = $stmt_history->get_result();
 
 // Query to fetch newly delivered orders
-$sql_new_delivered = "SELECT th.id, th.order_date, th.cart_items, th.product_id
+$sql_new_delivered = "SELECT th.id, th.order_date, th.cart_items, th.id
                       FROM transaction_history th
                       WHERE th.tbl_user_id = ? AND th.status = 'Delivered' AND th.review_requested = 0
                       ORDER BY th.order_date DESC

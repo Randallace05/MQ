@@ -1,11 +1,7 @@
 <?php
 header('Content-Type: application/json');
 
-// Database connection variables
-$host = 'localhost';
-$dbname = 'login_email_verification';
-$username = 'root';
-$password = '';
+include("../../conn/conn.php");
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
@@ -13,7 +9,7 @@ try {
 
     // Query to fetch sales data grouped by date, including cart_items and payment_method
     $query = "
-        SELECT 
+        SELECT
             DATE(order_date) AS order_date,
             SUM(total_amount) AS total,
             GROUP_CONCAT(cart_items SEPARATOR ', ') AS cart_items,

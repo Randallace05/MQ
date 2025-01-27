@@ -1,11 +1,5 @@
 <?php
-// Database connection
-$servername = "localhost"; // Change to your DB server
-$username = "root"; // Change to your DB username
-$password = ""; // Change to your DB password
-$dbname = "login_email_verification"; // Change to your DB name
-
-$conn = new mysqli($servername, $username, $password, $dbname);
+include("../../conn/conn.php");
 
 if ($conn->connect_error) {
     die(json_encode(["error" => "Connection failed: " . $conn->connect_error]));

@@ -1,13 +1,7 @@
 <?php
 session_start();
 
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "login_email_verification";
-
-// Create a connection to the MySQL server
-$conn = new mysqli($servername, $username, $password, $dbname);
+include("../../conn/conn.php");
 
 // Check if the connection was successful
 if ($conn->connect_error) {

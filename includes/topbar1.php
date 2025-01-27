@@ -162,9 +162,6 @@
             width: max-content;
         }
 
-        .z-index{
-            z-index: 1;
-        }
         .search-container {
             position: relative; /* Make this container the reference point for absolute positioning */
         }

@@ -18,7 +18,7 @@ if (isset($_POST['register'])) {
         $email = $_POST['email'];
         $username = $_POST['username'];
         $password = $_POST['password'];
-        $user_role = $_POST['user_role']; 
+        $user_role = $_POST['user_role'];
 
         // Generate a unique user ID
         $uniqueID = uniqid();
@@ -43,17 +43,17 @@ if (isset($_POST['register'])) {
 
             $insertStmt = $conn->prepare("
                 INSERT INTO `tbl_user` (
-                    `first_name`, 
-                    `last_name`, 
-                    `contact_number`, 
-                    `email`, 
-                    `username`, 
-                    `password`, 
-                    `verification_code`, 
+                    `first_name`,
+                    `last_name`,
+                    `contact_number`,
+                    `email`,
+                    `username`,
+                    `password`,
+                    `verification_code`,
                     `unique_id`,
                     `user_role`,
                     `img`
-                ) 
+                )
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
             $insertStmt->bind_param(
@@ -72,19 +72,19 @@ if (isset($_POST['register'])) {
             $insertStmt->execute();
 
             // Server settings
-            $mail->isSMTP(); 
-            $mail->Host       = 'smtp.gmail.com'; 
-            $mail->SMTPAuth   = true; 
+            $mail->isSMTP();
+            $mail->Host       = 'smtp.gmail.com';
+            $mail->SMTPAuth   = true;
             $mail->Username   = 'lorem.ipsum.sample.email@gmail.com';
             $mail->Password   = 'novtycchbrhfyddx'; // SMTP password
             $mail->SMTPSecure = 'ssl';
-            $mail->Port       = 465;                                    
+            $mail->Port       = 465;
 
             // Recipients
             $mail->setFrom('MQKitchen@gmail.com', 'MQ Kitchen');
-            $mail->addAddress($email);   
-            $mail->addReplyTo('MQKitchen@gmail.com', 'MQ Kitchen'); 
-        
+            $mail->addAddress($email);
+            $mail->addReplyTo('MQKitchen@gmail.com', 'MQ Kitchen');
+
             // Content
             $mail->isHTML(true);  // Enable HTML content
             $mail->Subject = 'Verification Code';
@@ -94,7 +94,7 @@ if (isset($_POST['register'])) {
                     <h1>Welcome to MQ Kitchen!</h1>
                     <p>Dear ' . htmlspecialchars($firstName . ' ' . $lastName) . ',</p>
                     <p>Thank you for registering with us.</p>
-                    <p>Your verification code is: 
+                    <p>Your verification code is:
                         <strong><span style="font-size:24px; color: #d24444;">' . htmlspecialchars($verificationCode) . '</span></strong>
                     </p>
                     <p>Please enter this code in the verification page to complete your registration process.</p>
@@ -108,9 +108,9 @@ if (isset($_POST['register'])) {
 
             // Send verification email
             $mail->send();
-            
+
             session_start();
-    
+
             $userVerificationID = $conn->insert_id;
             $_SESSION['user_verification_id'] = $userVerificationID;
 

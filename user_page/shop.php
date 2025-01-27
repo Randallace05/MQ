@@ -1,5 +1,20 @@
 <?php
 require_once '../endpoint/session_config.php';
+
+
+// Fetch user role based on session or user ID (adjust logic as needed)
+$user_id = $_SESSION['tbl_user_Id'] ?? null; // Replace with your actual session variable
+$user_role = '';
+
+if ($user_id) {
+    $sql = "SELECT user_role FROM tbl_user WHERE id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $tbl_user_id);
+    $stmt->execute();
+    $stmt->bind_result($user_role);
+    $stmt->fetch();
+    $stmt->close();
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -230,6 +245,21 @@ require_once '../endpoint/session_config.php';
                 grid-template-columns: 1fr;
             }
         }
+        .modal-content {
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            background-color: #ff6347;
+            color: white;
+            border-bottom: none;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .modal-footer {
+            border-top: none;
+        }
     </style>
 </head>
 <body>
@@ -448,6 +478,26 @@ require_once '../endpoint/session_config.php';
     </div>
 
     <?php include("../includes/footer.php"); ?>
+     <!-- Modal -->
+     <div class="modal fade" id="reminderModal" tabindex="-1" aria-labelledby="reminderModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="reminderModalLabel">Join Our Team!</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <p>If you want to become part of our Distributor/Reseller, please contact us on Facebook:</p>
+                    <a href="https://www.facebook.com/mqkitchen.main" target="_blank" class="btn btn-primary">
+                        <i class="bi bi-facebook"></i> MQ Kitchen Facebook Page
+                    </a>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -527,8 +577,19 @@ require_once '../endpoint/session_config.php';
             }
         });
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Check the PHP variable for user role
+            const userRole = "<?php echo $user_role; ?>";
+
+            // Show the modal if the user role is 'customer'
+            if (userRole === "customer") {
+                const reminderModal = new bootstrap.Modal(document.getElementById('reminderModal'));
+                reminderModal.show();
+            }
+        });
+    </script>
 
 </body>
 </html>
-
-

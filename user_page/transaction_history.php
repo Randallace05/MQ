@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cancel_order_id'])) {
         // Commit transaction
         $conn->commit();
 
-        echo "<script>alert('Order and related data have been cancelled successfully.'); window.location.href = 'transaction_history.php';</script>";
+        echo "<script>alert('Order and related data have been cancelled successfully.'); window.location.href = '../index.php';</script>";
     } catch (Exception $e) {
         // Rollback transaction in case of error
         $conn->rollback();
@@ -100,9 +100,8 @@ $result_history = $stmt_history->get_result();
 
         .container {
             max-width: 1200px;
-            margin: 10px auto;
-            padding: 10px;
-            padding-top: 5px;
+            margin: 20px auto;
+            padding: 15px;
             background-color: #fff;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
@@ -117,7 +116,8 @@ $result_history = $stmt_history->get_result();
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: auto;
+            margin-top: 20px;
+            overflow-x: auto;
         }
 
         th, td {
@@ -149,6 +149,7 @@ $result_history = $stmt_history->get_result();
             font-weight: bold;
             padding: 8px 12px;
             border-radius: 5px;
+            align-items: center;
         }
 
         .status.completed {
@@ -183,14 +184,66 @@ $result_history = $stmt_history->get_result();
         .actions button:hover {
             background-color: #c82333;
         }
+
         caption {
             font-size: 1.5em;
             text-align: center;
         }
 
+        button.back-btn {
+            padding: 10px 15px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        button.back-btn:hover {
+            background-color: #0056b3;
+        }
+
+        /* Media Queries for smaller screens */
+        @media screen and (max-width: 768px) {
+            table, th, td {
+                font-size: 14px;
+            }
+
+            .actions button, a {
+                font-size: 12px;
+                padding: 6px 10px;
+            }
+
+            button.back-btn {
+                font-size: 14px;
+                padding: 8px 12px;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+
+            table, th, td {
+                font-size: 12px;
+            }
+
+            .actions button, a {
+                font-size: 10px;
+                padding: 5px 8px;
+            }
+
+            button.back-btn {
+                font-size: 12px;
+                padding: 6px 10px;
+            }
+        }
     </style>
 </head>
 <body>
+    <button onclick="window.history.back()" style="padding: 8px 12px; background-color: #007BFF; color: white; border: none; border-radius: 5px; cursor: pointer; margin-left: 165px">←</button>
     <div class="container">
         <table>
         <caption style="caption-side: top; font-size: 1.3em; font-weight: bold; margin-bottom: 10px; text-align: left;">Order Management</caption>

@@ -269,7 +269,12 @@ $users = fetchUsers($conn, $selectedRole);
                                     <?php echo htmlspecialchars($user['username']); ?>
                                 </div>
                                 <div class="table-cell">
-                                    <?php echo htmlspecialchars($user['user_role']); ?>
+                                    <form method="POST" action="update_user_role.php" class="role-form">
+                                        <select name="user_role" onchange="updateUserRole(this, '<?php echo htmlspecialchars($user['username']); ?>')">
+                                            <option value="customer" <?php echo $user['user_role'] == 'customer' ? 'selected' : ''; ?>>Customer</option>
+                                            <option value="distributor" <?php echo $user['user_role'] == 'distributor' ? 'selected' : ''; ?>>Distributor</option>
+                                        </select>
+                                    </form>
                                 </div>
                                 <div class="table-cell">
                                     <button class="btn btn-sm <?php echo $user['is_active'] ? 'btn-danger' : 'btn-success'; ?>" 
@@ -318,6 +323,29 @@ $users = fetchUsers($conn, $selectedRole);
     document.documentElement.style.setProperty('--hover-color', theme.hoverColor);
     document.documentElement.style.setProperty('--text-color', theme.textColor);
     document.documentElement.style.setProperty('--border-color', theme.borderColor);
+}
+function updateUserRole(selectElement, username) {
+    const newRole = selectElement.value;
+
+    fetch('update_user_role.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `username=${encodeURIComponent(username)}&user_role=${encodeURIComponent(newRole)}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('User role updated successfully');
+        } else {
+            alert('Failed to update user role');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while updating the user role');
+    });
 }
     </script>
 </body>

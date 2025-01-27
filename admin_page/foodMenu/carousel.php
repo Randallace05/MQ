@@ -58,146 +58,136 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['image_type'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Upload Carousel and Promotional Images</title>
-    <style>
-        /* Global Reset */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
-        }
-
-        /* Body Styling */
-        body {
-            background-color: #f9f9f9;
-            color: #333;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        /* Container Styling */
-        .container {
-            background: #fff;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 500px;
-            padding: 20px;
-        }
-
-        /* Header Styling */
-        .container h2 {
-            font-size: 24px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        /* Form Styling */
-        .upload-form {
-            margin-bottom: 20px;
-        }
-
-        .upload-form label {
-            font-size: 16px;
-            margin-bottom: 10px;
-            display: block;
-        }
-
-        .upload-form input[type="file"] {
-            margin-bottom: 10px;
-            padding: 8px;
-            width: 100%;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-
-        .upload-form button {
-            padding: 12px 20px;
-            font-size: 16px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            width: 100%;
-        }
-
-        .upload-form button:hover {
-            background-color: #0056b3;
-        }
-
-        /* Preview Section Styling */
-        .preview {
-            margin-top: 15px;
-            text-align: center;
-        }
-
-        .preview img {
-            width: 100px;
-            height: auto;
-            border-radius: 5px;
-            margin-top: 10px;
-        }
-
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
+<style>
+    /* Reset and base styles */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background-color: #f4f4f4;
+        padding: 20px;
+    }
+
+    /* Container styles */
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background-color: #fff;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+        text-align: center;
+        margin-bottom: 30px;
+        color: #2c3e50;
+    }
+
+    /* Form styles */
+    form {
+        margin-bottom: 30px;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+        color: #34495e;
+    }
+
+    input[type="file"] {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+
+    button {
+        display: inline-block;
+        background-color: #3498db;
+        color: #fff;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+        background-color: #2980b9;
+    }
+
+    /* Image preview */
+    .image-preview {
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    .image-preview img {
+        max-width: 300px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    }
+</style>
 <body>
     <div class="container">
         <h2>Upload Carousel and Promotional Images</h2>
 
         <!-- Form for Carousel Image -->
-        <form class="upload-form" method="POST" enctype="multipart/form-data">
+        <form method="POST" enctype="multipart/form-data">
             <input type="hidden" name="image_type" value="carousel">
             <label for="carousel_image">Upload Carousel Image:</label>
-            <input type="file" name="image" id="carousel_image" accept="image/*" onchange="previewImage(event, 'carousel_preview')" required>
+            <input type="file" name="image" id="carousel_image" accept="image/*" required onchange="previewImage(event, 'carousel_image_preview')">
             <button type="submit">Upload Carousel Image</button>
-            <div class="preview">
-                <img id="carousel_preview" alt="Carousel Image Preview" />
-            </div>
         </form>
 
         <!-- Form for Left Image -->
-        <form class="upload-form" method="POST" enctype="multipart/form-data">
+        <form method="POST" enctype="multipart/form-data">
             <input type="hidden" name="image_type" value="left">
             <label for="left_image">Upload Left Image:</label>
-            <input type="file" name="image" id="left_image" accept="image/*" onchange="previewImage(event, 'left_preview')" required>
+            <input type="file" name="image" id="left_image" accept="image/*" required onchange="previewImage(event, 'left_image_preview')">
             <button type="submit">Upload Left Image</button>
-            <div class="preview">
-                <img id="left_preview" alt="Left Image Preview" />
-            </div>
         </form>
 
         <!-- Form for Right Image -->
-        <form class="upload-form" method="POST" enctype="multipart/form-data">
+        <form method="POST" enctype="multipart/form-data">
             <input type="hidden" name="image_type" value="right">
             <label for="right_image">Upload Right Image:</label>
-            <input type="file" name="image" id="right_image" accept="image/*" onchange="previewImage(event, 'right_preview')" required>
+            <input type="file" name="image" id="right_image" accept="image/*" required onchange="previewImage(event, 'right_image_preview')">
             <button type="submit">Upload Right Image</button>
-            <div class="preview">
-                <img id="right_preview" alt="Right Image Preview" />
-            </div>
         </form>
-         <a href="../foodMenu/foodMenu.php" class="btn btn-secondary w-100 mt-2">Cancel</a>
+
+        <!-- Image Previews -->
+        <div class="image-preview">
+            <h3>Image Previews</h3>
+            <img id="carousel_image_preview" alt="Carousel Image Preview" />
+            <img id="left_image_preview" alt="Left Image Preview" />
+            <img id="right_image_preview" alt="Right Image Preview" />
+        </div>
     </div>
 
     <script>
-        // Preview image function
         function previewImage(event, previewId) {
             const file = event.target.files[0];
             const reader = new FileReader();
-
             reader.onload = function(e) {
                 document.getElementById(previewId).src = e.target.result;
             };
-
-            if (file) {
-                reader.readAsDataURL(file);
-            }
+            reader.readAsDataURL(file);
         }
     </script>
 </body>
 </html>
+

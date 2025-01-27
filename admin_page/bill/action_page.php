@@ -103,68 +103,100 @@ if (isset($_POST['firstname'])) {
         }
     }
 
-    // Insert into orders table
-    $order_stmt = $conn->prepare(
-        "INSERT INTO orders (tbl_user_id, order_date, total_amount, shipping_address, payment_method)
-        VALUES (?, NOW(), ?, ?, ?)"
-    );
+    // Start a transaction
+    $conn->begin_transaction();
 
-    $order_stmt->bind_param("idss", $tbl_user_id, $total_amount, $address, $payment_method);
-    if (!$order_stmt->execute()) {
-        die("Error inserting into orders table: " . $order_stmt->error);
+    try {
+        // Insert into orders table
+        $order_stmt = $conn->prepare(
+            "INSERT INTO orders (tbl_user_id, order_date, total_amount, shipping_address, payment_method, batch_codename)
+            VALUES (?, NOW(), ?, ?, ?, ?)"
+        );
+
+        $order_stmt->bind_param("idsss", $tbl_user_id, $total_amount, $address, $payment_method, $cartItems[0]['batch_codename']);
+        if (!$order_stmt->execute()) {
+            throw new Exception("Error inserting into orders table: " . $order_stmt->error);
+        }
+
+        $orders_id = $order_stmt->insert_id;
+        $order_stmt->close();
+
+        // Insert data into the checkout table
+        $cart_items_combined = [];
+        foreach ($cartItems as $cartItem) {
+            $cart_items_combined[] = "{$cartItem['name']} ({$cartItem['quantity']}x)";
+        }
+        $cart_items_string = implode(", ", $cart_items_combined);
+
+        $checkout_stmt = $conn->prepare(
+            "INSERT INTO checkout (orders_id, tbl_user_id, cart_items, firstname, middlename, lastname, address, city, zip_code, contact_number, payment_method, gcash_proof, batch_codename)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        );
+
+        $checkout_stmt->bind_param(
+            "iisssssssssss", // Adjusted to 13 fields
+            $orders_id,
+            $tbl_user_id,
+            $cart_items_string,
+            $first_name,
+            $middle_name,
+            $last_name,
+            $address,
+            $city,
+            $zip_code,
+            $contact_number,
+            $payment_method,
+            $gcash_proof_path,
+            $cartItems[0]['batch_codename']
+        );
+
+
+        if (!$checkout_stmt->execute()) {
+            throw new Exception("Error inserting into checkout table: " . $checkout_stmt->error);
+        }
+
+        $checkout_stmt->close();
+
+        // Insert order items and update product batches
+        $order_items_stmt = $conn->prepare("INSERT INTO order_items (orders_id, product_id, quantity, price, batch_codename) VALUES (?, ?, ?, ?, ?)");
+
+        foreach ($cartItems as $item) {
+            $order_items_stmt->bind_param("iiids", $orders_id, $item['product_id'], $item['quantity'], $item['price'], $item['batch_codename']);
+            if (!$order_items_stmt->execute()) {
+                throw new Exception("Error inserting order item: " . $order_items_stmt->error);
+            }
+        }
+
+        $order_items_stmt->close();
+
+
+        // Delete selected items from cart
+        if (count($selected_products) > 0) {
+            $placeholders = implode(',', array_fill(0, count($selected_products), '?'));
+            $delete_stmt = $conn->prepare("DELETE FROM cart WHERE tbl_user_id = ? AND cart_id IN ($placeholders)");
+            $types = str_repeat('i', count($selected_products) + 1);
+            $delete_stmt->bind_param($types, $tbl_user_id, ...$selected_products);
+            if (!$delete_stmt->execute()) {
+                throw new Exception("Error deleting items from cart: " . $delete_stmt->error);
+            }
+            $delete_stmt->close();
+        }
+
+        // Commit the transaction
+        $conn->commit();
+
+        // Redirect to receipt
+        header("Location: receipt.php?order_id=$orders_id");
+        exit;
+
+    } catch (Exception $e) {
+        // An error occurred, rollback the transaction
+        $conn->rollback();
+        die("Error processing order: " . $e->getMessage());
     }
-
-    $orders_id = $order_stmt->insert_id;
-    $order_stmt->close();
-
-    // Insert data into the checkout table
-    $cart_items_combined = [];
-    foreach ($cartItems as $cartItem) {
-        $cart_items_combined[] = "{$cartItem['name']} ({$cartItem['quantity']}x)";
-    }
-    $cart_items_string = implode(", ", $cart_items_combined);
-
-    $checkout_stmt = $conn->prepare(
-        "INSERT INTO checkout (orders_id, tbl_user_id, cart_items, firstname, middlename, lastname, address, city, zip_code, contact_number, payment_method, gcash_proof)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-    );
-
-    $checkout_stmt->bind_param(
-        "iissssssssss",
-        $orders_id,
-        $tbl_user_id,
-        $cart_items_string,
-        $first_name,
-        $middle_name,
-        $last_name,
-        $address,
-        $city,
-        $zip_code,
-        $contact_number,
-        $payment_method,
-        $gcash_proof_path
-    );
-
-    if (!$checkout_stmt->execute()) {
-        die("Error inserting into checkout table: " . $checkout_stmt->error);
-    }
-
-    $checkout_stmt->close();
-
- // Delete selected items from cart
- if (count($selected_products) > 0) {
-    $placeholders = implode(',', array_fill(0, count($selected_products), '?'));
-    $stmt = $conn->prepare("DELETE FROM cart WHERE tbl_user_id = ? AND cart_id IN ($placeholders)");
-    $types = str_repeat('i', count($selected_products) + 1);
-    $stmt->bind_param($types, $tbl_user_id, ...$selected_products);
-    $stmt->execute();
-}
-
-    // Redirect to receipt
-    header("Location: receipt.php?order_id=$orders_id");
-    exit;
 }
 
 // Close the database connection
 $conn->close();
 ?>
+

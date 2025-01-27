@@ -12,7 +12,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     try {
         if ($status == 1) {
             // Get the product_id for the current batch
-            $getProductIdSql = "SELECT product_id FROM product_batches WHERE batch_number = ?";
+            $getProductIdSql = "SELECT product_id FROM product_batches WHERE id = ?";
             $stmt = $conn->prepare($getProductIdSql);
             $stmt->bind_param("i", $batchId);
             $stmt->execute();
@@ -28,7 +28,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         // Update the status of the specified batch
-        $updateBatchSql = "UPDATE product_batches SET status = ? WHERE batch_number = ?";
+        $updateBatchSql = "UPDATE product_batches SET status = ? WHERE id = ?";
         $stmt = $conn->prepare($updateBatchSql);
         $stmt->bind_param("ii", $status, $batchId);
         $stmt->execute();
@@ -47,4 +47,3 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 $conn->close();
 ?>
-

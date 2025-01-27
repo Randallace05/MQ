@@ -28,13 +28,14 @@ try {
 
     $cartItems = [];
     $grandTotal = 0;
+
     // Handle selected products
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['selected_products']) && !empty($_POST['selected_products'])) {
         $selected_products = array_map('intval', $_POST['selected_products']); // Ensure IDs are integers
 
         // Prepare query to fetch selected cart items
         $placeholders = implode(',', array_fill(0, count($selected_products), '?'));
-        $stmt = $conn->prepare("SELECT * FROM cart WHERE tbl_user_id = ? AND cart_id IN ($placeholders)");
+        $stmt = $conn->prepare("SELECT c.*, p.batch_codename FROM cart c JOIN product_batches p ON c.product_id = p.product_id WHERE c.tbl_user_id = ? AND c.cart_id IN ($placeholders)");
 
         // Bind parameters dynamically
         $types = str_repeat('i', count($selected_products) + 1); // 'i' for integers
@@ -55,7 +56,6 @@ try {
         </script>";
         exit;
     }
-
 
     // Handle form submission for checkout
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['firstname'])) {
@@ -331,7 +331,7 @@ try {
                     </div>
                     <div class="col-25">
                         <div class="container">
-                        <h4>Cart
+                            <h4>Cart
                                 <span class="price" style="color:black">
                                     <i class="fa fa-shopping-cart"></i>
                                     <b><?php echo count($cartItems); ?></b>

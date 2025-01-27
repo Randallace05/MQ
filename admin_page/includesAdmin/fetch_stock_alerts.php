@@ -1,12 +1,5 @@
 <?php
-// Database connection details
-$host = "localhost"; // Update as per your database host
-$username = "root"; // Update as per your database username
-$password = ""; // Update as per your database password
-$dbname = "login_email_verification"; // Update with your database name
-
-// Establish a connection to the database
-$conn = new mysqli($host, $username, $password, $dbname);
+include("../../conn/conn.php");
 
 // Check for a connection error
 if ($conn->connect_error) {

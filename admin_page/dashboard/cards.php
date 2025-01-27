@@ -1,11 +1,5 @@
 <?php
-// Database connection (replace with your credentials)
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "login_email_verification";
-
-$conn = new mysqli($servername, $username, $password, $dbname);
+include("../../conn/conn.php");
 
 // Check connection
 if ($conn->connect_error) {
@@ -44,7 +38,7 @@ $totalEarnings = $totalEarningsResult->fetch_assoc()['total_earnings'] ?? 0;
 
 
 $conn->close();
-?>                       
+?>
                        <!-- Users Example -->
                        <div class="col-xl-3 col-md-6 mb-4">
                         <div class="card border-left-primary shadow h-100 py-2">

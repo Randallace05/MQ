@@ -1,11 +1,5 @@
 <?php
-// Database connection
-$host = "localhost";
-$user = "root";
-$password = "";
-$database = "login_email_verification";
-
-$conn = new mysqli($host, $user, $password, $database);
+include("../../conn/conn.php");
 
 // Check connection
 if ($conn->connect_error) {

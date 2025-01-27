@@ -1,11 +1,90 @@
 <!-- session -->
-<?php
+<?php 
   session_start();
   if(isset($_SESSION['unique_id'])){
     header("location: user_page/shop.php");
   }
 ?>
+<style>
+    /* Custom styles for MQ Kitchen */
+body {
+    font-family: 'Inter', sans-serif; /* Use a clean and modern font */
+    background: linear-gradient(to bottom, #ffedd5, #fffbeb); /* Gradient background */
+    color: #374151; /* Dark gray for better contrast */
+    min-height: 100vh; /* Ensure the body covers the full viewport height */
+}
 
+header h1 {
+    letter-spacing: 2px; /* Add some spacing for a modern look */
+}
+
+nav ul li a {
+    transition: color 0.3s ease-in-out; /* Smooth hover effect */
+}
+
+marquee {
+    font-weight: bold;
+    animation: colorChange 10s infinite;
+}
+
+@keyframes colorChange {
+    0%, 100% {
+        color: #d97706; /* Yellow-800 */
+    }
+    50% {
+        color: #ea580c; /* Orange-600 */
+    }
+}
+
+img {
+    transition: transform 0.3s ease-in-out; /* Smooth zoom on hover */
+}
+
+img:hover {
+    transform: scale(1.05);
+}
+
+button {
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+button:hover {
+    transform: translateY(-2px); /* Lift button on hover */
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5); /* Indigo ring on focus */
+}
+
+footer p {
+    font-size: 0.875rem; /* Smaller font for a polished footer */
+    color: #9ca3af; /* Gray-400 */
+}
+
+.radio-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem; /* Space between radio buttons and text */
+}
+
+.checkbox-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem; /* Space between checkbox and text */
+}
+
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 1.5rem; /* Adjust font size for smaller screens */
+    }
+
+    marquee {
+        font-size: 0.875rem; /* Smaller marquee text for mobile */
+    }
+}
+
+</style>
 <head>
     <title>MQ Kitchen</title>
     <link rel="icon" type="image/x-icon" href="uploads/sili.ico" />
@@ -27,7 +106,7 @@
 
     <!-- Main Container -->
     <div class="container">
-        <div class="flex-container">
+        <div class="flex-container"> 
             <!-- Image Section -->
             <div class="image-container">
                 <img src="uploads/try3.png" alt="MO Kitchen">
@@ -77,15 +156,7 @@
                         <div class="form-group registration row">
                             <div class="col-5">
                                 <label for="contactNumber">Contact Number:</label>
-                                <input
-                                            type="text"
-                                            id="contactNumber"
-                                            name="contact_number"
-                                            required
-                                            pattern="\d{11}"
-                                            title="Contact number must be exactly 11 digits."
-                                            class="form-control"
-                                        >
+                                <input type="number" class="form-control" id="contactNumber" name="contact_number" maxlength="11">
                             </div>
                             <div class="col-7">
                                 <label for="email">Email:</label>
@@ -98,15 +169,7 @@
                         </div>
                         <div class="form-group registration">
                             <label for="registerPassword">Password:</label>
-                            <input
-                                type="password"
-                                class="form-control"
-                                id="registerPassword"
-                                name="password"
-                                required
-                                pattern="^(?=.*[0-9])(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$"
-                                title="Password must be at least 8 characters long, include a number and a special character."
-                            >
+                            <input type="password" class="form-control" id="registerPassword" name="password">
                         </div>
                         <div class="radio-group">
                             <label><input type="radio" name="user_role" value="customer"> Customer</label>
@@ -149,7 +212,7 @@
                                         It is your responsibility to select the appropriate role for your intended usage. Misuse of roles may result in account restrictions.</p>
 
                                         <p><strong>4. Data Privacy</strong><br>
-                                        Any personal data collected through this form will be used and stored in compliance with our Privacy Policy Republic Act 10173.<br>
+                                        Any personal data collected through this form will be used and stored in compliance with our Privacy Policy.<br>
                                         We respect your privacy and commit to protecting your personal information from unauthorized access or disclosure. By submitting the registration form, you consent to the processing of your data for account creation and other related services.</p>
 
                                         <p><strong>5. Account Management</strong><br>
@@ -166,6 +229,9 @@
                                         <p><strong>8. Disclaimer</strong><br>
                                         While we strive to ensure the security and functionality of our website, we cannot guarantee uninterrupted service or the absolute security of your data.<br>
                                         We are not liable for any losses or damages resulting from your use of our services unless caused directly by our negligence.</p>
+
+                                        <p><strong>9. Governing Law</strong><br>
+                                        These terms are governed by and construed in accordance with the laws of [Your Jurisdiction], without regard to its conflict of law provisions.</p>
                                     </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -232,9 +298,9 @@
     // New login form submission handler
     document.getElementById('loginFormSubmit').addEventListener('submit', function(e) {
         e.preventDefault();
-
+        
         const formData = new FormData(this);
-
+        
         fetch('endpoint/login.php', {
             method: 'POST',
             body: formData

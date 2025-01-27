@@ -84,6 +84,7 @@ footer p {
     }
 }
 
+
 </style>
 <head>
     <title>MQ Kitchen</title>
@@ -156,7 +157,7 @@ footer p {
                         <div class="form-group registration row">
                             <div class="col-5">
                                 <label for="contactNumber">Contact Number:</label>
-                                <input type="number" class="form-control" id="contactNumber" name="contact_number" maxlength="11">
+                                <input type="" class="form-control" id="contactNumber" name="contact_number" maxlength="11">
                             </div>
                             <div class="col-7">
                                 <label for="email">Email:</label>
@@ -171,10 +172,11 @@ footer p {
                             <label for="registerPassword">Password:</label>
                             <input type="password" class="form-control" id="registerPassword" name="password">
                         </div>
-                        <div class="radio-group">
-                            <label><input type="radio" name="user_role" value="customer"> Customer</label>
+                        <div class="radio-group" style="display: none;">
+                            <label><input type="radio" name="user_role" value="customer" checked> Customer</label>
                             <label><input type="radio" name="user_role" value="distributor"> Distributor</label>
                         </div>
+
                         <!-- New Terms and Conditions Checkbox with Modal Trigger -->
                         <div class="form-group terms">
                             <input type="checkbox" id="termsConditions" name="terms_conditions" required>

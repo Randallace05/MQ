@@ -72,16 +72,40 @@ $stmt_orders->bind_param('i', $tbl_user_id);
 $stmt_orders->execute();
 $result_orders = $stmt_orders->get_result();
 
-// Query to fetch transaction history
-$sql_history = "SELECT th.id, th.order_date, u.username AS customer_name, th.total_amount, th.status, th.cart_items
-                FROM transaction_history th
-                LEFT JOIN tbl_user u ON th.tbl_user_id = u.tbl_user_id
-                WHERE th.tbl_user_id = ?";
+// Modified query to fetch transaction history with product ID based on batch_codename prefix
+$sql_history = "SELECT
+    th.id,
+    th.order_date,
+    u.username AS customer_name,
+    th.total_amount,
+    th.status,
+    th.cart_items,
+    th.batch_codename,
+    p.id as product_id
+FROM transaction_history th
+LEFT JOIN tbl_user u ON th.tbl_user_id = u.tbl_user_id
+LEFT JOIN products p ON SUBSTRING(th.batch_codename, 1,
+    LOCATE('-', th.batch_codename) - 1) = SUBSTRING(p.codename, 1,
+    LOCATE('-', p.codename) - 1)
+WHERE th.tbl_user_id = ?";
 
 $stmt_history = $conn->prepare($sql_history);
 $stmt_history->bind_param('i', $tbl_user_id);
 $stmt_history->execute();
 $result_history = $stmt_history->get_result();
+
+// Query to fetch newly delivered orders
+$sql_new_delivered = "SELECT th.id, th.order_date, th.cart_items, th.product_id
+                      FROM transaction_history th
+                      WHERE th.tbl_user_id = ? AND th.status = 'Delivered' AND th.review_requested = 0
+                      ORDER BY th.order_date DESC
+                      LIMIT 1";
+
+$stmt_new_delivered = $conn->prepare($sql_new_delivered);
+$stmt_new_delivered->bind_param('i', $tbl_user_id);
+$stmt_new_delivered->execute();
+$result_new_delivered = $stmt_new_delivered->get_result();
+$new_delivered_order = $result_new_delivered->fetch_assoc();
 ?>
 
 <!DOCTYPE html>
@@ -100,8 +124,9 @@ $result_history = $stmt_history->get_result();
 
         .container {
             max-width: 1200px;
-            margin: 20px auto;
-            padding: 15px;
+            margin: 10px auto;
+            padding: 10px;
+            padding-top: 5px;
             background-color: #fff;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
@@ -116,8 +141,7 @@ $result_history = $stmt_history->get_result();
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
-            overflow-x: auto;
+            margin-top: auto;
         }
 
         th, td {
@@ -149,7 +173,6 @@ $result_history = $stmt_history->get_result();
             font-weight: bold;
             padding: 8px 12px;
             border-radius: 5px;
-            align-items: center;
         }
 
         .status.completed {
@@ -184,66 +207,13 @@ $result_history = $stmt_history->get_result();
         .actions button:hover {
             background-color: #c82333;
         }
-
         caption {
             font-size: 1.5em;
             text-align: center;
         }
-
-        button.back-btn {
-            padding: 10px 15px;
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-bottom: 20px;
-        }
-
-        button.back-btn:hover {
-            background-color: #0056b3;
-        }
-
-        /* Media Queries for smaller screens */
-        @media screen and (max-width: 768px) {
-            table, th, td {
-                font-size: 14px;
-            }
-
-            .actions button, a {
-                font-size: 12px;
-                padding: 6px 10px;
-            }
-
-            button.back-btn {
-                font-size: 14px;
-                padding: 8px 12px;
-            }
-        }
-
-        @media screen and (max-width: 480px) {
-            .container {
-                padding: 10px;
-            }
-
-            table, th, td {
-                font-size: 12px;
-            }
-
-            .actions button, a {
-                font-size: 10px;
-                padding: 5px 8px;
-            }
-
-            button.back-btn {
-                font-size: 12px;
-                padding: 6px 10px;
-            }
-        }
     </style>
 </head>
 <body>
-    <button onclick="window.history.back()" style="padding: 8px 12px; background-color: #007BFF; color: white; border: none; border-radius: 5px; cursor: pointer; margin-left: 165px">←</button>
     <div class="container">
         <table>
         <caption style="caption-side: top; font-size: 1.3em; font-weight: bold; margin-bottom: 10px; text-align: left;">Order Management</caption>
@@ -290,7 +260,6 @@ $result_history = $stmt_history->get_result();
             </tbody>
         </table>
     </div>
-</body>
 
 
 <div class="container">
@@ -306,13 +275,14 @@ $result_history = $stmt_history->get_result();
                     <th>Status</th>
                     <th>Completed</th>
                     <th>Receipt</th>
+                    <th>Review</th>
                 </tr>
             </thead>
             <tbody>
                 <?php
                 if ($result_history->num_rows > 0) {
                     while ($row = $result_history->fetch_assoc()) {
-                        $statusClass = strtolower($row['status']); // Convert status to lowercase for class
+                        $statusClass = strtolower($row['status']);
                         echo "<tr>";
                         echo "<td>" . htmlspecialchars($row['id']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['order_date']) . "</td>";
@@ -329,10 +299,9 @@ $result_history = $stmt_history->get_result();
                         echo "</form>";
                         echo "</td>";
 
-
                         // Receipt Link
                         echo "<td>";
-                        echo "<a href='../admin_page/bill/receipt.php?order_id=" . htmlspecialchars($row['id']) . "'
+                        echo "<a href='receipt.php?order_id=" . htmlspecialchars($row['id']) . "'
                                 style='
                                     display: inline-block;
                                     padding: 8px 12px;
@@ -347,11 +316,32 @@ $result_history = $stmt_history->get_result();
                                 onmouseout='this.style.backgroundColor=\"#007BFF\"'>
                                 View Receipt
                             </a>";
-                        "</td>";
+                        echo "</td>";
 
+                        // Review Button - Only show if status is Delivered and product_id exists
+                        echo "<td>";
+                        if ($row['status'] === 'Delivered' && $row['product_id']) {
+                            echo "<a href='items.php?id=" . htmlspecialchars($row['product_id']) . "&order_id=" . htmlspecialchars($row['id']) . "#review-section'
+                                    style='
+                                        display: inline-block;
+                                        padding: 8px 12px;
+                                        background-color: #28a745;
+                                        color: white;
+                                        text-decoration: none;
+                                        border-radius: 5px;
+                                        font-size: 14px;
+                                        text-align: center;
+                                    '
+                                    onmouseover='this.style.backgroundColor=\"#218838\"'
+                                    onmouseout='this.style.backgroundColor=\"#28a745\"'>
+                                    Review
+                                </a>";
+                        }
+                        echo "</td>";
+                        echo "</tr>";
                     }
                 } else {
-                    echo "<tr><td colspan='8'>No records found</td></tr>";
+                    echo "<tr><td colspan='9'>No records found</td></tr>";
                 }
                 ?>
             </tbody>
@@ -362,7 +352,9 @@ $result_history = $stmt_history->get_result();
     // Close the statement and database connection
     $stmt_orders->close();
     $stmt_history->close();
+    $stmt_new_delivered->close();
     $conn->close();
     ?>
 </body>
 </html>
+

@@ -3,7 +3,7 @@ include("../../conn/conn.php");
 
 function fetchInventory($conn, $limit, $offset) {
     $sql = "
-        SELECT th.order_id, th.tbl_user_id, th.order_date, th.shipping_address, th.total_amount, th.payment_method, th.cart_items, th.status, u.username
+        SELECT th.order_id, th.tbl_user_id, th.order_date, th.shipping_address, th.total_amount, th.payment_method, th.cart_items, th.status, th.batch_codename, u.username
         FROM transaction_history th
         LEFT JOIN tbl_user u ON th.tbl_user_id = u.tbl_user_id
         ORDER BY th.order_date DESC
@@ -43,8 +43,6 @@ $inventory = fetchInventory($conn, $limit, $offset);
 
 $conn->close();
 ?>
-
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -183,9 +181,6 @@ $conn->close();
             justify-content: center;
             margin: 20px 0;
         }
-
-        
-        
     </style>
 </head>
 <body id="page-top">
@@ -208,6 +203,7 @@ $conn->close();
                 <th>Total Amount</th>
                 <th>Payment Method</th>
                 <th>Cart Items</th>
+                <th>Batch Codename</th>
                 <th>Status</th>
             </tr>
         </thead>
@@ -222,10 +218,11 @@ $conn->close();
                         <td>₱ <?= number_format($item['total_amount'], 2); ?></td>
                         <td><?= htmlspecialchars($item['payment_method']); ?></td>
                         <td><?= htmlspecialchars($item['cart_items']); ?></td>
+                        <td><?= htmlspecialchars($item['batch_codename']); ?></td>
                         <td>
-                            <select 
-                                class="form-select status-dropdown" 
-                                data-order-id="<?= htmlspecialchars($item['order_id']); ?>" 
+                            <select
+                                class="form-select status-dropdown"
+                                data-order-id="<?= htmlspecialchars($item['order_id']); ?>"
                                 data-status="<?= htmlspecialchars($item['status']); ?>"
                             >
                                 <option value="Order Placed" <?= $item['status'] == 'Order Placed' ? 'selected' : ''; ?>>Placed</option>
@@ -234,12 +231,11 @@ $conn->close();
                                 <option value="Ng Cancel" <?= $item['status'] == 'Ng Cancel' ? 'selected' : ''; ?>>Cancel</option>
                             </select>
                         </td>
-
                     </tr>
                 <?php endforeach; ?>
             <?php else: ?>
                 <tr>
-                    <td colspan="8">No transaction history found.</td>
+                    <td colspan="9">No transaction history found.</td>
                 </tr>
             <?php endif; ?>
         </tbody>
@@ -261,7 +257,7 @@ $conn->close();
     </div>
 </div>
 </body>
-    
+
     <script src="vendor/jquery/jquery.min.js"></script>
     <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
@@ -284,9 +280,9 @@ $conn->close();
             fetch('update_status.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    order_id: e.target.getAttribute('data-order-id'), 
-                    status: newStatus 
+                body: JSON.stringify({
+                    order_id: e.target.getAttribute('data-order-id'),
+                    status: newStatus
                 }),
             })
                 .then(response => response.json())
@@ -321,9 +317,6 @@ $conn->close();
         }
     }
 });
-
-
     </script>
-</body>
-
 </html>
+

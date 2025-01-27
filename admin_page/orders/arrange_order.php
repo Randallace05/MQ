@@ -22,18 +22,19 @@ if (isset($_GET['order_id'])) {
         $order = $result->fetch_assoc();
 
         // Insert order into transaction history (use tbl_user_id instead of username)
-        $insert_sql = "INSERT INTO transaction_history (order_id, tbl_user_id, order_date, total_amount, shipping_address, payment_method, cart_items)
-                       VALUES (?, ?, ?, ?, ?, ?, ?)";
+        $insert_sql = "INSERT INTO transaction_history (order_id, tbl_user_id, order_date, total_amount, shipping_address, payment_method, cart_items, batch_codename)
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         $insert_stmt = $conn->prepare($insert_sql);
         $insert_stmt->bind_param(
-            "iisdsss",
+            "iisdssss",
             $order['id'],
             $order['tbl_user_id'], // Use tbl_user_id here
             $order['order_date'],
             $order['total_amount'],
             $order['shipping_address'],
             $order['payment_method'],
-            $order['cart_items']
+            $order['cart_items'],
+            $order['batch_codename'] // Add batch_codename here
         );
 
         if ($insert_stmt->execute()) {
@@ -85,6 +86,7 @@ if (isset($_GET['order_id'])) {
         echo "<p class='section-title'>Order Details</p>";
         echo "<p><strong>Cart Items:</strong> " . htmlspecialchars($order['cart_items']) . "</p>";
         echo "<p><strong>Shipping Address:</strong> " . htmlspecialchars($order['shipping_address']) . "</p>";
+        echo "<p><strong>Batch Codename:</strong> " . htmlspecialchars($order['batch_codename']) . "</p>"; // Added line for batch codename
         echo "</div>";
 
         // Total Amount Section
@@ -114,3 +116,4 @@ if (isset($_GET['order_id'])) {
 // Close the database connection
 $conn->close();
 ?>
+

@@ -2,17 +2,149 @@
 include '../../conn/conn.php';
 
 // Fetch all products for mapping product names to IDs
-$sql = "SELECT * FROM products";
+$sql = "SELECT p.*,
+               pb.stock AS batch_stock,
+               pb.batch_codename AS batch_codename,
+               pb.expiration_date,
+               pb.id AS batch_id,
+               pb.status AS batch_status
+        FROM products p
+        LEFT JOIN product_batches pb ON p.id = pb.product_id
+        ORDER BY p.id, pb.id";
 $stmt = $conn->prepare($sql);
 $stmt->execute();
 $result = $stmt->get_result();
 $products = $result->fetch_all(MYSQLI_ASSOC);
+
+// Group products by their ID
+$grouped_products = [];
+foreach ($products as $product) {
+    $id = $product['id'];
+    if (!isset($grouped_products[$id])) {
+        $grouped_products[$id] = [
+            'id' => $product['id'],
+            'name' => $product['name'],
+            'price' => $product['price'],
+            'image' => $product['image'],
+            'description' => $product['description'],
+            'is_disabled' => $product['is_disabled'],
+            'batches' => []
+        ];
+    }
+    $grouped_products[$id]['batches'][] = [
+        'batch_id' => $product['batch_id'],
+        'stock' => $product['batch_stock'],
+        'codename' => $product['batch_codename'],
+        'expiration_date' => $product['expiration_date'],
+        'status' => $product['batch_status']
+    ];
+}
+$products = array_values($grouped_products);
+
 
 // Create a product map for easy lookup by name
 $product_map = [];
 foreach ($products as $product) {
     $product_map[$product['name']] = $product;
 }
+
+// Fetch the transaction history data
+$sql = "SELECT * FROM transaction_history";
+$result = $conn->query($sql);
+
+$product_details = [];
+while ($row = $result->fetch_assoc()) {
+    // Split cart_items into individual items
+    $cart_items = explode(',', $row['cart_items']); // Assuming items are comma-separated
+
+    foreach ($cart_items as $item) {
+        // Extract product name and quantity using regex
+        if (preg_match('/^(.*?) $$(\d+)x$$$/', trim($item), $matches)) {
+            $product_name = $matches[1]; // Extracted product name
+            $quantity = (int) $matches[2]; // Extracted quantity
+
+            // Check if product exists in the product map
+            if (isset($product_map[$product_name])) {
+                $product = $product_map[$product_name];
+                $product_details[] = [
+                    'product_id' => $product['id'],
+                    'product_name' => $product_name,
+                    'price' => $product['price'],
+                    'quantity' => $quantity,
+                ];
+            }
+        }
+    }
+}
+
+// Aggregate quantities and calculate total price for each product
+$aggregated_details = [];
+foreach ($product_details as $detail) {
+    $product_id = $detail['product_id'];
+    if (!isset($aggregated_details[$product_id])) {
+        $aggregated_details[$product_id] = [
+            'product_id' => $detail['product_id'],
+            'product_name' => $detail['product_name'],
+            'quantity' => $detail['quantity'],
+            'total_price' => $detail['price'] * $detail['quantity'],
+        ];
+    } else {
+        $aggregated_details[$product_id]['quantity'] += $detail['quantity'];
+        $aggregated_details[$product_id]['total_price'] += $detail['price'] * $detail['quantity'];
+    }
+}
+
+// Function to get the next batch number
+function getNextBatchNumber($conn, $product_id) {
+    $sql = "SELECT MAX(CAST(SUBSTRING(codename, -1) AS UNSIGNED)) as max_batch
+            FROM products
+            WHERE id = ? AND codename REGEXP '^[A-Z]+[0-9]+$'";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $product_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+    return ($row['max_batch'] !== null) ? $row['max_batch'] + 1 : 2;
+}
+
+// Handle form submission for adding a new batch
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_batch'])) {
+    $product_id = $_POST['product_id'];
+    $new_stock = $_POST['new_stock'];
+    $new_expiration_date = $_POST['new_expiration_date'];
+
+    // Fetch the existing product details
+    $stmt = $conn->prepare("SELECT * FROM products WHERE id = ?");
+    $stmt->bind_param("i", $product_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $product = $result->fetch_assoc();
+
+    if ($product) {
+        $next_batch_number = getNextBatchNumber($conn, $product_id);
+        $new_codename = $product['codename']. "-" . $new_expiration_date ."-".$next_batch_number;
+
+        // Insert new batch
+        $insert_sql = "INSERT INTO product_batches (product_id, stock, expiration_date, batch_codename, status)
+                       VALUES (?, ?, ?, ?, 'active')";
+        $insert_stmt = $conn->prepare($insert_sql);
+        $insert_stmt->bind_param("iiss",
+            $product_id,
+            $new_stock,
+            $new_expiration_date,
+            $new_codename
+        );
+
+        if ($insert_stmt->execute()) {
+            echo "<script>alert('New batch added successfully!');</script>";
+        } else {
+            echo "<script>alert('Error adding new batch: " . $insert_stmt->error . "');</script>";
+        }
+        $insert_stmt->close();
+    }
+    $stmt->close();
+}
+
 
 // Fetch the transaction history data
 $sql = "SELECT * FROM transaction_history";
@@ -59,62 +191,6 @@ foreach ($product_details as $detail) {
         $aggregated_details[$product_id]['total_price'] += $detail['price'] * $detail['quantity'];
     }
 }
-
-// Function to get the next batch number
-function getNextBatchNumber($conn, $product_id) {
-    $sql = "SELECT MAX(CAST(SUBSTRING(condname, -1) AS UNSIGNED)) as max_batch
-            FROM products
-            WHERE id = ? AND condname REGEXP '^[A-Z]+[0-9]+$'";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $product_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $row = $result->fetch_assoc();
-    return ($row['max_batch'] !== null) ? $row['max_batch'] + 1 : 2;
-}
-
-// Handle form submission for adding a new batch
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_batch'])) {
-    $product_id = $_POST['product_id'];
-    $new_stock = $_POST['new_stock'];
-    $new_expiration_date = $_POST['new_expiration_date'];
-
-    // Fetch the existing product details
-    $stmt = $conn->prepare("SELECT * FROM products WHERE id = ?");
-    $stmt->bind_param("i", $product_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $product = $result->fetch_assoc();
-
-    if ($product) {
-        $next_batch_number = getNextBatchNumber($conn, $product_id);
-        $new_condname = $product['condname'] . $next_batch_number;
-
-        // Insert new batch
-        $insert_sql = "INSERT INTO products (name, price, image, description, other_images, stock, expiration_date, condname)
-                       VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        $insert_stmt = $conn->prepare($insert_sql);
-        $insert_stmt->bind_param("sdssssss",
-            $product['name'],
-            $product['price'],
-            $product['image'],
-            $product['description'],
-            $product['other_images'],
-            $new_stock,
-            $new_expiration_date,
-            $new_condname
-        );
-
-        if ($insert_stmt->execute()) {
-            echo "<script>alert('New batch added successfully!');</script>";
-        } else {
-            echo "<script>alert('Error adding new batch: " . $insert_stmt->error . "');</script>";
-        }
-        $insert_stmt->close();
-    }
-    $stmt->close();
-}
-
 ?>
 
 <!DOCTYPE html>
@@ -124,10 +200,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_batch'])) {
     <title>Product List</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
+<style>
     /* Base Styles */
 
-/* General Body Styling */
 body {
     font-family: 'Inter', sans-serif;
     background-color: #f4f5f7;
@@ -379,27 +454,40 @@ footer a:hover {
 
 </head>
 
-<div class="container mt-5 px-4"> <!-- Added px-4 for left/right indent -->
-    <div class="row justify-content-center g-4"> <!-- Added g-4 for consistent gap -->
+<div class="container mt-5 px-4">
+    <div class="row justify-content-center g-4">
         <?php foreach ($products as $product): ?>
             <div class="col-md-4">
                 <div class="card h-100">
-                    <div class="card-body  flex-column">
+                    <div class="card-body flex-column">
                         <img src="uploads/<?= $product['image']; ?>" class="product-img mb-3">
                         <h5 class="card-title"><?= $product['name']; ?></h5>
                         <h5 class="card-title">&#8369; <?= $product['price']; ?></h5>
+                        <?php
+                        $active_batch = null;
+                        $total_stock = 0;
+                        foreach ($product['batches'] as $batch) {
+                            if ($batch['status'] == 1) {  // Assuming 1 means active
+                                $active_batch = $batch;
+                                break;
+                            }
+                            $total_stock += $batch['stock'];
+                        }
+                        ?>
+                        <p class="card-text">Stock: <?= $active_batch ? $active_batch['stock'] : ($total_stock ?: 'N/A'); ?></p>
+                        <p class="card-text">Active Batch: <?= $active_batch ? $active_batch['codename'] : 'N/A'; ?></p>
                         <?php
                         $toggle_action = $product['is_disabled'] == 1 ? "Enable" : "Disable";
                         ?>
 
                         <!-- Updated button layout -->
-                        <div class="mt-auto d-flex flex-column gap-2"> <!-- Added flex-column and gap-2 -->
+                        <div class="mt-auto d-flex flex-column gap-2">
                             <button class="btn btn-primary w-100" data-bs-toggle="modal"
                                     data-bs-target="#editFormModal<?= $product['id']; ?>">
                                 Edit Dish
                             </button>
                             <a href="disableMenu.php?id=<?= $product['id']; ?>"
-                               class="btn btn-danger w-100">
+                            class="btn btn-danger w-100">
                                 <?= $toggle_action; ?>
                             </a>
                         </div>
@@ -456,7 +544,7 @@ footer a:hover {
             </div>
         <?php endforeach; ?>
     </div>
-    <div class="row align-items-start g-4"> <!-- Use align-items-start for proper vertical alignment -->
+    <div class="row align-items-start g-4">
         <div class="col-md-6">
             <div class="table-container">
                 <h2 class="text-center mb-4" style="color: #EA7C69;">Product Inventory</h2>
@@ -598,16 +686,16 @@ footer a:hover {
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="addBatchForm" action="foodMenuBackend.php" method="post">
+                <form id="addBatchForm" action="readMenu.php" method="post">
                     <input type="hidden" id="batchProductId" name="product_id">
                     <input type="hidden" name="add_batch" value="1">
                     <div class="mb-3">
                         <label for="batchStock" class="form-label">Stock</label>
-                        <input type="number" class="form-control" id="batchStock" name="stock" required>
+                        <input type="number" class="form-control" id="batchStock" name="new_stock" required>
                     </div>
                     <div class="mb-3">
                         <label for="batchExpirationDate" class="form-label">Expiration Date</label>
-                        <input type="date" class="form-control" id="batchExpirationDate" name="expiration_date" required>
+                        <input type="date" class="form-control" id="batchExpirationDate" name="new_expiration_date" required>
                     </div>
                     <button type="submit" class="btn btn-primary">Add Batch</button>
                 </form>
@@ -659,34 +747,23 @@ productDetailsModal.addEventListener('show.bs.modal', function (event) {
         if (!data.error) {
             document.getElementById('productId').textContent = data.id;
             document.getElementById('productName').textContent = data.name;
-            document.getElementById('productTotalStock').textContent = data.total_stock;
+            document.getElementById('productCodename').textContent = data.batches.length > 0 ? data.batches[0].codename : 'N/A';
+            document.getElementById('productTotalStock').textContent = data.total_stock || 'N/A';
 
             const batchInfo = document.getElementById('batchInfo');
             batchInfo.innerHTML = '';
 
-            if (data.batch_info) {
-                const batches = data.batch_info.split('|');
-                let firstBatchCodename = ''; // Variable to store the first batch's codename
-
-                batches.forEach((batch, index) => {
-                    const [batchNumber, stock, expirationDate, batchCodename] = batch.split(':');
-
-                    // Set the first batch codename (for the first iteration only)
-                    if (index === 0) {
-                        firstBatchCodename = batchCodename;
-                    }
-                    const isActive = status === '1';  // Check if status is 1 (active)
-                    const activeClass = isActive ? 'table-success' : '';
-
+            if (data.batches && data.batches.length > 0) {
+                data.batches.forEach((batch, index) => {
                     const row = `
                         <tr>
-                            <td>${batchNumber}</td>
-                            <td>${stock}</td>
-                            <td>${expirationDate}</td>
-                            <td>${batchCodename}</td>
+                            <td>${index + 1}</td>
+                            <td>${batch.stock}</td>
+                            <td>${batch.expiration_date}</td>
+                            <td>${batch.codename}</td>
                             <td>
-                                <button id="statusBtn-${batchNumber}" class="btn btn-${isActive ? 'primary' : 'secondary'}" onclick="updateBatchStatus('${batchNumber}', '${isActive ? '0' : '1'}')">
-                                    ${isActive ? 'Active' : 'Inactive'}
+                                <button id="statusBtn-${batch.batch_id}" class="btn btn-${batch.is_active ? 'primary' : 'secondary'}" onclick="updateBatchStatus('${batch.batch_id}', '${batch.is_active ? '0' : '1'}')">
+                                    ${batch.is_active ? 'Active' : 'Inactive'}
                                 </button>
                             </td>
                         </tr>
@@ -694,10 +771,10 @@ productDetailsModal.addEventListener('show.bs.modal', function (event) {
                     batchInfo.innerHTML += row;
                 });
 
-                // Display the first batch codename in the codename element
-                document.getElementById('productCodename').textContent = firstBatchCodename || 'N/A';
+                // Update all button states after adding rows
+                updateAllButtonStates();
             } else {
-                document.getElementById('productCodename').textContent = 'N/A';
+                batchInfo.innerHTML = '<tr><td colspan="5">No batches available for this product.</td></tr>';
             }
 
             const addBatchBtn = document.getElementById('addBatchBtn');
@@ -706,6 +783,7 @@ productDetailsModal.addEventListener('show.bs.modal', function (event) {
                 document.getElementById('batchProductId').value = data.id;
                 addBatchModal.show();
             };
+
         } else {
             alert('Error: ' + data.error);
         }
@@ -716,7 +794,6 @@ productDetailsModal.addEventListener('show.bs.modal', function (event) {
     });
 });
 
-// Add event listener to the Add Batch button
 function updateBatchStatus(batchNumber, newStatus) {
     console.log(`Updating batch ${batchNumber} status to: ${newStatus}`);
     fetch('updateBatchStatus.php', {
@@ -729,18 +806,7 @@ function updateBatchStatus(batchNumber, newStatus) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            const button = document.querySelector(`#statusBtn-${batchNumber}`);
-            if (newStatus === '1') {
-                button.classList.remove('btn-secondary');
-                button.classList.add('btn-primary');
-                button.textContent = 'Active';
-                button.onclick = () => updateBatchStatus(batchNumber, '0');
-            } else {
-                button.classList.remove('btn-primary');
-                button.classList.add('btn-secondary');
-                button.textContent = 'Inactive';
-                button.onclick = () => updateBatchStatus(batchNumber, '1');
-            }
+            updateButtonStates(batchNumber, newStatus);
         } else {
             alert('Error: ' + data.message);
         }
@@ -750,9 +816,50 @@ function updateBatchStatus(batchNumber, newStatus) {
         alert('Error updating batch status: ' + error.message);
     });
 }
+
+function updateButtonStates(activeBatchNumber, newStatus) {
+    const buttons = document.querySelectorAll('[id^="statusBtn-"]');
+    buttons.forEach(button => {
+        const batchNumber = button.id.split('-')[1];
+        if (batchNumber === activeBatchNumber) {
+            updateButtonState(button, newStatus);
+        } else {
+            updateButtonState(button, '0');
+        }
+    });
+}
+
+function updateButtonState(button, status) {
+    if (status === '1') {
+        button.classList.remove('btn-secondary');
+        button.classList.add('btn-primary');
+        button.textContent = 'Active';
+        button.setAttribute('onclick', `updateBatchStatus('${button.id.split('-')[1]}', '0')`);
+    } else {
+        button.classList.remove('btn-primary');
+        button.classList.add('btn-secondary');
+        button.textContent = 'Inactive';
+        button.setAttribute('onclick', `updateBatchStatus('${button.id.split('-')[1]}', '1')`);
+    }
+}
+
+// Add this function to update all buttons when the modal is shown
+function updateAllButtonStates() {
+    const buttons = document.querySelectorAll('[id^="statusBtn-"]');
+    buttons.forEach(button => {
+        const currentStatus = button.classList.contains('btn-primary') ? '1' : '0';
+        updateButtonState(button, currentStatus);
+    });
+}
+</script>
+<script>
+const addBatchBtn = document.getElementById('addBatchBtn');
+addBatchBtn.onclick = function () {
+    const addBatchModal = new bootstrap.Modal(document.getElementById('addBatchModal'));
+    document.getElementById('batchProductId').value = data.id;
+    addBatchModal.show();
+};
 </script>
 </body>
 </html>
-
-
 

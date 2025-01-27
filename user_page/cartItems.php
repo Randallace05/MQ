@@ -288,7 +288,7 @@ if (isset($_POST['update_product_quantity'])) {
         </thead>
         <tbody>
             <?php
-            $select_cart_products = $conn->prepare("SELECT * FROM `cart` WHERE tbl_user_id = ?");
+            $select_cart_products = $conn->prepare("SELECT cart_id, product_id, name, image, price, quantity, total_price FROM `cart` WHERE tbl_user_id = ?");
             $select_cart_products->bind_param("i", $tbl_user_id);
             $select_cart_products->execute();
             $result = $select_cart_products->get_result();
@@ -299,7 +299,7 @@ if (isset($_POST['update_product_quantity'])) {
                     ?>
                     <tr>
                         <td>
-                            <input type="checkbox" class="select-product" name="selected_products[]" value="<?php echo $fetch_cart_products['cart_id']; ?>" data-price="<?php echo $fetch_cart_products['price'] * $fetch_cart_products['quantity']; ?>">
+                            <input type="checkbox" class="select-product" name="selected_products[]" value="<?php echo $fetch_cart_products['cart_id']; ?>" data-price="<?php echo $fetch_cart_products['total_price']; ?>">
                         </td>
                         <td><?php echo $sl_no++; ?></td>
                         <td><?php echo htmlspecialchars($fetch_cart_products['name']); ?></td>
@@ -314,7 +314,7 @@ if (isset($_POST['update_product_quantity'])) {
                                 <button type="button" class="quantity-btn plus" data-cart-id="<?php echo $fetch_cart_products['cart_id']; ?>">+</button>
                             </div>
                         </td>
-                        <td><?php echo "₱" . htmlspecialchars($fetch_cart_products['price'] * $fetch_cart_products['quantity']); ?></td>
+                        <td><?php echo "₱" . htmlspecialchars($fetch_cart_products['total_price']); ?></td>
                         <td>
                             <a href="delete_cart_item.php?id=<?php echo htmlspecialchars($fetch_cart_products['cart_id']); ?>" onclick="return confirm('Are you sure you want to remove this item?');">
                                 Remove
@@ -405,15 +405,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const updateTotal = () => {
         let total = 0;
         checkboxes.forEach(checkbox => {
+            const row = checkbox.closest("tr");
+            const totalPriceCell = row.querySelector("td:nth-child(7)");
+            const itemTotal = parseFloat(totalPriceCell.textContent.replace("₱", ""));
             if (checkbox.checked) {
-                const row = checkbox.closest("tr");
-                const totalPriceCell = row.querySelector("td:nth-child(7)");
-                const itemTotal = parseFloat(totalPriceCell.textContent.replace("₱", ""));
                 total += itemTotal;
             }
         });
 
-        totalDisplay.textContent = `₱${total.toFixed(2)}`;
+        totalDisplay.textContent = `Total: ₱${total.toFixed(2)}`;
 
         // Enable or disable checkout button
         if (total > 0) {
@@ -430,6 +430,9 @@ document.addEventListener("DOMContentLoaded", () => {
     checkboxes.forEach(checkbox => {
         checkbox.addEventListener("change", updateTotal);
     });
+
+    checkboxes.forEach(checkbox => checkbox.checked = true);
+    updateTotal();
 });
 
 
@@ -438,3 +441,4 @@ document.addEventListener("DOMContentLoaded", () => {
 
 </body>
 </html>
+

@@ -35,7 +35,7 @@ try {
 
         // Prepare query to fetch selected cart items
         $placeholders = implode(',', array_fill(0, count($selected_products), '?'));
-        $stmt = $conn->prepare("SELECT * FROM cart WHERE tbl_user_id = ? AND cart_id IN ($placeholders)");
+        $stmt = $conn->prepare("SELECT c.*, p.batch_codename FROM cart c JOIN product_batches p ON c.product_id = p.product_id WHERE c.tbl_user_id = ? AND c.cart_id IN ($placeholders)");
 
         // Bind parameters dynamically
         $types = str_repeat('i', count($selected_products) + 1); // 'i' for integers
@@ -86,34 +86,60 @@ try {
             }
         }
 
-        // Insert data into the checkout table
-        $stmt = $conn->prepare("
-            INSERT INTO checkout (id, firstname, middlename, lastname, address, city, zip_code, contact_number, payment_method, gcash_proof, grand_total)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ");
-        $stmt->bind_param(
-            "isssssssssd",
-            $tbl_user_id,
-            $firstName,
-            $middleName,
-            $lastName,
-            $address,
-            $city,
-            $zipCode,
-            $contactNumber,
-            $paymentMethod,
-            $gcashProofPath,
-            $grandTotal
-        );
+        // Start a transaction
+        $conn->begin_transaction();
 
-        if ($stmt->execute()) {
-            // Get the last inserted order ID
+        try {
+            // Insert data into the checkout table
+            $stmt = $conn->prepare("
+                INSERT INTO checkout (id, firstname, middlename, lastname, address, city, zip_code, contact_number, payment_method, gcash_proof, grand_total, batch_codename)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ");
+            $stmt->bind_param(
+                "isssssssssds",
+                $tbl_user_id,
+                $firstName,
+                $middleName,
+                $lastName,
+                $address,
+                $city,
+                $zipCode,
+                $contactNumber,
+                $paymentMethod,
+                $gcashProofPath,
+                $grandTotal,
+                $cartItems[0]['batch_codename']
+            );
+
+            if (!$stmt->execute()) {
+                throw new Exception("Error inserting into checkout table: " . $stmt->error);
+            }
+
             $order_id = $conn->insert_id;
 
+            // Insert order items and update product batches
+            $order_items_stmt = $conn->prepare("INSERT INTO order_items (order_id, product_id, quantity, price, batch_codename) VALUES (?, ?, ?, ?, ?)");
+
+
+            foreach ($cartItems as $item) {
+                $order_items_stmt->bind_param("iiids", $order_id, $item['product_id'], $item['quantity'], $item['price'], $item['batch_codename']);
+                if (!$order_items_stmt->execute()) {
+                    throw new Exception("Error inserting order item: " . $order_items_stmt->error);
+                }
+            }
+
+            $order_items_stmt->close();
+
             // Remove processed items from the cart
-            $stmt = $conn->prepare("DELETE FROM cart WHERE tbl_user_id = ? AND cart_id IN ($placeholders)");
-            $stmt->bind_param($types, $tbl_user_id, ...$selected_products);
-            $stmt->execute();
+            $delete_stmt = $conn->prepare("DELETE FROM cart WHERE tbl_user_id = ? AND cart_id IN ($placeholders)");
+            $delete_stmt->bind_param($types, $tbl_user_id, ...$selected_products);
+            if (!$delete_stmt->execute()) {
+                throw new Exception("Error deleting items from cart: " . $delete_stmt->error);
+            }
+            $delete_stmt->close();
+
+            // Commit the transaction
+            $conn->commit();
 
             // Redirect based on payment method
             if ($paymentMethod === "Cash on Delivery") {
@@ -122,8 +148,10 @@ try {
                 header("Location: ref.php?order_id=$order_id");
             }
             exit;
-        } else {
-            echo "Error: " . $stmt->error;
+        } catch (Exception $e) {
+            // An error occurred, rollback the transaction
+            $conn->rollback();
+            die("Error processing order: " . $e->getMessage());
         }
     }
 } catch (Exception $e) {
@@ -366,5 +394,4 @@ try {
 
 </body>
 </html>
-
 

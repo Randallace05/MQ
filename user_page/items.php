@@ -274,14 +274,15 @@ if (isset($_SESSION['success_message'])) {
         }
 
         .quantity-input {
-            width: 80px;
-            height: 40px;
+            width: 60px;  /* Reduce width */
+            height: 30px;  /* Reduce height */
             border: 1px solid #ddd;
             border-radius: 4px;
-            padding: 5px;
-            font-size: 16px;
+            padding: 3px;
+            font-size: 14px;
             text-align: center;
         }
+
 
         .action-buttons {
             display: flex;
@@ -546,10 +547,10 @@ if (isset($_SESSION['success_message'])) {
                 <hr>
 
                 <form method="post">
-                    <div class="form-group">
+                <div class="form-group"> 
                         <label for="quantity">Quantity:</label>
                         <input type="number" id="quantity" name="quantity" value="1" min="1"
-                               max="<?php echo htmlspecialchars($product['stock']); ?>" class="form-control">
+                            max="<?php echo htmlspecialchars($product['stock']); ?>" class="quantity-input">
                     </div>
                     <button type="submit" name="add_to_cart" class="btn btn-primary mt-3">Add to Cart</button>
                 </form>
@@ -865,36 +866,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<div id="review-section">
-    <h3>Write a Review</h3>
-    <?php if (isset($_SESSION['unique_id'])): ?>
-        <form method="post" class="review-form">
-            <div class="mb-3">
-                <label for="rating" class="form-label">Rating:</label>
-                <div class="chili-rating submission-chilies">
-                    <?php for($i = 1; $i <= 5; $i++): ?>
-                        <i class="fa-solid fa-pepper-hot chili"
-                           data-rating="<?php echo $i; ?>"
-                           style="color: #c2bdbd; --fa-rotate-angle: 320deg;">
-                        </i>
-                    <?php endfor; ?>
-                </div>
-                <input type="hidden" name="rating" id="rating" value="0" required>
-            </div>
-            <div class="mb-3">
-                <label for="review_text" class="form-label">Your Review:</label>
-                <textarea name="review_text" id="review_text" rows="3" class="form-control" required></textarea>
-            </div>
-            <div class="mb-3 form-check anonymous-toggle">
-                <input type="checkbox" class="form-check-input" id="is_anonymous" name="is_anonymous">
-                <label class="form-check-label" for="is_anonymous">Post anonymously</label>
-            </div>
-            <button type="submit" name="submit_review" class="btn btn-primary">Submit Review</button>
-        </form>
-    <?php else: ?>
-        <p><a href="../user_page/login.php">Log in</a> to write a review.</p>
-    <?php endif; ?>
-</div>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -973,66 +944,6 @@ document.addEventListener('DOMContentLoaded', function () {
             // Load reviews for selected rating
             const rating = button.dataset.rating;
             loadReviewPage(1, rating === 'all' ? 0 : parseInt(rating, 10));
-        });
-    });
-});
-</script>
-
-<div id="review-section">
-    <h3>Write a Review</h3>
-    <?php if (isset($_SESSION['unique_id'])): ?>
-        <form method="post" class="review-form">
-            <div class="mb-3">
-                <label for="rating" class="form-label">Rating:</label>
-                <div class="chili-rating submission-chilies">
-                    <?php for ($i = 1; $i <= 5; $i++): ?>
-                        <i class="fa-solid fa-pepper-hot chili"
-                           data-rating="<?php echo $i; ?>"
-                           style="color: #c2bdbd; --fa-rotate-angle: 320deg;"></i>
-                    <?php endfor; ?>
-                </div>
-                <input type="hidden" name="rating" id="rating" value="0" required>
-            </div>
-            <div class="mb-3">
-                <label for="review_text" class="form-label">Your Review:</label>
-                <textarea name="review_text" id="review_text" rows="3" class="form-control" required></textarea>
-            </div>
-            <div class="mb-3 form-check anonymous-toggle">
-                <input type="checkbox" class="form-check-input" id="is_anonymous" name="is_anonymous">
-                <label class="form-check-label" for="is_anonymous">Post anonymously</label>
-            </div>
-            <button type="submit" name="submit_review" class="btn btn-primary">Submit Review</button>
-        </form>
-    <?php else: ?>
-        <p><a href="../user_page/login.php">Log in</a> to write a review.</p>
-    <?php endif; ?>
-</div>
-
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const submissionChilies = document.querySelectorAll('.submission-chilies .chili');
-    const ratingInput = document.getElementById('rating');
-
-    submissionChilies.forEach((chili, index) => {
-        chili.addEventListener('mouseover', () => {
-            submissionChilies.forEach((c, i) => {
-                c.style.color = i <= index ? '#ff0000' : '#c2bdbd';
-            });
-        });
-
-        chili.addEventListener('mouseout', () => {
-            submissionChilies.forEach((c, i) => {
-                c.style.color = i < ratingInput.value ? '#ff0000' : '#c2bdbd';
-            });
-        });
-
-        chili.addEventListener('click', () => {
-            ratingInput.value = index + 1;
-
-            submissionChilies.forEach((c, i) => {
-                c.classList.toggle('active', i <= index);
-                c.style.color = i <= index ? '#ff0000' : '#c2bdbd';
-            });
         });
     });
 });

@@ -47,7 +47,7 @@ function getTotalReviews($conn) {
 }
 
 // Pagination settings
-$limit = 10; // Reviews per page
+$limit = 5; // Reviews per page
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($page - 1) * $limit;
 

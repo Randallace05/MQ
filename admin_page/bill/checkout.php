@@ -35,7 +35,7 @@ try {
 
         // Prepare query to fetch selected cart items
         $placeholders = implode(',', array_fill(0, count($selected_products), '?'));
-        $stmt = $conn->prepare("SELECT c.*, p.batch_codename FROM cart c JOIN product_batches p ON c.product_id = p.product_id WHERE c.tbl_user_id = ? AND c.cart_id IN ($placeholders)");
+        $stmt = $conn->prepare("SELECT * FROM cart WHERE tbl_user_id = ? AND cart_id IN ($placeholders)");
 
         // Bind parameters dynamically
         $types = str_repeat('i', count($selected_products) + 1); // 'i' for integers
@@ -390,6 +390,58 @@ try {
         // Allow the form to submit and backend to handle the rest
         return true;
     }
+
+    <script>
+    function togglePaymentFields(show) {
+        const gcashImage = document.getElementById('gcash-image');
+        const gcashUpload = document.getElementById('gcash-upload');
+
+        gcashImage.style.display = show ? 'block' : 'none';
+        gcashUpload.style.display = show ? 'block' : 'none';
+    }
+
+    function handleCheckout(event) {
+        const confirmation = confirm("Are you sure you want to proceed with the checkout?");
+        if (!confirmation) {
+            event.preventDefault();
+            return false;
+        }
+        return true;
+    }
+
+    // Function to copy billing address to shipping address
+    function copyBillingToShipping() {
+        const sameAdrCheckbox = document.querySelector("input[name='sameadr']");
+        if (sameAdrCheckbox.checked) {
+            document.getElementById('ship_fname').value = document.getElementById('fname').value;
+            document.getElementById('ship_mname').value = document.getElementById('email').value;
+            document.getElementById('ship_lname').value = document.getElementById('email').value;
+            document.getElementById('ship_adr').value = document.getElementById('adr').value;
+            document.getElementById('ship_city').value = document.getElementById('city').value;
+            document.getElementById('ship_zip').value = document.getElementById('z').value;
+            document.getElementById('ship_num').value = document.getElementById('num').value;
+
+            // Disable shipping fields to prevent editing
+            document.getElementById('ship_fname').setAttribute('readonly', true);
+            document.getElementById('ship_mname').setAttribute('readonly', true);
+            document.getElementById('ship_lname').setAttribute('readonly', true);
+            document.getElementById('ship_adr').setAttribute('readonly', true);
+            document.getElementById('ship_city').setAttribute('readonly', true);
+            document.getElementById('ship_zip').setAttribute('readonly', true);
+            document.getElementById('ship_num').setAttribute('readonly', true);
+        } else {
+            // Enable fields for manual entry if unchecked
+            document.getElementById('ship_fname').removeAttribute('readonly');
+            document.getElementById('ship_mname').removeAttribute('readonly');
+            document.getElementById('ship_lname').removeAttribute('readonly');
+            document.getElementById('ship_adr').removeAttribute('readonly');
+            document.getElementById('ship_city').removeAttribute('readonly');
+            document.getElementById('ship_zip').removeAttribute('readonly');
+            document.getElementById('ship_num').removeAttribute('readonly');
+        }
+    }
+</script>
+
 </script>
 
 </body>

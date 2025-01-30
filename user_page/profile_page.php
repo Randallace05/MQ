@@ -15,11 +15,26 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
 
 $tbl_user_id = intval($_SESSION['tbl_user_id']);
 
-$user_query = $conn->prepare("SELECT first_name, last_name, contact_number, email, username FROM tbl_user WHERE tbl_user_id = ?");
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['profile_picture'])) {
+    $target_dir = "../uploads/";
+    $target_file = $target_dir . basename($_FILES["profile_picture"]["name"]);
+    $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
+    $allowed_types = ['jpg', 'jpeg', 'png', 'gif'];
+
+    if (in_array($imageFileType, $allowed_types) && move_uploaded_file($_FILES["profile_picture"]["tmp_name"], $target_file)) {
+        $update_query = $conn->prepare("UPDATE tbl_user SET profile_picture = ? WHERE tbl_user_id = ?");
+        $update_query->bind_param("si", $_FILES["profile_picture"]["name"], $tbl_user_id);
+        $update_query->execute();
+    }
+}
+
+$user_query = $conn->prepare("SELECT first_name, last_name, contact_number, email, username, profile_picture FROM tbl_user WHERE tbl_user_id = ?");
 $user_query->bind_param("i", $tbl_user_id);
 $user_query->execute();
 $result = $user_query->get_result();
 $user_data = $result->fetch_assoc();
+
+$profile_picture = !empty($user_data['profile_picture']) ? '../uploads/' . htmlspecialchars($user_data['profile_picture']) : '../uploads/default.png';
 ?>
 
 <!DOCTYPE html>
@@ -42,12 +57,20 @@ $user_data = $result->fetch_assoc();
             border-radius: 10px;
             padding: 20px;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
         }
         .profile-title {
             font-size: 2rem;
-            text-align: center;
             margin-bottom: 20px;
             font-weight: bold;
+        }
+        .profile-picture {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 20px;
+            border: 3px solid #007bff;
         }
         .profile-table {
             width: 100%;
@@ -85,6 +108,11 @@ $user_data = $result->fetch_assoc();
 <body>
 <div class="profile-container">
     <div class="profile-title">Profile Information</div>
+    <img src="<?php echo $profile_picture; ?>" alt="Profile Picture" class="profile-picture">
+    <form action="" method="POST" enctype="multipart/form-data">
+        <input type="file" name="profile_picture" required>
+        <button type="submit" class="btn btn-primary">Upload</button>
+    </form>
     <table class="profile-table">
         <tbody>
             <tr>

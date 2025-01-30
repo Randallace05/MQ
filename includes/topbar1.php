@@ -347,6 +347,14 @@
     // Retrieve user ID from session
     $tbl_user_id = $_SESSION['tbl_user_id'] ?? null;
 
+    $user_query = $conn->prepare("SELECT profile_picture FROM tbl_user WHERE tbl_user_id = ?");
+$user_query->bind_param("i", $tbl_user_id);
+$user_query->execute();
+$result = $user_query->get_result();
+$user_data = $result->fetch_assoc();
+
+$profile_picture = !empty($user_data['profile_picture']) ? '../uploads/' . htmlspecialchars($user_data['profile_picture']) : '../uploads/default.png';
+
     // Initialize cart count
     $row_count = 0;
     if ($conn && $tbl_user_id) {
@@ -446,7 +454,7 @@
             </a>
             <div class="user-dropdown">
                 <a href="#" class="user-icon" onclick="toggleDropdown(event)">
-                    <i class="fa-regular fa-user"></i>
+                <img src="<?php echo $profile_picture; ?>" alt="Profile" class="rounded-circle" width="40" height="40">
 
                 </a>
                 <div class="dropdown-content">

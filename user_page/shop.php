@@ -399,11 +399,11 @@ if ($user_id) {
                                     <span class="chili filled" data-value="<?php echo $i; ?>">
                                         <?php
                                         if ($i <= floor($average_rating)) {
-                                            echo '🌶️';
+                                            echo '⭐';
                                         } elseif ($i == ceil($average_rating) && $average_rating != floor($average_rating)) {
-                                            echo '🌶️';
+                                            echo '⭐';
                                         } else {
-                                            echo '🌶️';
+                                            echo '⭐';
                                         }
                                         ?>
                                     </span>
@@ -456,11 +456,11 @@ if ($user_id) {
                                     <span class="chili filled" data-value="<?php echo $i; ?>">
                                         <?php
                                         if ($i <= floor($average_rating)) {
-                                            echo '🌶️';
+                                            echo '⭐';
                                         } elseif ($i == ceil($average_rating) && $average_rating != floor($average_rating)) {
-                                            echo '🌶️';
+                                            echo '⭐';
                                         } else {
-                                            echo '🌶️';
+                                            echo '⭐';
                                         }
                                         ?>
                                     </span>

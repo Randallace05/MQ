@@ -83,7 +83,7 @@ footer p {
         font-size: 0.875rem; /* Smaller marquee text for mobile */
     }
 }
-
+/* try klung makaakpg push */
 
 </style>
 <head>

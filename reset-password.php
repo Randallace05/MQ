@@ -38,7 +38,7 @@ if (!isset($_SESSION['reset_email'])) {
 <body>
     <div class="reset-password-form">
         <h2 class="text-center mb-4">Reset Password</h2>
-        <form id="resetPasswordForm" action="endpoint/reset-password.php" method="POST">
+        <form id="resetPasswordForm">
             <div class="form-group">
                 <label for="otp">OTP</label>
                 <input type="text" class="form-control" id="otp" name="otp" required>
@@ -55,8 +55,73 @@ if (!isset($_SESSION['reset_email'])) {
         </form>
     </div>
 
+    <!-- Success Modal -->
+    <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="successModalLabel">Success</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="successModalBody"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Modal -->
+    <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="errorModalLabel">Error</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="errorModalBody"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#resetPasswordForm').on('submit', function(e) {
+                e.preventDefault();
+                $.ajax({
+                    url: 'endpoint/reset-password.php',
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.success) {
+                            $('#successModalBody').text(response.message);
+                            $('#successModal').modal('show');
+                            $('#successModal').on('hidden.bs.modal', function () {
+                                window.location.href = 'index.php';
+                            });
+                        } else {
+                            $('#errorModalBody').text(response.message);
+                            $('#errorModal').modal('show');
+                        }
+                    },
+                    error: function() {
+                        $('#errorModalBody').text('An error occurred. Please try again later.');
+                        $('#errorModal').modal('show');
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>
 

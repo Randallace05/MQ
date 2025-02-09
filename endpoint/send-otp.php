@@ -9,6 +9,8 @@ require 'PHPMailer/src/Exception.php';
 require 'PHPMailer/src/PHPMailer.php';
 require 'PHPMailer/src/SMTP.php';
 
+header('Content-Type: application/json');
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = $_POST['email'];
 
@@ -53,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $mail->send();
 
             $_SESSION['reset_email'] = $email;
-            echo json_encode(['success' => true, 'message' => 'OTP sent successfully']);
+            echo json_encode(['success' => true, 'message' => 'OTP sent successfully. Please check your email.']);
         } catch (Exception $e) {
             echo json_encode(['success' => false, 'message' => 'Message could not be sent. Mailer Error: ' . $mail->ErrorInfo]);
         }

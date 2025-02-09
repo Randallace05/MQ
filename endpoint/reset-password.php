@@ -2,6 +2,8 @@
 session_start();
 include('../conn/conn.php');
 
+header('Content-Type: application/json');
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $otp = $_POST['otp'];
     $new_password = $_POST['new_password'];
@@ -27,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $updateStmt->execute();
 
         unset($_SESSION['reset_email']);
-        echo json_encode(['success' => true, 'message' => 'Password reset successfully']);
+        echo json_encode(['success' => true, 'message' => 'Password reset successfully. You can now login with your new password.']);
     } else {
         echo json_encode(['success' => false, 'message' => 'Invalid OTP']);
     }

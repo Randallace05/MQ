@@ -130,6 +130,7 @@ footer p {
                                 <label for="password">Password:</label>
                                 <input type="password" class="form-control" id="password" name="password">
                             </div>
+                            <p>Forgot your password? <a href="forgot-password.php">Reset it here</a></p>
                             <p>No Account? Register <span class="switch-form-link" onclick="showRegistrationForm()">Here.</span></p>
                             <button type="submit" class="btn btn-secondary login-btn form-control">Login</button>
                         </form>

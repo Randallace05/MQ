@@ -478,8 +478,8 @@ if ($user_id) {
     </div>
 
     <?php include("../includes/footer.php"); ?>
-     <!-- Modal -->
-     <div class="modal fade" id="reminderModal" tabindex="-1" aria-labelledby="reminderModalLabel" aria-hidden="true">
+     <!-- Modal be part-->
+    <div class="modal fade" id="reminderModal" tabindex="-1" aria-labelledby="reminderModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
@@ -493,6 +493,10 @@ if ($user_id) {
                     </a>
                 </div>
                 <div class="modal-footer">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="dontShowAgain">
+                        <label class="form-check-label" for="dontShowAgain">Don't show this again</label>
+                    </div>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
@@ -579,17 +583,29 @@ if ($user_id) {
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Check the PHP variable for user role
-            const userRole = "<?php echo $user_role; ?>";
+    document.addEventListener('DOMContentLoaded', function () {
+        const userRole = "<?php echo $user_role; ?>";
+        const userId = "<?php echo $tbl_user_id; ?>"; // Ensure this variable is available in PHP
+        const modalKey = `hideReminderModal_${userId}`;
+        const reminderModal = new bootstrap.Modal(document.getElementById('reminderModal'));
+        const dontShowAgainCheckbox = document.getElementById('dontShowAgain');
 
-            // Show the modal if the user role is 'customer'
-            if (userRole === "customer") {
-                const reminderModal = new bootstrap.Modal(document.getElementById('reminderModal'));
-                reminderModal.show();
+        // Check if the modal should be shown for this specific user
+        if (userRole === "customer" && localStorage.getItem(modalKey) !== 'true') {
+            reminderModal.show();
+        }
+
+        // Store preference with the user ID
+        dontShowAgainCheckbox.addEventListener('change', function () {
+            if (this.checked) {
+                localStorage.setItem(modalKey, 'true');
+            } else {
+                localStorage.removeItem(modalKey);
             }
         });
-    </script>
+    });
+</script>
+
 
 </body>
 </html>

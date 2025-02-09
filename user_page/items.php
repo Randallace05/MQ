@@ -387,7 +387,7 @@ if (isset($_SESSION['success_message'])) {
         }
 
         .chili-rating .chili.active {
-            color: #ff0000;
+            color: rgb(248, 229, 59);
         }
 
         .review-form {
@@ -524,11 +524,11 @@ if (isset($_SESSION['success_message'])) {
                             $half_chili = $average_rating - $full_chilies >= 0.5;
                             for ($i = 1; $i <= 5; $i++):
                                 if ($i <= $full_chilies): ?>
-                                    <i class="fas fa-pepper-hot" style="color: #ff0000;"></i>
+                                    <i class="fa-solid fa-star" style="color: rgb(248, 229, 59);"></i>
                                 <?php elseif ($i == $full_chilies + 1 && $half_chili): ?>
-                                    <i class="fas fa-pepper-hot" style="color: #ff0000; opacity: 0.5;"></i>
+                                    <i class="fa-solid fa-star" style="color: rgb(248, 229, 59); opacity: 0.5;"></i>
                                 <?php else: ?>
-                                    <i class="fas fa-pepper-hot" style="color: #c2bdbd;"></i>
+                                    <i class="fa-solid fa-star" style="color: #c2bdbd;"></i>
                                 <?php endif;
                             endfor; ?>
                             <span>(<?php echo number_format($average_rating, 1); ?>)</span>
@@ -575,10 +575,7 @@ if (isset($_SESSION['success_message'])) {
                     <label for="rating" class="form-label">Rating:</label>
                     <div class="chili-rating submission-chilies">
                         <?php for($i = 1; $i <= 5; $i++): ?>
-                            <i class="fa-solid fa-pepper-hot chili"
-                               data-rating="<?php echo $i; ?>"
-                               style="color: #c2bdbd; --fa-rotate-angle: 320deg;">
-                            </i>
+                            <i class="fa-solid fa-star chili" data-rating="<?php echo $i; ?>"></i>
                         <?php endfor; ?>
                     </div>
                     <input type="hidden" name="rating" id="rating" value="0" required>
@@ -618,11 +615,11 @@ if (isset($_SESSION['success_message'])) {
                     $half_chili = $average_rating - $full_chilies >= 0.5;
                     for ($i = 1; $i <= 5; $i++):
                         if ($i <= $full_chilies): ?>
-                            <i class="fas fa-pepper-hot" style="color: #ff0000;"></i>
+                            <i class="fa-solid fa-star" style="color:rgb(248, 229, 59);"></i>
                         <?php elseif ($i == $full_chilies + 1 && $half_chili): ?>
-                            <i class="fas fa-pepper-hot" style="color: #ff0000; opacity: 0.5;"></i>
+                            <i class="fa-solid fa-star" style="color: rgb(248, 229, 59); opacity: 0.5;"></i>
                         <?php else: ?>
-                            <i class="fas fa-pepper-hot" style="color: #c2bdbd;"></i>
+                            <i class="fa-solid fa-star" style="color: #c2bdbd;"></i>
                         <?php endif;
                     endfor; ?>
                 </div>
@@ -716,8 +713,8 @@ if (isset($_SESSION['success_message'])) {
                             </div>
                             <div class="chili-rating">
                                 <?php for($i = 1; $i <= 5; $i++): ?>
-                                    <i class="fa-solid fa-pepper-hot <?php echo $i <= $review['rating'] ? 'active' : ''; ?>"
-                                       style="color: <?php echo $i <= $review['rating'] ? '#ff0000' : '#c2bdbd'; ?>;">
+                                    <i class="fa-solid fa-star <?php echo $i <= $review['rating'] ? 'active' : ''; ?>"
+                                       style="color: <?php echo $i <= $review['rating'] ? 'rgb(248, 229, 59)' : '#c2bdbd'; ?>;">
                                     </i>
                                 <?php endfor; ?>
                             </div>
@@ -792,13 +789,13 @@ if (isset($_SESSION['success_message'])) {
     submissionChilies.forEach((chili, index) => {
         chili.addEventListener('mouseover', () => {
             submissionChilies.forEach((c, i) => {
-                c.style.color = i <= index ? '#ff0000' : '#c2bdbd';
+                c.style.color = i <= index ? 'rgb(248, 229, 59)' : '#c2bdbd';
             });
         });
 
         chili.addEventListener('mouseout', () => {
             submissionChilies.forEach((c, i) => {
-                c.style.color = i < ratingInput.value ? '#ff0000' : '#c2bdbd';
+                c.style.color = i < ratingInput.value ? 'rgb(248, 229, 59)' : '#c2bdbd';
             });
         });
 
@@ -875,13 +872,13 @@ document.addEventListener('DOMContentLoaded', () => {
     submissionChilies.forEach((chili, index) => {
         chili.addEventListener('mouseover', () => {
             submissionChilies.forEach((c, i) => {
-                c.style.color = i <= index ? '#ff0000' : '#c2bdbd';
+                c.style.color = i <= index ? 'rgb(248, 229, 59)' : '#c2bdbd';
             });
         });
 
         chili.addEventListener('mouseout', () => {
             submissionChilies.forEach((c, i) => {
-                c.style.color = i < ratingInput.value ? '#ff0000' : '#c2bdbd';
+                c.style.color = i < ratingInput.value ? 'rgb(248, 229, 59)' : '#c2bdbd';
             });
         });
 

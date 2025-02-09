@@ -150,12 +150,19 @@ if (isset($_POST['submit_review'])) {
 }
 
 // Fetch existing reviews for the product
-$review_query = "SELECT username, review_text, rating, created_at, is_anonymous FROM reviews WHERE product_id = ? ORDER BY created_at DESC";
+// Fetch reviews along with the profile picture
+$review_query = "SELECT r.username, r.review_text, r.rating, r.created_at, r.is_anonymous, u.profile_picture 
+                 FROM reviews r
+                 LEFT JOIN tbl_user u ON r.username = u.username
+                 WHERE r.product_id = ? 
+                 ORDER BY r.created_at DESC";
+
 $review_stmt = $conn->prepare($review_query);
 $review_stmt->bind_param("i", $product_id);
 $review_stmt->execute();
 $reviews_result = $review_stmt->get_result();
 $reviews = $reviews_result->fetch_all(MYSQLI_ASSOC);
+
 
 $total_rating = 0;
 $review_count = count($reviews);
@@ -173,6 +180,7 @@ if (isset($_SESSION['success_message'])) {
     echo '<div class="alert alert-success">' . $_SESSION['success_message'] . '</div>';
     unset($_SESSION['success_message']);
 }
+echo '<img src="' . $review['profile_picture'] . '">';
 
 ?>
 
@@ -666,7 +674,7 @@ if (isset($_SESSION['success_message'])) {
         $rating_filter = isset($_GET['rating']) ? (int)$_GET['rating'] : 0;
         $rating_condition = $rating_filter > 0 ? "AND r.rating = ?" : "";
 
-        $review_query = "SELECT r.*, u.img
+        $review_query = "SELECT r.*, u.profile_picture
                         FROM reviews r
                         LEFT JOIN tbl_user u ON r.tbl_user_id = u.tbl_user_id
                         WHERE r.product_id = ? $rating_condition
@@ -690,9 +698,9 @@ if (isset($_SESSION['success_message'])) {
                     <!-- User Profile Image -->
                     <div class="review-avatar">
                         <?php if ($review['is_anonymous']): ?>
-                            <img src="../assets/default-avatar.png" alt="Anonymous" class="rounded-circle" width="48" height="48">
+                            <img src="../uploads/default.png" alt="Anonymous" class="rounded-circle" width="48" height="48">
                         <?php else: ?>
-                            <img src="<?php echo $review['profile_image'] ?? '../assets/default-avatar.png'; ?>"
+                            <img src="<?php echo $review['profile_image'] ?? '../uploads/default.png'; ?>"
                                  alt="<?php echo htmlspecialchars($review['username']); ?>"
                                  class="rounded-circle"
                                  width="48"

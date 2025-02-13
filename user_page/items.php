@@ -14,10 +14,7 @@ if ($product_id <= 0) {
 // Check if the order is eligible for review
 $show_review_form = isset($_SESSION['tbl_user_id']);
 
-
-// Modified review form visibility logic (Removed old logic)
-
-
+// Fetch product details
 if (isset($_GET['id'])) {
     $id = $_GET['id'];
     $query = "SELECT p.id, p.name, p.price, p.image, p.other_images, p.description,

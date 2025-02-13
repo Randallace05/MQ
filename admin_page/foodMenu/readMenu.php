@@ -2,8 +2,8 @@
 include '../../conn/conn.php';
 
 // Fetch all products for mapping product names to IDs
-$sql = "SELECT p.*,
-               pb.stock AS batch_stock,
+$sql = "SELECT p.*, 
+               pb.stock AS batch_stock, 
                pb.batch_codename AS batch_codename,
                pb.expiration_date,
                pb.id AS batch_id,
@@ -451,7 +451,6 @@ footer a:hover {
 }
 </style>
 
-
 </head>
 
 <div class="container mt-5 px-4">
@@ -776,7 +775,7 @@ productDetailsModal.addEventListener('show.bs.modal', function (event) {
             } else {
                 batchInfo.innerHTML = '<tr><td colspan="5">No batches available for this product.</td></tr>';
             }
-
+            
             const addBatchBtn = document.getElementById('addBatchBtn');
             addBatchBtn.onclick = function () {
                 const addBatchModal = new bootstrap.Modal(document.getElementById('addBatchModal'));

@@ -443,14 +443,20 @@ $profile_picture = !empty($user_data['profile_picture']) ? '../uploads/' . htmls
 
             <a href="../user_page/wishlistZ.php">
                 <i class="fa-regular fa-heart"></i>
-                <span class="icon-badge">
-                    <?php echo $wishlist_count; ?></span>
+                <?php if ($wishlist_count > 0): ?>
+                    <span class="icon-badge">
+                        <?php echo $wishlist_count; ?>
+                    </span>
+                <?php endif; ?>
             </a>
 
-            <a href="../user_page/cart.php"><i class="fa-solid fa-cart-shopping"></i>
-                <span class="icon-badge">
-
-                    <?php echo $row_count; ?></span>
+            <a href="../user_page/cart.php">
+                <i class="fa-solid fa-cart-shopping"></i>
+                <?php if ($row_count > 0): ?>
+                    <span class="icon-badge">
+                        <?php echo $row_count; ?>
+                    </span>
+                <?php endif; ?>
             </a>
             <div class="user-dropdown">
                 <a href="#" class="user-icon" onclick="toggleDropdown(event)">

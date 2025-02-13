@@ -3,7 +3,7 @@
 include("../../conn/conn.php");
 
 // Number of orders to display per page
-$limit = 10;
+$limit = 5;
 
 // Get the current page from the URL, default to page 1
 $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;

@@ -41,7 +41,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $batch_result = $batch_stmt->get_result();
         $batch_row = $batch_result->fetch_assoc();
         $next_batch_number = ($batch_row['max_batch'] !== null) ? $batch_row['max_batch'] + 1 : 1;
-
+        
         // Generate batch codename
         $batch_codename = generateCodename($name) . '-' . $new_expiration_date . '-' . $next_batch_number;
 

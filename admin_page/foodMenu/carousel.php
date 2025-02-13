@@ -58,7 +58,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['image_type'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Upload Carousel and Promotional Images</title>
-    <link rel="stylesheet" href="styles.css">
+    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link
+        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+        rel="stylesheet">
+
+    <!-- Custom styles for this template-->
+    <link href="../dashboard/css/sb-admin-2.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Add this in the <head> section of your HTML -->
 </head>
 <style>
     /* Reset and base styles */
@@ -143,6 +151,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['image_type'])) {
 </style>
 <body>
     <div class="container">
+        <div class="btn btn-circle">
+            <a href="foodMenu.php" class="btn btn-primary">Back</a>
+        </div>
+
         <h2>Upload Carousel and Promotional Images</h2>
 
         <!-- Form for Carousel Image -->

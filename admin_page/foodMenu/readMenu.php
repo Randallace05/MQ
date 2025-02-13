@@ -451,7 +451,6 @@ footer a:hover {
 }
 </style>
 
-
 </head>
 
 <div class="container mt-5 px-4">

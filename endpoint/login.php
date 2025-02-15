@@ -13,7 +13,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit;
     }
 
-    $query = "SELECT tbl_user_id, unique_id, password, username, user_role, is_active, block_expiry_date FROM tbl_user WHERE username = ?";
+    $query = "SELECT tbl_user_id, unique_id, password, username, user_role, is_active FROM tbl_user WHERE username = ?";
     $stmt = $conn->prepare($query);
     if ($stmt === false) {
         echo json_encode(["error" => "An error occurred. Please try again later."]);
@@ -26,27 +26,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($result->num_rows > 0) {
         $user = $result->fetch_assoc();
-
-        // Check if the user is blocked
-        if ($user['is_active'] == 0) {
-            $currentDate = new DateTime();
-            $blockExpiryDate = new DateTime($user['block_expiry_date']);
-
-            if ($blockExpiryDate <= $currentDate) {
-                // Unblock the user if the block has expired
-                $sqlUnblock = "UPDATE tbl_user SET is_active = 1, block_expiry_date = NULL WHERE tbl_user_id = ?";
-                $stmtUnblock = $conn->prepare($sqlUnblock);
-                $stmtUnblock->bind_param("i", $user['tbl_user_id']);
-                $stmtUnblock->execute();
-                $stmtUnblock->close();
-            } else {
-                // Inform the user that the account is still blocked
-                echo json_encode(["error" => "Your account has been blocked by the admin until " . $blockExpiryDate->format('Y-m-d H:i:s') . "."]);
-                exit;
-            }
+        if ($user['is_active'] == 1) {
+            echo json_encode(["error" => "Your account has been blocked by the admin."]);
+            exit;
         }
-
-        // Verify password
         if (password_verify($password, $user['password'])) {
             $status = "Active now";
             $sql2 = "UPDATE tbl_user SET status = ? WHERE tbl_user_id = ?";
@@ -83,3 +66,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 $conn->close();
 ?>
+

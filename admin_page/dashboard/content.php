@@ -1,4 +1,3 @@
-
 <div class="row">
     <!-- Area Chart -->
     <div class="col-xl-8 col-lg-7">
@@ -347,8 +346,6 @@ document.addEventListener("DOMContentLoaded", function () {
             console.error("Error fetching product data:", error);
         });
 });
-
-
 
 </script>
 

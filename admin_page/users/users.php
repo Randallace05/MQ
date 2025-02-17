@@ -223,6 +223,9 @@ $users = fetchUsers($conn, $selectedRole);
     }
 </style>
 
+
+
+
 </head>
 
 <body id="page-top">
@@ -239,7 +242,8 @@ $users = fetchUsers($conn, $selectedRole);
                     <div class="d-sm-flex align-items-center justify-content-between mb-4">
                         <h1 class="h3 mb-0 text-gray-800">Accounts</h1>
                     </div>
-
+                    <!--                 darrly nakuha mo ba
+ -->
                     <!-- Dropdown for Filtering -->
                     <form method="GET" action="">
                         <select name="user_role" id="userRoleFilter" onchange="this.form.submit()">
@@ -255,6 +259,7 @@ $users = fetchUsers($conn, $selectedRole);
                             <span class="table-cell">Username</span>
                             <span class="table-cell">Type</span>
                             <span class="table-cell">Action</span>
+
                         </div>
 
                         <?php foreach ($users as $user) { ?>
@@ -285,73 +290,40 @@ $users = fetchUsers($conn, $selectedRole);
         </div>
     </div>
 
-    <!-- Add this modal for disabling account -->
-    <div class="modal fade" id="disableAccountModal" tabindex="-1" role="dialog" aria-labelledby="disableAccountModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="disableAccountModalLabel">Disable Account</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form id="disableAccountForm">
-                        <input type="hidden" id="disableUsername" name="username">
-                        <div class="form-group">
-                            <label for="disableReason">Reason for disabling:</label>
-                            <textarea class="form-control" id="disableReason" name="reason" required></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="disableExpiryDate">Block until:</label>
-                            <input type="date" class="form-control" id="disableExpiryDate" name="expiryDate" required>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-danger" onclick="submitDisableAccount()">Disable Account</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- Scripts -->
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="js/sb-admin-2.min.js"></script>
+    <script>
+        function toggleUserStatus(username, newStatus) {
+            fetch('toggle_user_status.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `username=${encodeURIComponent(username)}&status=${newStatus}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Failed to update user status');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while updating user status');
+            });
+        }
 
-</body>
-</html>
-
-<!-- Scripts -->
-<script src="vendor/jquery/jquery.min.js"></script>
-<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-<script src="js/sb-admin-2.min.js"></script>
-<script>
-function toggleUserStatus(username, newStatus) {
-    if (newStatus === 0) {
-        // If disabling the account, show the modal
-        $('#disableUsername').val(username);
-        $('#disableAccountModal').modal('show');
-    } else {
-        // If enabling the account, proceed as before
-        updateUserStatus(username, newStatus);
-    }
-}
-
-function submitDisableAccount() {
-    const username = $('#disableUsername').val();
-    const reason = $('#disableReason').val();
-    const expiryDate = $('#disableExpiryDate').val();
-
-    updateUserStatus(username, 0, reason, expiryDate);
-    $('#disableAccountModal').modal('hide');
-}
-
-function setTheme(theme) {
+        function setTheme(theme) {
     document.documentElement.style.setProperty('--primary-color', theme.primaryColor);
     document.documentElement.style.setProperty('--secondary-color', theme.secondaryColor);
     document.documentElement.style.setProperty('--hover-color', theme.hoverColor);
     document.documentElement.style.setProperty('--text-color', theme.textColor);
     document.documentElement.style.setProperty('--border-color', theme.borderColor);
 }
-
 function updateUserRole(selectElement, username) {
     const newRole = selectElement.value;
 
@@ -375,28 +347,7 @@ function updateUserRole(selectElement, username) {
         alert('An error occurred while updating the user role');
     });
 }
-
-function updateUserStatus(username, newStatus, reason = '', expiryDate = '') {
-    fetch('toggle_user_status.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: `username=${encodeURIComponent(username)}&status=${newStatus}&reason=${encodeURIComponent(reason)}&expiryDate=${encodeURIComponent(expiryDate)}`
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        } else {
-            alert('Failed to update user status');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('An error occurred while updating user status');
-    });
-}
-</script>
-
+    </script>
+</body>
+</html>
 

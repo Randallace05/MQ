@@ -13,7 +13,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit;
     }
 
-    $query = "SELECT tbl_user_id, unique_id, password, username, user_role, is_active, block_expiry_date FROM tbl_user WHERE username = ?";
+    $query = "SELECT tbl_user_id, unique_id, password, username, user_role, is_active, block_expiry_date, block_reason FROM tbl_user WHERE username = ?";
     $stmt = $conn->prepare($query);
     if ($stmt === false) {
         echo json_encode(["error" => "An error occurred. Please try again later."]);
@@ -34,14 +34,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             if ($blockExpiryDate <= $currentDate) {
                 // Unblock the user if the block has expired
-                $sqlUnblock = "UPDATE tbl_user SET is_active = 1, block_expiry_date = NULL WHERE tbl_user_id = ?";
+                $sqlUnblock = "UPDATE tbl_user SET is_active = 1, block_expiry_date = NULL, block_reason = NULL WHERE tbl_user_id = ?";
                 $stmtUnblock = $conn->prepare($sqlUnblock);
                 $stmtUnblock->bind_param("i", $user['tbl_user_id']);
                 $stmtUnblock->execute();
                 $stmtUnblock->close();
             } else {
                 // Inform the user that the account is still blocked
-                echo json_encode(["error" => "Your account has been blocked by the admin until " . $blockExpiryDate->format('Y-m-d H:i:s') . "."]);
+                $blockReason = $user['block_reason'] ? " Reason: " . $user['block_reason'] : "";
+                echo json_encode(["error" => "Your account has been blocked by the admin until " . $blockExpiryDate->format('Y-m-d H:i:s') . "." . $blockReason]);
                 exit;
             }
         }

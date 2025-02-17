@@ -1,6 +1,6 @@
 <?php
 require_once '../endpoint/session_config.php';
-// asdasd
+
 
 // Fetch user role based on session or user ID (adjust logic as needed)
 $user_id = $_SESSION['tbl_user_Id'] ?? null; // Replace with your actual session variable
@@ -369,51 +369,63 @@ if ($user_id) {
 
             $sql = "SELECT p.id, p.name, p.price, p.image,
                COUNT(r.rating) as total_ratings,
-               AVG(r.rating) as average_rating
+               AVG(r.rating) as average_rating,
+               SUM(oi.quantity) as total_ordered
         FROM products p
         LEFT JOIN reviews r ON p.id = r.product_id
+        LEFT JOIN order_items oi ON p.id = oi.product_id
         WHERE p.is_disabled = 0
-        GROUP BY p.id";
+        GROUP BY p.id
+        ORDER BY total_ordered DESC
+        LIMIT 4";
             $result = $conn->query($sql);
 
             if ($result && $result->num_rows > 0) {
+                $count = 0;
                 while ($product = $result->fetch_assoc()) {
-                    ?>
-                    <div class="product-card">
-                        </button>
-                        <a href="items.php?id=<?php echo $product['id']; ?>">
-                            <img src="../admin_page/foodMenu/uploads/<?php echo htmlspecialchars($product['image']); ?>"
-                                 alt="<?php echo htmlspecialchars($product['name']); ?>"
-                                 class="product-image">
-                        </a>
-                        <div class="product-info">
-                            <div class="p-3">
-                                <h5 class="text-center mb-2"><?php echo htmlspecialchars($product['name']); ?></h5>
-                                <p class="text-center mb-2">₱<?php echo number_format($product['price'], 2); ?></p>
-                            </div>
-                            <div class="chili-rating" data-product-id="<?php echo $product['id']; ?>">
-                                <?php
-                                $average_rating = round($product['average_rating'], 1);
-                                for($i = 1; $i <= 5; $i++):
-                                ?>
-                                    <span class="chili filled" data-value="<?php echo $i; ?>">
-                                        <?php
-                                        if ($i <= floor($average_rating)) {
-                                            echo '⭐';
-                                        } elseif ($i == ceil($average_rating) && $average_rating != floor($average_rating)) {
-                                            echo '⭐';
-                                        } else {
-                                            echo '⭐';
-                                        }
-                                        ?>
-                                    </span>
-                                <?php endfor; ?>
-                                <span class="average-rating"><?php echo number_format($average_rating, 1); ?></span>
-                                <span class="total-ratings">(<?php echo $product['total_ratings']; ?>)</span>
+                    if ($count < 4) {
+                        ?>
+                        <div class="product-card">
+                            <button class="wishlist-btn <?php echo isset($_SESSION['wishlist']) && in_array($product['id'], $_SESSION['wishlist']) ? 'active' : ''; ?>" onclick="toggleWishlist(this, <?php echo $product['id']; ?>)">
+                                <i class="bi <?php echo isset($_SESSION['wishlist']) && in_array($product['id'], $_SESSION['wishlist']) ? 'bi-heart-fill' : 'bi-heart'; ?>"></i>
+                            </button>
+                            <a href="items.php?id=<?php echo $product['id']; ?>">
+                                <img src="../admin_page/foodMenu/uploads/<?php echo htmlspecialchars($product['image']); ?>"
+                                     alt="<?php echo htmlspecialchars($product['name']); ?>"
+                                     class="product-image">
+                            </a>
+                            <div class="product-info">
+                                <div class="p-3">
+                                    <h5 class="text-center mb-2"><?php echo htmlspecialchars($product['name']); ?></h5>
+                                    <p class="text-center mb-2">₱<?php echo number_format($product['price'], 2); ?></p>
+                                </div>
+                                <div class="chili-rating" data-product-id="<?php echo $product['id']; ?>">
+                                    <?php
+                                    $average_rating = round($product['average_rating'], 1);
+                                    for($i = 1; $i <= 5; $i++):
+                                    ?>
+                                        <span class="chili filled" data-value="<?php echo $i; ?>">
+                                            <?php
+                                            if ($i <= floor($average_rating)) {
+                                                echo '⭐';
+                                            } elseif ($i == ceil($average_rating) && $average_rating != floor($average_rating)) {
+                                                echo '⭐';
+                                            } else {
+                                                echo '⭐';
+                                            }
+                                            ?>
+                                        </span>
+                                    <?php endfor; ?>
+                                    <span class="average-rating"><?php echo number_format($average_rating, 1); ?></span>
+                                    <span class="total-ratings">(<?php echo $product['total_ratings']; ?>)</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <?php
+                        <?php
+                        $count++;
+                    } else {
+                        break;
+                    }
                 }
             }
             ?>
@@ -426,17 +438,23 @@ if ($user_id) {
             <?php
             $sql = "SELECT p.id, p.name, p.price, p.image,
                COUNT(r.rating) as total_ratings,
-               AVG(r.rating) as average_rating
-                FROM products p
-                LEFT JOIN reviews r ON p.id = r.product_id
-                WHERE p.is_disabled = 0
-                GROUP BY p.id";
+               AVG(r.rating) as average_rating,
+               SUM(oi.quantity) as total_ordered
+        FROM products p
+        LEFT JOIN reviews r ON p.id = r.product_id
+        LEFT JOIN order_items oi ON p.id = oi.product_id
+        WHERE p.is_disabled = 0
+        GROUP BY p.id
+        ORDER BY total_ordered DESC
+        LIMIT 4, 18446744073709551615"; // Start after the 4th product and get all remaining
             $result = $conn->query($sql);
 
             if ($result && $result->num_rows > 0) {
                 while ($product = $result->fetch_assoc()) {
                     ?>
                     <div class="product-card">
+                        <button class="wishlist-btn <?php echo isset($_SESSION['wishlist']) && in_array($product['id'], $_SESSION['wishlist']) ? 'active' : ''; ?>" onclick="toggleWishlist(this, <?php echo $product['id']; ?>)">
+                            <i class="bi <?php echo isset($_SESSION['wishlist']) && in_array($product['id'], $_SESSION['wishlist']) ? 'bi-heart-fill' : 'bi-heart'; ?>"></i>
                         </button>
                         <a href="items.php?id=<?php echo $product['id']; ?>">
                             <img src="../admin_page/foodMenu/uploads/<?php echo htmlspecialchars($product['image']); ?>"
@@ -585,7 +603,7 @@ if ($user_id) {
     <script>
     document.addEventListener('DOMContentLoaded', function () {
         const userRole = "<?php echo $user_role; ?>";
-        const userId = "<?php echo $tbl_user_id; ?>"; // Ensure this variable is available in PHP
+        const userId = "<?php echo $user_id; ?>"; // Corrected variable name
         const modalKey = `hideReminderModal_${userId}`;
         const reminderModal = new bootstrap.Modal(document.getElementById('reminderModal'));
         const dontShowAgainCheckbox = document.getElementById('dontShowAgain');
@@ -604,8 +622,9 @@ if ($user_id) {
             }
         });
     });
-</script>
+    </script>
 
 
 </body>
 </html>
+

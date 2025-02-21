@@ -3,7 +3,7 @@
 $servername = "localhost";
 $username = "root";
 $password = "";
-$db = "login_email_verification";
+$db = "mq_kitchen";
 
 // Create connection
 $conn = mysqli_connect($servername, $username, $password, $db);

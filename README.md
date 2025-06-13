@@ -1,0 +1,1 @@
+MQ Kitchen is a modern, user-friendly e-commerce web application built to showcase and sell kitchen and food products online. Inspired by platforms like Shopee, this system features a seamless shopping experience, dynamic product listings, and a secure online checkout process.
